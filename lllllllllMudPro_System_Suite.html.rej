@@ -1,0 +1,855 @@
+diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(rejected hunks)
+@@ -1112,50 +1112,61 @@ body::after{
+   text-shadow:0 1px 8px rgba(0,0,0,.55);
+ }
+ ::-webkit-scrollbar{
+   width:8px;
+   height:8px;
+ }
+ ::-webkit-scrollbar-thumb{
+   background:linear-gradient(180deg,rgba(0,212,255,.34),rgba(30,60,96,.78));
+   border-radius:999px;
+   border:1px solid rgba(255,255,255,.04);
+ }
+ ::-webkit-scrollbar-track{
+   background:rgba(255,255,255,.025);
+ }
+ body.light #tb,body.light #gbar,body.light #pd-topbar{
+   box-shadow:0 10px 28px rgba(28,76,120,.1),inset 0 -1px 0 rgba(0,132,204,.05)!important;
+ }
+ body.light .tb-inp,body.light .tb-select,body.light .sb-search,body.light .lfi input:not([type=color]),body.light .lfi select,body.light .emi,body.light .ems,body.light .fmt-sel{
+   background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(243,248,252,.94))!important;
+   border-color:#c8d9e7!important;
+   box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 1px 0 rgba(255,255,255,.45)!important;
+ }
+ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-card,body.light .chart-card,body.light .pd-tot-cell,body.light .rp-total,body.light .pd-cat-pit-btn,body.light .pd-cat-hero{
+   box-shadow:0 14px 28px rgba(50,90,130,.08),inset 0 1px 0 rgba(255,255,255,.65)!important;
+ }
++body.light .pd-cat-pit-btn{
++  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(241,247,252,.94))!important;
++  border-color:#d0dde8!important;
++  color:#0f1e2d!important;
++}
++body.light .pd-cat-pit-btn:hover,body.light .pd-cat-pit-btn:focus{
++  background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(232,244,252,.96))!important;
++  border-color:rgba(0,132,204,.36)!important;
++}
++body.light .pd-cat-pit-name{color:#0f1e2d!important}
++body.light .pd-cat-pit-sub,body.light .pd-cat-pit-chip{color:#3a5570!important}
+ </style>
+ </head>
+ <body>
+ 
+ <!-- GLOBAL NAV -->
+ <div id="gbar">
+   <div id="gbar-logo">
+     <span style="color:#00d4ff;font-size:20px;line-height:1">⬡</span>
+     <div><span class="gname">MudPro</span><span class="gsub">Drilling Fluids Suite</span></div>
+   </div>
+   <div class="gnav-tabs">
+     <button class="gnav-btn active" id="gnav-layout"  onclick="switchPage('layout',this)">🗺️ System Layout</button>
+     <button class="gnav-btn"        id="gnav-details" onclick="switchPage('details',this)">📊 Pit Analytics <span class="gnav-badge" id="gnav-pit-count">0</span></button>
+   </div>
+   <div id="gbar-right">
+     <div id="gbar-rig">ADM-655 &nbsp;·&nbsp; SFNY-938</div>
+     <div id="gbar-clock">--:--:--</div>
+     <div class="gbar-dot"></div>
+   </div>
+ </div>
+ 
+ <!-- PAGE: SYSTEM LAYOUT -->
+ <div id="page-layout" class="mp-page active">
+ 
+ <div id="app">
+@@ -1171,51 +1182,51 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
+     <div class="tb-group"><div class="tb-lbl">DATE</div><input class="tb-inp" type="date" id="tb-date" style="width:128px;text-align:left" oninput="updHdr()"></div>
+     <div class="tb-sep"></div>
+     <div class="tb-group"><div class="tb-lbl">SHIFT</div>
+       <select class="tb-select" id="tb-shift">
+         <option value="day">Day (06–18)</option><option value="night">Night (18–06)</option>
+       </select>
+     </div>
+   </div>
+   <div class="tb-r">
+     <button class="tbt on" id="em-btn" onclick="toggleEdit()">✏️ Edit</button>
+     <button class="tbt" onclick="openDailyLog()">📅 Log</button>
+     <button class="tbt" onclick="openChart()">📊 Chart</button>
+     <button class="tbt" onclick="openSnapViewer()">🕐 History</button>
+     <button class="tbt" onclick="addBlankPit()">+ Pit</button>
+     <button class="tbt" onclick="openPrintCtrl()">🖨️ Print</button>
+     <div class="tb-sep"></div>
+     <div class="zoom-grp">
+       <span>ZOOM</span>
+       <button class="z-btn" onclick="zoomG(-10)">−</button>
+       <span class="zoom-val" id="zlbl">90</span>
+       <button class="z-btn" onclick="zoomG(10)">+</button>
+       <button class="z-btn" onclick="fitG()" title="Fit to window" style="font-size:11px;color:var(--ac)">FIT</button>
+     </div>
+     <div class="tb-sep"></div>
+     <button class="tbt" onclick="loadDefault()" title="Reset to default layout">🔄</button>
+-    <button class="tbt" onclick="document.body.classList.toggle('light')" title="Toggle light/dark theme">🌙</button>
++    <button class="tbt" id="layout-theme-btn" onclick="toggleLayoutTheme()" title="Toggle System Layout light/dark theme">🌙</button>
+     <div style="display:flex;gap:3px;align-items:center;margin-left:2px;flex-shrink:0;border-left:1px solid var(--b2);padding-left:8px">
+       <button id="undo-btn" onclick="doUndo()" disabled
+         style="border:1px solid var(--b2);background:rgba(0,212,255,.06);color:var(--ts);font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:5px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:4px"
+         onmouseover="if(!this.disabled)this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--b2)'">
+         ↩ <span id="undo-cnt" style="background:rgba(0,212,255,.2);color:var(--ac);font-size:8px;padding:1px 4px;border-radius:4px;min-width:12px;text-align:center"></span>
+       </button>
+       <button id="redo-btn" onclick="doRedo()" disabled
+         style="border:1px solid var(--b2);background:rgba(0,212,255,.06);color:var(--ts);font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:5px;cursor:pointer;transition:all .18s"
+         onmouseover="if(!this.disabled)this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--b2)'">↪</button>
+     </div>
+   </div>
+ </div>
+ 
+ <div id="main">
+ <!-- LEFT PANEL -->
+ <div id="lp">
+   <button class="panel-pin" id="lp-pin-btn" onclick="togglePanelPin('lp')" title="Pin left sidebar">📌</button>
+   <div class="lp-sec">
+     <div class="lp-t">Grid</div>
+     <div class="lfi"><div class="lfl">Cell Size</div><input type="number" id="c-cell" value="90" min="45" max="140" oninput="setCell()"><span class="fu">px</span></div>
+     <div class="lfi"><div class="lfl">Columns</div><input type="number" id="c-cols" value="12" min="6" max="24" oninput="resGrid()"></div>
+     <div class="lfi"><div class="lfl">Rows</div><input type="number" id="c-rows" value="10" min="4" max="20" oninput="resGrid()"></div>
+   </div>
+   <div style="padding:10px 0 0">
+     <div style="padding:0 14px 6px"><div class="lp-t">Drag onto Grid</div></div>
+@@ -1506,50 +1517,51 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
+ <div class="mbox" style="width:420px">
+   <div class="mt"><span>🧪 Mix Calculator</span><button class="mc" onclick="document.getElementById('mx-modal').classList.remove('vis')">✕</button></div>
+   <div class="emf"><div class="eml">Fluid 1 Volume (bbl)</div><input type="number" class="emi" id="mx-v1" oninput="calcMix()"></div>
+   <div class="emf"><div class="eml">Fluid 1 Density</div><input type="number" class="emi" id="mx-d1" step="0.1" placeholder="e.g. 75 pcf" oninput="calcMix()"></div>
+   <div class="emf"><div class="eml">Fluid 2 Volume (bbl)</div><input type="number" class="emi" id="mx-v2" oninput="calcMix()"></div>
+   <div class="emf"><div class="eml">Fluid 2 Density</div><input type="number" class="emi" id="mx-d2" step="0.1" oninput="calcMix()"></div>
+   <div id="mx-result" style="margin-top:14px;padding:14px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);border-radius:8px;font-family:var(--mono);font-size:13px;color:var(--a2);line-height:2;min-height:66px">—</div>
+ </div>
+ </div>
+ 
+ <div id="toast"></div>
+ 
+ </div>
+ 
+ <!-- PAGE: PIT ANALYTICS -->
+ <div id="page-details" class="mp-page">
+   <div id="pd-topbar" style="height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--gb);background:rgba(5,9,15,.96);backdrop-filter:blur(28px);flex-shrink:0;">
+     <div style="display:flex;align-items:center;gap:12px">
+       <span id="pd-topbar-title" style="font-family:var(--cond);font-size:16px;font-weight:900;letter-spacing:1px;color:var(--ts)">Pit Analytics</span>
+       <span style="font-size:11px;color:var(--ts);font-family:var(--mono)" id="pd-sub">Select a pit →</span>
+     </div>
+     <div style="display:flex;gap:7px">
+       <button class="tbt" onclick="pdLoadFromLayout()">📂 Sync from Layout</button>
+       <button class="tbt" onclick="pdLoadDemo()">🎲 Demo Data</button>
+       <button class="tbt" onclick="pdExportReport()">📤 Export Report</button>
++      <button class="tbt" id="pd-theme-btn" onclick="toggleAnalyticsTheme()" title="Toggle Pit Analytics light/dark theme">🌙 Theme</button>
+       <button class="tbt on" onclick="openAnalyticsPrintCtrl()">🖨️ Print</button>
+     </div>
+   </div>
+   <div style="flex:1;display:flex;overflow:hidden">
+     <div id="pd-sidebar" style="width:220px;min-width:220px;background:rgba(5,9,15,.95);border-right:1px solid var(--gb);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0">
+       <div class="sb-hdr">
+         <div class="sb-title">Pit List</div>
+         <input class="sb-search" id="pd-search" placeholder="🔍 Search pits…" oninput="pdFilterPits()">
+       </div>
+       <div class="pit-list" id="pd-pit-list"></div>
+       <div id="pd-sys-total">
+         <div class="sb-title" style="margin-bottom:8px">System Total</div>
+         <div id="pd-total-cells" style="display:grid;grid-template-columns:1fr 1fr;gap:5px"></div>
+       </div>
+       <div id="pd-categories" style="padding:12px;border-top:1px solid var(--gb);flex-shrink:0">
+         <div class="sb-title" style="margin-bottom:8px">Categories</div>
+         <div id="pd-category-list" style="display:flex;flex-direction:column;gap:4px"></div>
+       </div>
+     </div>
+     <div id="pd-content" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px">
+       <div id="pd-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;opacity:.45;padding:40px">
+         <div style="font-size:52px">🪣</div>
+         <div style="font-size:14px;color:var(--ts);text-align:center;line-height:1.7">Select a pit from the left<br>or sync from the Layout page</div>
+         <button class="tbt on" onclick="pdLoadFromLayout()" style="padding:9px 22px;font-size:11px">📂 Sync from Layout →</button>
+       </div>
+@@ -1603,55 +1615,70 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
+     </div>
+   </div>
+ </div></div>
+ 
+ <!-- NOTES CONFIG -->
+ <div class="mbg" id="notes-cfg-modal">
+ <div class="mbox" style="width:420px">
+   <div class="mt">
+     <span>&#9881; System Notes Settings</span>
+     <button class="mc" onclick="document.getElementById('notes-cfg-modal').classList.remove('vis')">&#10005;</button>
+   </div>
+   <div style="padding:4px 4px 8px">
+     <div style="font-size:10px;color:var(--ts);margin-bottom:12px;padding:0 4px">Toggle and drag to reorder notes in the bottom bar.</div>
+     <div id="nc-rows" style="display:flex;flex-direction:column;gap:3px;max-height:340px;overflow-y:auto"></div>
+     <div style="display:flex;gap:8px;margin-top:14px;padding:0 4px">
+       <button class="tbt" onclick="ncToggleAll(true)" style="flex:1">All</button>
+       <button class="tbt" onclick="ncToggleAll(false)" style="flex:1">None</button>
+       <button class="tbt on" onclick="applyNotesCfg()" style="flex:2">Apply</button>
+     </div>
+   </div>
+ </div></div>
+ 
+ <script>
+ (function tick(){const el=document.getElementById('gbar-clock');if(el)el.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});setTimeout(tick,1000);})();
+ 
++let currentPage='layout',layoutThemeLight=false,analyticsThemeLight=false;
++function updateThemeButtons(){
++  const l=document.getElementById('layout-theme-btn'),a=document.getElementById('pd-theme-btn');
++  if(l){l.textContent=layoutThemeLight?'☀️':'🌙';l.title='Toggle System Layout light/dark theme';l.classList.toggle('on',layoutThemeLight);}
++  if(a){a.textContent=analyticsThemeLight?'☀️ Theme':'🌙 Theme';a.title='Toggle Pit Analytics light/dark theme';a.classList.toggle('on',analyticsThemeLight);}
++}
++function applyPageTheme(pg=currentPage){
++  currentPage=pg;
++  document.body.classList.toggle('light',pg==='details'?analyticsThemeLight:layoutThemeLight);
++  updateThemeButtons();
++}
++function toggleLayoutTheme(){layoutThemeLight=!layoutThemeLight;applyPageTheme('layout');if(typeof save==='function')save();}
++function toggleAnalyticsTheme(){analyticsThemeLight=!analyticsThemeLight;applyPageTheme('details');if(typeof save==='function')save();}
++
+ function switchPage(pg,btn){
+   document.querySelectorAll('.mp-page').forEach(p=>p.classList.remove('active'));
+   document.getElementById('page-'+pg).classList.add('active');
+   document.querySelectorAll('.gnav-btn').forEach(b=>b.classList.remove('active'));
+   if(btn)btn.classList.add('active');
++  applyPageTheme(pg);
+   if(pg==='details'){
+     if(typeof pdLoadFromLayout==='function')pdLoadFromLayout();
+     setTimeout(function(){
+       if(typeof pdPits!=='undefined'&&pdPits.length&&typeof pdSelectPit==='function')pdSelectPit(pdPits[0].id);
+       pdUpdateSysTotal();pdUpdateCategories();
+     },80);
+   }
+   if(pg==='layout')typeof updHdr==='function'&&updHdr();
+ }
+ 
+ 
+ let undoStack=[],redoStack=[];
+ function pushUndo(lbl){
+   undoStack.push({lbl:lbl,s:JSON.stringify(pits),n:nid});
+   if(undoStack.length>30)undoStack.shift();
+   redoStack=[];_updUndo();
+ }
+ function doUndo(){
+   if(!undoStack.length)return;
+   redoStack.push({s:JSON.stringify(pits),n:nid,lbl:'redo'});
+   const p=undoStack.pop();pits=JSON.parse(p.s);nid=p.n;
+   save();resGrid();renderSummary();renderCatCounts();renderNotes();calcDelta();
+   toast('↩ Undid: '+p.lbl);_updUndo();
+ }
+ function doRedo(){
+@@ -2051,51 +2078,51 @@ function renderNotes(){
+   nc.innerHTML=parts.join(' &nbsp;|&nbsp; ')
+     ||'<span style="color:var(--td)">Click configure to choose notes</span>';
+ }
+ function toggleNotesEdit(){
+   notesManual=!notesManual;
+   var autoEl=document.getElementById('nb-auto');
+   var edEl=document.getElementById('nb-editor');
+   var fmtBar=document.getElementById('nb-fmt-bar');
+   var btn=document.getElementById('nb-edit-btn');
+   var nbEl=document.getElementById('nb');
+   if(notesManual){
+     if(!notesText){
+       var at=document.getElementById('nb-auto');
+       notesText=at?at.innerHTML:'';
+     }
+     if(autoEl)autoEl.style.display='none';
+     if(edEl){edEl.style.display='block';edEl.contentEditable='true';edEl.innerHTML=notesText||'';}
+     if(fmtBar)fmtBar.classList.add('vis');
+     if(nbEl){nbEl.style.maxHeight='';nbEl.classList.add('editing');}
+     if(btn){btn.textContent='Done';btn.classList.add('on');}
+     setTimeout(function(){if(edEl)edEl.focus();},50);
+   }else{
+     if(edEl){notesText=edEl.innerHTML;edEl.style.display='none';edEl.contentEditable='false';}
+     if(fmtBar)fmtBar.classList.remove('vis');
+     if(nbEl){nbEl.style.maxHeight='';nbEl.classList.remove('editing');nbEl.scrollTop=0;}
+-    if(autoEl)autoEl.style.display='block';
++    if(autoEl){autoEl.innerHTML=notesText||'';autoEl.style.display='block';}
+     if(btn){btn.textContent='Edit';btn.classList.remove('on');}
+     save();
+   }
+ }
+ function resetNotesAuto(){notesManual=false;notesText='';toggleNotesEdit();toggleNotesEdit()}
+ 
+ // ═══ HEADER ══════════════════════════════════════════════════════
+ function updHdr(){
+   const rig=document.getElementById('tb-rig')?.value||'T-907';const well=document.getElementById('tb-well')?.value||'';
+   const dv=document.getElementById('tb-date')?.value;let ds='';
+   if(dv){const d=new Date(dv+'T12:00');ds=d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-')}
+   document.getElementById('rh-rig').textContent=`${rig}${well?' — '+well:''} — MUD SYSTEM LAY OUT`;
+   document.getElementById('rh-date').textContent=ds;
+ }
+ 
+ // ═══ DAILY LOG ═══════════════════════════════════════════════════
+ function openDailyLog(){populateSel('dl-pit');renderDLLog();document.getElementById('dl-modal').classList.add('vis')}
+ function logDailyReading(){
+   const pitId=parseInt(document.getElementById('dl-pit').value);const vol=parseFloat(document.getElementById('dl-vol').value);
+   if(isNaN(vol)){toast('Enter volume','er');return}
+   const p=pits.find(pp=>pp.id===pitId);if(!p)return;
+   const prev=p.vol;p.vol=vol;
+   const mw=parseFloat(document.getElementById('dl-mw').value)||null;if(mw)p.dens=mw;
+   p.history=p.history||[];p.history.push({ts:Date.now(),vol,note:document.getElementById('dl-note').value});if(p.history.length>48)p.history.shift();
+   dailyLog.unshift({ts:Date.now(),pitId,pitName:p.name,mud:mLbl(p),dens:p.dens,du:p.du,vol,prev,delta:vol-(prev||0),note:document.getElementById('dl-note').value});
+@@ -2347,52 +2374,52 @@ function doPrint(){
+ function exportCSV(){
+   const rows=[['Pit Name','Category','Mud Type','Volume (bbl)','Max (bbl)','Dead (bbl)','Density','Unit','Tag','Col','Row','W','H']];
+   pits.forEach(p=>rows.push([p.name,p.cat,mLbl(p),p.vol??'',p.max??'',p.dead??'',p.dens??'',p.du||'',p.tag||'',p.x,p.y,p.w,p.h]));
+   const csv=rows.map(r=>r.map(c=>`"${(c+'').replace(/"/g,'""')}"`).join(',')).join('\n');
+   const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='mud_system_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('✅ CSV exported');
+ }
+ 
+ // ═══ EDIT MODE ═══════════════════════════════════════════════════
+ function toggleEdit(){editMode=!editMode;const b=document.getElementById('em-btn');b.textContent=editMode?'✏️ Edit':'👁️ View';b.classList.toggle('on',editMode);renderPits()}
+ 
+ // ═══ MISC ════════════════════════════════════════════════════════
+ function populateSel(id){const s=document.getElementById(id);if(!s)return;const cur=s.value;s.innerHTML=pits.map(p=>`<option value="${p.id}"${p.id==cur?' selected':''}>${p.name} (${p.vol||0} bbl)</option>`).join('')}
+ 
+ // ═══ KEYBOARD ════════════════════════════════════════════════════
+ document.addEventListener('keydown',e=>{
+   if(e.key==='Escape'){document.querySelectorAll('.mbg.vis').forEach(m=>m.classList.remove('vis'))}
+   if(e.key==='Delete'&&selId&&!document.querySelector('.mbg.vis'))delPit(selId);
+   if(e.key==='Enter'&&selId&&!document.querySelector('.mbg.vis'))openEM(selId);
+   if(e.key==='e'&&!e.ctrlKey&&!document.querySelector('.mbg.vis'))toggleEdit();
+   if((e.key==='s'||e.key==='S')&&(e.ctrlKey||e.metaKey)){e.preventDefault();save();toast('💾 Saved')}
+ });
+ // Close modals on bg click
+ document.querySelectorAll('.mbg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('vis')}));
+ 
+ // ═══ SAVE/LOAD ═══════════════════════════════════════════════════
+-function save(){try{localStorage.setItem('msl4',JSON.stringify({pits,nid,snapshots,dailyLog,transfers,notesManual,notesText,panelPins}))}catch(e){}}
+-function load(){try{const s=localStorage.getItem('msl4');if(s){const d=JSON.parse(s);pits=d.pits||[];nid=d.nid||pits.length+1;snapshots=d.snapshots||[];dailyLog=d.dailyLog||[];transfers=d.transfers||[];notesManual=d.notesManual||false;notesText=d.notesText||'';panelPins={lp:!!d.panelPins?.lp,rp:!!d.panelPins?.rp,nb:!!d.panelPins?.nb};return true}}catch(e){}return false}
++function save(){try{localStorage.setItem('msl4',JSON.stringify({pits,nid,snapshots,dailyLog,transfers,notesManual,notesText,panelPins,layoutThemeLight,analyticsThemeLight}))}catch(e){}}
++function load(){try{const s=localStorage.getItem('msl4');if(s){const d=JSON.parse(s);pits=d.pits||[];nid=d.nid||pits.length+1;snapshots=d.snapshots||[];dailyLog=d.dailyLog||[];transfers=d.transfers||[];notesManual=d.notesManual||false;notesText=d.notesText||'';panelPins={lp:!!d.panelPins?.lp,rp:!!d.panelPins?.rp,nb:!!d.panelPins?.nb};layoutThemeLight=!!d.layoutThemeLight;analyticsThemeLight=!!d.analyticsThemeLight;return true}}catch(e){}return false}
+ 
+ // ═══ INIT ════════════════════════════════════════════════════════
+ /* boot in master */;
+ 
+ (function(){
+ 
+ // ═══ STATE ═══════════════════════════════════════════════════════
+ let pits = [];
+ let selId = null;
+ let chartRanges = {};
+ let nid = 1;
+ let snapshots = [];
+ let dailyLog = [];
+ let transfers = [];
+ 
+ // ═══ MUD CONFIG ══════════════════════════════════════════════════
+ const MH={obm:'#c8d850',wbm:'#50b4e4',sbm:'#c090ee',brine:'#50e484',diesel:'#eeb838',cement:'#d4c268',water:'#5cc4ec',empty:'#484848',frac:'#9e84cc',custom:'#ce9cf0'};
+ const MF={obm:'rgba(180,210,40,.5)',wbm:'rgba(50,155,225,.45)',sbm:'rgba(165,100,238,.45)',brine:'rgba(30,200,108,.48)',diesel:'rgba(238,168,38,.5)',cement:'rgba(208,188,98,.45)',water:'rgba(60,178,235,.4)',empty:'rgba(55,55,55,.25)',frac:'rgba(138,108,208,.4)',custom:'rgba(195,155,238,.44)'};
+ const ML={obm:'OBM',wbm:'WBM',sbm:'SBM',brine:'Brine',diesel:'Diesel',cement:'Cement',water:'Water',empty:'Empty',frac:'Frac'};
+ const CAT_C={active:'rgba(0,255,157,.7)',reserve:'rgba(0,212,255,.6)',premix:'rgba(255,184,0,.65)',other:'rgba(90,122,154,.5)',custom:'rgba(192,132,252,.65)'};
+ 
+ // ═══ HELPERS ═════════════════════════════════════════════════════
+ function fN(v){return(!isNaN(v)&&v!=null&&isFinite(v))?Math.round(+v).toLocaleString():'---'}
+ function fm(v,d=1){return(isNaN(v)||v==null)?'---':(+v).toFixed(d)}
+ function mLbl(p){return p.mudCust||(ML[p.mud])||p.mud?.toUpperCase()||'?'}
+@@ -2495,124 +2522,149 @@ function renderPitList(){
+ }
+ function filterPits(){
+   const q=(document.getElementById('pd-search')?.value||'').toLowerCase();
+   const filtered=pits.filter(p=>{
+     return p.name.toLowerCase().includes(q)||mLbl(p).toLowerCase().includes(q);
+   });
+   if(!filtered.some(p=>p.id===selId))selId=filtered.length?filtered[0].id:null;
+   renderPitList();
+   renderDetail();
+ }
+ 
+ // ═══ SELECT PIT ══════════════════════════════════════════════════
+ function selectPit(id){
+   selectedCategory = null;
+   selId=id;
+   document.querySelectorAll('.pit-item').forEach(el=>el.classList.toggle('active',el.id==='pdli-'+id));
+   if(typeof pdUpdateCategories==='function')pdUpdateCategories();
+   const sub=document.getElementById('pd-sub');if(sub)sub.textContent='Loading pit analytics...';
+   renderDetail();
+ }
+ function pdSelectPit(id){
+   selectPit(id);
+ }
+ 
+ // ═══ RENDER DETAIL ═══════════════════════════════════════════════
++function buildCategoryAggregate(cat,pitsInCat){
++  const catTitle={active:'Active',reserve:'Reserve',premix:'Premix',other:'Other',custom:'Custom'}[cat]||cat;
++  const totalVol=pitsInCat.reduce((s,pp)=>s+(pp.vol||0),0);
++  const totalMax=pitsInCat.reduce((s,pp)=>s+(pp.max||0),0);
++  const totalDead=pitsInCat.reduce((s,pp)=>s+(pp.dead||0),0);
++  const densPits=pitsInCat.filter(pp=>pp.dens!=null&&(pp.vol||0)>0);
++  const densVol=densPits.reduce((s,pp)=>s+(pp.vol||0),0);
++  const dens=densVol?+(densPits.reduce((s,pp)=>s+(pp.dens||0)*(pp.vol||0),0)/densVol).toFixed(2):null;
++  const maxHist=Math.max(0,...pitsInCat.map(pp=>(pp.history||[]).length));
++  const history=[];
++  for(let i=0;i<maxHist;i++){
++    let vol=0,mwNum=0,mwDen=0,ts=0,notes=[];
++    pitsInCat.forEach(pp=>{
++      const h=(pp.history||[])[Math.max(0,(pp.history||[]).length-maxHist+i)];
++      if(!h)return;
++      vol+=h.vol||0;ts=Math.max(ts,h.ts||0);
++      if(h.mw!=null){mwNum+=(h.mw||0)*(h.vol||0);mwDen+=(h.vol||0);}
++      if(h.note)notes.push(pp.name+': '+h.note);
++    });
++    history.push({ts:ts||Date.now(),vol:+vol.toFixed(1),mw:mwDen?+(mwNum/mwDen).toFixed(2):null,note:notes.slice(0,3).join('; ')});
++  }
++  return {id:'cat-'+cat,name:catTitle+' Category',cat,mud:'custom',mudCust:'Category Sum',vol:totalVol,max:totalMax||null,dead:totalDead,dens,du:'pcf',tag:pitsInCat.length+' pits',pitColor:'#00d4ff',history};
++}
++
+ function renderDetail(){
+-  const p=pits.find(pp=>pp.id===selId);
++  let p=pits.find(pp=>pp.id===selId);
+   const det=document.getElementById('pd-detail');
+   const empty=document.getElementById('pd-empty');
+   const sub=document.getElementById('pd-sub');
+   if(!det||!empty)return;
+   if(!p&&!selectedCategory){
+     if(sub)sub.textContent='Select a pit →';
+     empty.style.display='flex';det.style.display='none';return
+   }
+   empty.style.display='none';
+   det.style.display='flex';
+   let categoryBlock='';
+   if(selectedCategory){
+     const pitsInCat=pits.filter(pp=>pp.cat===selectedCategory);
++    p=buildCategoryAggregate(selectedCategory,pitsInCat);
+     const totalVol=pitsInCat.reduce((s,pp)=>s+(pp.vol||0),0);
+     const totalMax=pitsInCat.reduce((s,pp)=>s+(pp.max||0),0);
+     const usableVol=pitsInCat.reduce((s,pp)=>s+Math.max(0,(pp.vol||0)-(pp.dead||0)),0);
++    const totalDead=pitsInCat.reduce((s,pp)=>s+(pp.dead||0),0);
+     const catTitle={active:'Active',reserve:'Reserve',premix:'Premix',other:'Other',custom:'Custom'}[selectedCategory]||selectedCategory;
+     categoryBlock=`
+     <div class="chart-card">
+       <div class="cc-hdr"><div class="cc-title">📂 ${catTitle} Category</div></div>
+       <div class="cc-body" style="display:flex;flex-direction:column;gap:12px">
+         <div class="pd-cat-hero">
+           <div class="pd-cat-kicker">Category Overview</div>
+           <div class="pd-cat-title-row">
+             <div>
+               <div class="pd-cat-title">${catTitle}</div>
+               <div class="pd-cat-desc">Category mode shows the rolled-up view for this pit group only. Click any pit card below to switch back to single-pit analytics.</div>
+             </div>
+             <div class="pd-cat-pill">${pitsInCat.length} pit${pitsInCat.length!==1?'s':''} selected</div>
+           </div>
+         </div>
+-        <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
++        <div class="stats-row" style="grid-template-columns:repeat(5,1fr)">
+           <div class="stat-card sc-blue"><div class="sc-val" style="color:var(--ac)">${Math.round(totalVol).toLocaleString()}</div><div class="sc-lbl">Total Volume</div><div class="sc-sub">bbl</div></div>
+           <div class="stat-card sc-green"><div class="sc-val" style="color:var(--a2)">${pitsInCat.length}</div><div class="sc-lbl">Pit Count</div><div class="sc-sub">selected category</div></div>
+           <div class="stat-card sc-amber"><div class="sc-val" style="color:var(--wn)">${Math.round(usableVol).toLocaleString()}</div><div class="sc-lbl">Usable Volume</div><div class="sc-sub">bbl</div></div>
++          <div class="stat-card sc-or"><div class="sc-val" style="color:var(--or)">${Math.round(totalDead).toLocaleString()}</div><div class="sc-lbl">Dead Volume</div><div class="sc-sub">summed category bbl</div></div>
+           <div class="stat-card sc-pu"><div class="sc-val" style="color:var(--pu)">${totalMax?fm(totalVol/totalMax*100,1)+'%':'—'}</div><div class="sc-lbl">Fill Percentage</div><div class="sc-sub">${totalMax?Math.round(totalMax).toLocaleString()+' bbl cap':'No max set'}</div></div>
+         </div>
+         <div class="pd-cat-pit-grid">
+           ${pitsInCat.map(pp=>`
+             <button type="button" onclick="pdSelectPit(${pp.id})" class="pd-cat-pit-btn" style="text-align:left;border-color:${pp.id===selId?'var(--ac)':'var(--b1)'};background:${pp.id===selId?'linear-gradient(180deg,rgba(0,212,255,.18),rgba(5,8,14,.96))':'linear-gradient(180deg,rgba(10,16,28,.82),rgba(5,8,14,.9))'}">
+               <div class="pd-cat-pit-top">
+                 <div class="pd-cat-pit-name">
+                   <span style="width:10px;height:10px;border-radius:3px;background:${hCol(pp)};display:inline-block;flex-shrink:0;box-shadow:0 0 10px ${hCol(pp)}66"></span>
+                   <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${pp.name}</span>
+                 </div>
+                 <span class="pd-cat-pit-chip">${mLbl(pp)}</span>
+               </div>
+               <div class="pd-cat-pit-metrics">
+                 <div>
+                   <div class="pd-cat-pit-vol" style="color:${hCol(pp)}">${pp.vol!=null?fN(pp.vol):'—'} bbl</div>
+                   <div class="pd-cat-pit-sub">Usable ${fN(Math.max(0,(pp.vol||0)-(pp.dead||0)))} bbl</div>
+                 </div>
+                 <span class="pd-cat-pit-chip">${pp.max?fm((pp.vol||0)/pp.max*100,1)+'% full':'No max'}</span>
+               </div>
+               <div class="pd-cat-volbar"><div class="pd-cat-volfill" style="width:${pp.max?Math.max(0,Math.min(100,(pp.vol||0)/pp.max*100)):0}%;background:${hCol(pp)}"></div></div>
+             </button>
+           `).join('')}
+         </div>
+       </div>
+     </div>`;
+   }
+-  if(!p){
+-    if(sub)sub.textContent=`${{active:'Active',reserve:'Reserve',premix:'Premix',other:'Other',custom:'Custom'}[selectedCategory]||selectedCategory} category`;
+-    det.innerHTML=categoryBlock;
+-    return;
+-  }
+-  if(sub)sub.textContent=`${p.name} — ${mLbl(p)} ${p.dens?'· '+p.dens+' '+p.du:''}`;
++  if(sub)sub.textContent=selectedCategory
++    ? `${p.name} — ${pits.filter(pp=>pp.cat===selectedCategory).length} pits · category sum`
++    : `${p.name} — ${mLbl(p)} ${p.dens?'· '+p.dens+' '+p.du:''}`;
+ 
+   const pct=pctF(p);
+   const usable=Math.max(0,(p.vol||0)-(p.dead||0));
+   const headspace=p.max?(p.max-(p.vol||0)):null;
+-  const deadPct=p.max&&p.dead?Math.min(100,p.dead/p.max*100):0;
++  const deadPct=p.max&&p.dead?Math.max(0,Math.min(100,(p.dead/p.max)*100)):0;
++  const deadVisualPct=p.dead?Math.max(deadPct||0,4):0;
+ 
+   // Stats from history
+   const vols=p.history.map(h=>h.vol);
+   const maxVol=vols.length?Math.max(...vols):p.vol||0;
+   const minVol=vols.length?Math.min(...vols):p.vol||0;
+   const avgVol=vols.length?vols.reduce((s,v)=>s+v,0)/vols.length:p.vol||0;
+   const lastDelta=vols.length>=2?vols[vols.length-1]-vols[vols.length-2]:0;
+   const trend24=vols.length>=2?vols[vols.length-1]-vols[0]:0;
+ 
+   det.innerHTML=categoryBlock+`
+   <!-- STAT CARDS -->
+   <div class="stats-row">
+     <div class="stat-card sc-blue">
+       <div class="sc-val" style="color:var(--ac)">${p.vol!=null?fN(p.vol):'—'}</div>
+       <div class="sc-lbl">Current Volume</div>
+       <div class="sc-sub">bbl</div>
+     </div>
+     <div class="stat-card sc-green">
+       <div class="sc-val" style="color:${pct>90?'var(--dg)':pct>70?'var(--wn)':'var(--a2)'}">${p.max?fm(pct,1)+'%':'—'}</div>
+       <div class="sc-lbl">% Full</div>
+       <div class="sc-sub">${p.max?fN(p.max)+' bbl capacity':'No max set'}</div>
+     </div>
+     <div class="stat-card sc-amber">
+       <div class="sc-val" style="color:var(--wn)">${fN(usable)}</div>
+       <div class="sc-lbl">Usable Volume</div>
+@@ -2636,104 +2688,103 @@ function renderDetail(){
+       <div class="sc-sub">${p.history.length} readings logged</div>
+     </div>
+   </div>
+ 
+   <!-- ROW 1: Tank visual + Volume history -->
+   <div class="chart-grid cg-wide">
+     <div class="chart-card">
+       <div class="cc-hdr">
+         <div class="cc-title">📈 Volume History</div>
+         <div class="cc-actions chart-toolbar" id="vol-range-btns">
+           <button class="cc-btn on" onclick="pdSetRange('vol',6,this)">6h</button>
+           <button class="cc-btn" onclick="pdSetRange('vol',12,this)">12h</button>
+           <button class="cc-btn" onclick="pdSetRange('vol',24,this)">24h</button>
+           <button class="cc-btn" onclick="pdSetRange('vol',0,this)">All</button>
+         </div>
+       </div>
+       <div class="cc-body"><canvas id="ch-vol" height="220"></canvas></div>
+     </div>
+     <div class="chart-card">
+       <div class="cc-hdr"><div class="cc-title">🪣 Tank Level</div></div>
+       <div class="cc-body" style="padding:16px">
+         <div class="tank-3d" id="tank-3d">
+           <div class="tank-3d-fill" id="t3fill" style="height:${pct}%;background:${fCol(p)}">
+             <div class="tank-wave"></div>
+           </div>
+-          <div class="tank-3d-dead" id="t3dead" style="height:${deadPct}%">
+-            ${p.dead>0&&deadPct>=14?`<div class="tank-dead-badge${deadPct<20?' compact':''}" style="color:${hCol(p)};border-color:${hCol(p)}aa;box-shadow:0 0 0 1px ${hCol(p)}33,0 0 18px ${hCol(p)}33;text-shadow:0 1px 10px rgba(0,0,0,.75),0 0 10px ${hCol(p)}55">Dead ${fN(p.dead)} bbl</div>`:''}
++          <div class="tank-3d-dead" id="t3dead" style="height:${deadVisualPct}%">
++            ${p.dead>0?`<div class="tank-dead-badge${deadVisualPct<20?' compact':''}" style="color:${hCol(p)};border-color:${hCol(p)}aa;box-shadow:0 0 0 1px ${hCol(p)}33,0 0 18px ${hCol(p)}33;text-shadow:0 1px 10px rgba(0,0,0,.75),0 0 10px ${hCol(p)}55">⚠ Dead ${fN(p.dead)} bbl</div>`:''}
+           </div>
+           ${p.max?`<div class="cap-marker" style="bottom:${Math.min(98,100-1)}%;top:auto"><div class="cap-label" style="margin-top:-12px">MAX ${fN(p.max)} bbl</div></div>`:''}
+-          ${p.dead>0?`<div class="cap-marker" style="bottom:${deadPct}%;background:rgba(255,184,0,.95);height:4px;box-shadow:0 0 10px rgba(255,184,0,.55)"><div class="cap-label" style="margin-top:4px;color:#ffd68a;font-weight:700;background:rgba(60,30,0,.9);padding:2px 6px;border-radius:4px">DEAD ${fN(p.dead)} bbl</div></div>`:''}
+           <div class="tank-3d-labels">
+             ${p.max?`<span class="tank-3d-lbl">${fN(p.max)}</span>`:'<span></span>'}
+             ${p.max?`<span class="tank-3d-lbl">${fN(p.max/2)}</span>`:'<span></span>'}
+             <span class="tank-3d-lbl">0</span>
+           </div>
+           <div class="tank-3d-vol">
+             <div class="big" style="color:${hCol(p)};text-shadow:0 0 30px ${hCol(p)}66">${p.vol!=null?fN(p.vol):'—'}</div>
+             <div class="unit">bbl</div>
+             <div class="pct">${p.max?fm(pct,1)+'% full':''}</div>
+           </div>
+         </div>
+         <!-- Mini stats below tank -->
+         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px">
+           ${[['Peak 24h',fN(maxVol)+'b','var(--dg)'],['Avg 24h',fN(avgVol)+'b','var(--ac)'],['Low 24h',fN(minVol)+'b','var(--wn)']].map(([l,v,c])=>`
+           <div style="background:rgba(0,0,0,.3);border:1px solid var(--b1);border-radius:7px;padding:8px;text-align:center">
+             <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${c}">${v}</div>
+             <div style="font-size:9px;color:var(--ts);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">${l}</div>
+           </div>`).join('')}
+         </div>
+       </div>
+     </div>
+   </div>
+ 
+   <!-- ROW 2: Rate of change + Density chart -->
+   <div class="chart-grid cg-2">
+     <div class="chart-card">
+       <div class="cc-hdr">
+         <div class="cc-title">⚡ Rate of Change (bbl/hr)</div>
+         <div class="cc-actions"><button class="cc-btn" onclick="exportChartCSV('roc')">CSV</button></div>
+       </div>
+       <div class="cc-body"><canvas id="ch-roc" height="180"></canvas></div>
+     </div>
+     <div class="chart-card">
+       <div class="cc-hdr">
+         <div class="cc-title">⚖️ Density / MW Trend</div>
+         <div class="cc-actions"><button class="cc-btn" onclick="exportChartCSV('mw')">CSV</button></div>
+       </div>
+       <div class="cc-body"><canvas id="ch-mw" height="180"></canvas></div>
+     </div>
+   </div>
+ 
+   <!-- ROW 3: Capacity gauge + Cumulative flow + Daily bar -->
+   <div class="chart-grid cg-3">
+     <div class="chart-card">
+       <div class="cc-hdr"><div class="cc-title">🔵 Capacity Gauge</div></div>
+       <div class="cc-body" style="display:flex;flex-direction:column;align-items:center;padding:16px">
+         <canvas id="ch-gauge" width="200" height="200" style="width:200px;height:200px"></canvas>
+         <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+-          ${[['Dead Vol',fN(p.dead||0),'var(--wn)'],['Usable',fN(usable),'var(--a2)'],
++          ${[['Current',p.vol!=null?fN(p.vol):'—','var(--ac)'],['Usable',fN(usable),'var(--a2)'],
+              ['Headspace',headspace!=null?fN(headspace):'—','var(--ts)'],['Total Cap',p.max?fN(p.max):'—','var(--ac)']
+           ].map(([l,v,c])=>`<div style="background:rgba(0,0,0,.25);border:1px solid var(--b1);border-radius:6px;padding:7px;text-align:center">
+             <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:${c}">${v}</div>
+             <div style="font-size:9px;color:var(--ts);letter-spacing:.5px;text-transform:uppercase">${l}</div>
+           </div>`).join('')}
+         </div>
+       </div>
+     </div>
+     <div class="chart-card">
+       <div class="cc-hdr"><div class="cc-title">📊 Hourly Volume Bars</div></div>
+       <div class="cc-body"><canvas id="ch-bar" height="280"></canvas></div>
+     </div>
+     <div class="chart-card">
+       <div class="cc-hdr"><div class="cc-title">🔄 Gain / Loss Events</div></div>
+       <div class="cc-body"><canvas id="ch-gl" height="280"></canvas></div>
+     </div>
+   </div>
+ 
+   <!-- ROW 4: Full history table -->
+   <div class="chart-card">
+     <div class="cc-hdr">
+       <div class="cc-title">📋 Reading History — All Logs</div>
+       <div class="cc-actions">
+         <span style="font-size:10px;color:var(--ts);font-family:var(--mono)">${p.history.length} readings</span>
+         <button class="cc-btn" onclick="exportChartCSV('history')">📤 CSV</button>
+@@ -2767,75 +2818,73 @@ function renderDetail(){
+ // ═══ CHART: VOLUME HISTORY ════════════════════════════════════════
+ function setRange(chart,hrs,btn){
+   if(!btn)return;
+   document.querySelectorAll(`#${chart==='vol'?'vol-range-btns':''} .cc-btn`).forEach(b=>b.classList.remove('on'));
+   btn.classList.add('on');
+   chartRanges[chart]=hrs;
+   const p=pits.find(pp=>pp.id===selId);if(p){drawVolChart(p)}
+ }
+ 
+ function getHistory(p,hrs){
+   if(!hrs||hrs===0)return p.history;
+   const cutoff=Date.now()-hrs*3600000;
+   const filt=p.history.filter(h=>h.ts>=cutoff);
+   return filt.length>1?filt:p.history.slice(-Math.max(4,Math.ceil(p.history.length*hrs/24)));
+ }
+ 
+ function drawVolChart(p){
+   const c=document.getElementById('ch-vol');if(!c)return;
+   const ctx=c.getContext('2d');
+   c.width=c.offsetWidth;const W=c.width,H=c.height;
+   ctx.clearRect(0,0,W,H);
+   const hist=getHistory(p,chartRanges.vol||6);
+   if(hist.length<2){drawEmpty(ctx,W,H,'No history data');return}
+   const pad={l:50,r:20,t:20,b:36};
+   const vols=hist.map(h=>h.vol);
+-  const minV=Math.min(...vols)*0.96,maxV=Math.max(...vols,p.max||0)*1.04;
++  const minV=Math.min(...vols,p.dead||0,0)*0.96,maxV=Math.max(...vols,p.max||0,p.dead||0)*1.04;
+   const px=i=>pad.l+(i/(hist.length-1))*(W-pad.l-pad.r);
+   const py=v=>pad.t+(1-(v-minV)/(maxV-minV||1))*(H-pad.t-pad.b);
+   // Grid
+   const gridLevels=5;
+   for(let i=0;i<=gridLevels;i++){
+     const v=minV+(maxV-minV)*i/gridLevels;
+     const y=py(v);
+     ctx.strokeStyle='rgba(26,40,64,.6)';ctx.lineWidth=1;
+     ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+     ctx.fillStyle='rgba(78,110,142,.7)';ctx.font='10px Share Tech Mono';ctx.textAlign='right';
+     ctx.fillText(Math.round(v),pad.l-4,y+4);
+   }
+   // Max/dead lines
+   if(p.max){
+     ctx.strokeStyle='rgba(255,71,87,.4)';ctx.setLineDash([5,4]);ctx.lineWidth=1.5;
+     ctx.beginPath();ctx.moveTo(pad.l,py(p.max));ctx.lineTo(W-pad.r,py(p.max));ctx.stroke();
+     ctx.setLineDash([]);ctx.fillStyle='rgba(255,71,87,.6)';ctx.font='9px Share Tech Mono';ctx.textAlign='left';
+     ctx.fillText('MAX',pad.l+4,py(p.max)-4);
+   }
+-  if(p.dead>0&&p.dead>minV){
++  if(p.dead>0){
+     ctx.strokeStyle='rgba(255,184,0,.9)';ctx.setLineDash([]);ctx.lineWidth=3;
+     ctx.beginPath();ctx.moveTo(pad.l,py(p.dead));ctx.lineTo(W-pad.r,py(p.dead));ctx.stroke();
+-    ctx.setLineDash([]);ctx.fillStyle='rgba(255,184,0,.9)';ctx.font='9px Share Tech Mono';ctx.textAlign='left';
+-    ctx.fillText('DEAD',pad.l+4,py(p.dead)-4);
+   }
+   // Gradient fill
+   const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
+   const col=hCol(p);grad.addColorStop(0,col+'55');grad.addColorStop(1,col+'08');
+   ctx.beginPath();ctx.moveTo(px(0),H-pad.b);
+   hist.forEach((h,i)=>ctx.lineTo(px(i),py(h.vol)));
+   ctx.lineTo(px(hist.length-1),H-pad.b);ctx.closePath();
+   ctx.fillStyle=grad;ctx.fill();
+   // Line — colored by delta
+   for(let i=1;i<hist.length;i++){
+     const d=hist[i].vol-hist[i-1].vol;
+     ctx.strokeStyle=d>5?'rgba(255,71,87,.9)':d<-5?'rgba(255,184,0,.8)':col+'dd';
+     ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(px(i-1),py(hist[i-1].vol));ctx.lineTo(px(i),py(hist[i].vol));ctx.stroke();
+   }
+   // Dots
+   hist.forEach((h,i)=>{
+     const d=i>0?h.vol-hist[i-1].vol:0;
+     ctx.fillStyle=d>5?'rgba(255,71,87,.9)':d<-5?'rgba(255,184,0,.9)':col;
+     ctx.beginPath();ctx.arc(px(i),py(h.vol),3.5,0,Math.PI*2);ctx.fill();
+   });
+   // Time axis
+   ctx.fillStyle='rgba(78,110,142,.7)';ctx.font='9px Share Tech Mono';ctx.textAlign='center';
+   const step=Math.max(1,Math.floor(hist.length/6));
+   for(let i=0;i<hist.length;i+=step){
+     const t=new Date(hist[i].ts);ctx.fillText(t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),px(i),H-4);
+@@ -3240,52 +3289,52 @@ function exportReport(){
+   toast('✅ Report opened in new window — Print to save as PDF');
+ }
+ 
+ // ═══ LOAD FROM LAYOUT ════════════════════════════════════════════
+ function importFromLayout(){
+   try{
+     const saved=localStorage.getItem('msl4');
+     if(!saved){toast('No layout data found — open Mud System Layout first','wn');return}
+     const d=JSON.parse(saved);
+     if(!d.pits?.length){toast('No pits in saved layout','wn');return}
+     pits=d.pits.map(p=>({...p,history:p.history||[]}));
+     transfers=d.transfers||[];
+     snapshots=d.snapshots||[];
+     renderPitList();if(pits.length)selectPit(pits[0].id);
+     toast('✅ Loaded '+pits.length+' pits from layout');
+   }catch(e){toast('Could not load layout data','er')}
+ }
+ 
+ // ═══ RESIZE ══════════════════════════════════════════════════════
+ window.addEventListener('resize',()=>{
+   const p=pits.find(pp=>pp.id===selId);if(!p)return;
+   requestAnimationFrame(()=>{drawVolChart(p);drawROC(p);drawMWChart(p);drawBarChart(p);drawGLChart(p)});
+ });
+ 
+ // ═══ SAVE/LOAD ════════════════════════════════════════════════════
+-function save(){try{localStorage.setItem('msl4',JSON.stringify({pits,nid,snapshots,dailyLog,transfers,notesManual,notesText,panelPins}))}catch(e){}}
+-function load(){try{const s=localStorage.getItem('msl4');if(s){const d=JSON.parse(s);pits=d.pits||[];nid=d.nid||pits.length+1;snapshots=d.snapshots||[];dailyLog=d.dailyLog||[];transfers=d.transfers||[];notesManual=d.notesManual||false;notesText=d.notesText||'';panelPins={lp:!!d.panelPins?.lp,rp:!!d.panelPins?.rp,nb:!!d.panelPins?.nb};return true}}catch(e){}return false}
++function save(){try{localStorage.setItem('msl4',JSON.stringify({pits,nid,snapshots,dailyLog,transfers,notesManual,notesText,panelPins,layoutThemeLight,analyticsThemeLight}))}catch(e){}}
++function load(){try{const s=localStorage.getItem('msl4');if(s){const d=JSON.parse(s);pits=d.pits||[];nid=d.nid||pits.length+1;snapshots=d.snapshots||[];dailyLog=d.dailyLog||[];transfers=d.transfers||[];notesManual=d.notesManual||false;notesText=d.notesText||'';panelPins={lp:!!d.panelPins?.lp,rp:!!d.panelPins?.rp,nb:!!d.panelPins?.nb};layoutThemeLight=!!d.layoutThemeLight;analyticsThemeLight=!!d.analyticsThemeLight;return true}}catch(e){}return false}
+ 
+ // ═══ INIT ════════════════════════════════════════════════════════
+ ;
+ load();
+ window.pdLoadFromLayout = importFromLayout;
+ window.pdLoadDemo       = loadDemoData;
+ window.pdSelectPit      = selectPit;
+ window.pdFilterPits     = filterPits;
+ window.pdExportReport   = exportReport;
+ window.pdExportCSV      = exportChartCSV;
+ window.pdClearHistory   = clearHistory;
+ window.pdSetRange       = setRange;
+ window.pdRenderPitList  = renderPitList;
+ window.pdRenderDetail   = renderDetail;
+ window.pdGetSelectedPitId = function(){return selId;};
+ window.pdEnsureSelection = function(){
+   const q=(document.getElementById('pd-search')?.value||'').toLowerCase();
+   const filtered=pits.filter(p=>{
+     return p.name.toLowerCase().includes(q)||mLbl(p).toLowerCase().includes(q);
+   });
+   if(selectedCategory&&selId==null){
+     renderPitList();
+     renderDetail();
+     return;
+   }
+@@ -3333,52 +3382,53 @@ function pdUpdateCategories(){
+   }).join('');
+ }
+ function pdSelectCategory(cat){
+   selectedCategory = selectedCategory===cat ? null : cat;
+   if(selectedCategory)selId=null;
+   document.querySelectorAll('.pit-item').forEach(function(el){el.classList.remove('active');});
+   var sub=document.getElementById('pd-sub');
+   if(sub&&selectedCategory){
+     sub.textContent=({active:'Active',reserve:'Reserve',premix:'Premix',other:'Other',custom:'Custom'}[selectedCategory]||selectedCategory)+' category overview';
+   }
+   pdUpdateCategories();
+   if(selectedCategory){
+     if(typeof pdRenderPitList==='function')pdRenderPitList();
+     if(typeof pdRenderDetail==='function')pdRenderDetail();
+     return;
+   }
+   if(typeof pdEnsureSelection==='function')pdEnsureSelection();
+ }
+ 
+ 
+ window.onload=function(){
+   load();
+   if(!pits.length)loadDefault();
+   const tbd=document.getElementById('tb-date');if(tbd)tbd.value=new Date().toISOString().slice(0,10);
+   applyPanelPins();
++  applyPageTheme('layout');
+   updHdr();resGrid();renderTemplates();renderSummary();renderCatCounts();renderNotes();renderSnaps();populateCmpSnap();calcDelta();setupGridDrop();_updUndo();
+-  if(notesManual&&notesText){const a=document.getElementById('nb-auto'),m2=document.getElementById('nb-manual'),b=document.getElementById('nb-edit-btn');if(a)a.style.display='none';if(m2){m2.style.display='block';m2.value=notesText;}if(b){b.textContent='✅ Done';b.classList.add('on');}}
++  if(notesManual&&notesText){notesManual=false;const a=document.getElementById('nb-auto'),ed=document.getElementById('nb-editor'),b=document.getElementById('nb-edit-btn');if(a){a.innerHTML=notesText;a.style.display='block';}if(ed){ed.style.display='none';ed.contentEditable='false';}if(b){b.textContent='Edit';b.classList.remove('on');}}
+   const lbl=document.getElementById('zlbl');if(lbl)lbl.textContent=CELL;
+   setTimeout(fitG,150);
+   document.getElementById('tb-rig')?.addEventListener('input',updHdr);
+   document.getElementById('tb-well')?.addEventListener('input',updHdr);
+   document.getElementById('tb-date')?.addEventListener('input',updHdr);
+   if(typeof pdLoadFromLayout==='function'){pdLoadFromLayout();pdUpdateNavBadge();pdUpdateSysTotal();pdUpdateCategories();}
+ };
+ 
+ 
+ // ── NOTE_TYPES ──────────────────────────────────────────────────
+ var NOTE_TYPES=[
+   {id:'mud_summary',  label:'Mud Type Summary',          on:true},
+   {id:'total_system', label:'Total System Volume',        on:true},
+   {id:'diesel',       label:'Diesel Volume',              on:true},
+   {id:'cement',       label:'Cement Volume',              on:false},
+   {id:'total_active', label:'Total Active Volume',        on:false},
+   {id:'capacity',     label:'Capacity Utilization',       on:false},
+   {id:'cat_counts',   label:'Category Pit Counts',        on:false},
+   {id:'dead_vol',     label:'Total Dead Volume',          on:false},
+   {id:'highest_pit',  label:'Highest Volume Pit',         on:false},
+   {id:'water_brine',  label:'Water / Brine Volumes',      on:false},
+   {id:'obm_wbm',      label:'OBM / WBM Volumes',          on:false},
+   {id:'avg_density',  label:'Avg Mud Density',            on:false},
+   {id:'reserve_ratio',label:'Reserve / Active Ratio',     on:false},
+   {id:'usable_vol',   label:'Total Usable Volume',        on:false}
+@@ -3742,51 +3792,51 @@ function prSum(c){
+   if(!rows.length)return'';
+   return'<div style="margin-bottom:7mm"><div style="font-size:9pt;font-weight:700;text-transform:uppercase;color:'+c.acc+';margin-bottom:3mm;padding-bottom:2mm;border-bottom:1pt solid '+c.b+'">Mud Summary</div>'
+     +'<table style="width:100%;border-collapse:collapse;font-size:9pt">'
+     +'<thead><tr style="background:'+c.bg2+'"><th style="padding:4px 8px;text-align:left;border-bottom:1pt solid '+c.b+'">Mud</th><th style="padding:4px 8px;text-align:right;border-bottom:1pt solid '+c.b+'">Volume</th><th style="padding:4px 8px;text-align:right;border-bottom:1pt solid '+c.b+'">Pits</th><th style="padding:4px 8px;text-align:right;border-bottom:1pt solid '+c.b+'">%</th><th style="padding:4px 8px;text-align:right;border-bottom:1pt solid '+c.b+'">Density</th></tr></thead>'
+     +'<tbody>'+rows.map(function(r,i){return'<tr style="background:'+(i%2?c.bg2:c.bg)+'">'
+       +'<td style="padding:4px 8px;border-bottom:1pt solid '+c.b+'"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+(MUD_C[r.mud]||'#888')+';margin-right:5px;vertical-align:middle"></span>'+(ML2[r.mud]||r.mud)+'</td>'
+       +'<td style="padding:4px 8px;text-align:right;font-weight:700;border-bottom:1pt solid '+c.b+'">'+Math.round(r.vol).toLocaleString()+'</td>'
+       +'<td style="padding:4px 8px;text-align:right;border-bottom:1pt solid '+c.b+'">'+r.n+'</td>'
+       +'<td style="padding:4px 8px;text-align:right;border-bottom:1pt solid '+c.b+'">'+(tot?(r.vol/tot*100).toFixed(1)+'%':'--')+'</td>'
+       +'<td style="padding:4px 8px;text-align:right;border-bottom:1pt solid '+c.b+'">'+(r.dens?r.dens+' '+(r.du||'pcf'):'--')+'</td></tr>';}).join('')
+     +'<tr style="font-weight:700;background:'+c.bg2+'"><td style="padding:5px 8px;border-top:1.5pt solid '+c.b+'">TOTAL</td><td style="padding:5px 8px;text-align:right;border-top:1.5pt solid '+c.b+'">'+Math.round(tot).toLocaleString()+'</td><td colspan="3" style="border-top:1.5pt solid '+c.b+'"></td></tr>'
+     +'</tbody></table></div>';
+ }
+ function prCats(c){
+   var currentPits = getCurrentPits();
+   var CAT_C2={active:'#00ff9d',reserve:'#00d4ff',premix:'#ffb800',other:'#6a8aaa'};
+   var cats={active:0,reserve:0,premix:0,other:0},vols={active:0,reserve:0,premix:0,other:0};
+   currentPits.forEach(function(p){var k=cats[p.cat]!==undefined?p.cat:'other';cats[k]++;vols[k]+=(p.vol||0);});
+   return'<div style="margin-bottom:7mm"><div style="font-size:9pt;font-weight:700;text-transform:uppercase;color:'+c.acc+';margin-bottom:3mm;padding-bottom:2mm;border-bottom:1pt solid '+c.b+'">Category Counts</div>'
+     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+Object.entries(cats).map(function(e){var k=e[0],v=e[1];return'<div style="background:'+CAT_C2[k]+'18;border:2pt solid '+CAT_C2[k]+';border-radius:6px;padding:8px;text-align:center">'
+       +'<div style="font-size:20pt;font-weight:900;color:'+CAT_C2[k]+'">'+v+'</div>'
+       +'<div style="font-size:8pt;text-transform:uppercase;color:'+c.ts+';margin-top:2px">'+k+'</div>'
+       +'<div style="font-size:8pt;color:'+c.ts+'">'+Math.round(vols[k]).toLocaleString()+' bbl</div></div>';}).join('')+'</div></div>';
+ }
+ function prNotes(c){
+-  var el=document.getElementById('nb-auto');var txt=el?el.textContent.trim():'';
++  var txt=notesManual&&notesText?notesText:(document.getElementById('nb-auto')?document.getElementById('nb-auto').innerHTML.trim():'');
+   if(!txt)return'';
+   return'<div style="margin-bottom:7mm;padding:8px 12px;border-left:3pt solid '+c.acc+';background:'+c.bg2+';font-size:9pt;line-height:1.6"><strong>System Notes:</strong> '+txt+'</div>';
+ }
+ function prDelta(c){
+   if(!snapshots||!snapshots.length)return'';
+   const currentPits = getCurrentPits();
+   const snap=snapshots[snapshots.length-1]; // Use latest snapshot
+   const sG={};snap.data.forEach(d=>{const ml=mLbl(d);const k=ml+'|'+(d.dens?d.dens+' '+(d.du||'pcf'):'');if(!sG[k])sG[k]={vol:0,mud:d.mud};sG[k].vol+=d.vol||0});
+   const cG={};currentPits.filter(p=>p.vol>0).forEach(p=>{const ml=mLbl(p);const k=ml+'|'+(p.dens?p.dens+' '+(p.du||'pcf'):'');if(!cG[k])cG[k]={vol:0,mud:p.mud};cG[k].vol+=p.vol||0});
+   const sT=snap.data.reduce((t,d)=>t+(d.vol||0),0),cT=currentPits.reduce((t,p)=>t+(p.vol||0),0);const tot=cT-sT;
+   const keys=new Set([...Object.keys(sG),...Object.keys(cG)]);
+   let rows='';
+   keys.forEach(k=>{const prev=sG[k]?.vol||0;const curr=cG[k]?.vol||0;const d=curr-prev;if(Math.abs(d)<0.5)return;const dc=d>0?c.dg:d<0?c.wn:c.a2;const nm=k.split('|')[0];
+     rows+=`<tr style="background:${rows.split('</tr>').length%2?c.bg2:c.bg}">
+       <td style="padding:4px 8px;text-align:left;border-bottom:1pt solid ${c.b}">${nm}</td>
+       <td style="padding:4px 8px;text-align:right;border-bottom:1pt solid ${c.b}">${Math.round(prev).toLocaleString()}</td>
+       <td style="padding:4px 8px;text-align:right;border-bottom:1pt solid ${c.b}">${Math.round(curr).toLocaleString()}</td>
+       <td style="padding:4px 8px;text-align:right;border-bottom:1pt solid ${c.b};font-weight:700;color:${dc}">${d>=0?'+':''}${Math.round(d)}</td>
+     </tr>`;
+   });
+   const totDc=tot>5?c.dg:tot<-5?c.wn:c.a2;
+   return `<div style="margin-bottom:7mm">
+     <div style="font-size:9pt;font-weight:700;text-transform:uppercase;color:${c.acc};margin-bottom:3mm;padding-bottom:2mm;border-bottom:1pt solid ${c.b}">Volume Delta vs Latest Snapshot (${snap.label})</div>
+     <table style="width:100%;border-collapse:collapse;font-size:9pt">
+       <thead><tr style="background:${c.bg2}">
