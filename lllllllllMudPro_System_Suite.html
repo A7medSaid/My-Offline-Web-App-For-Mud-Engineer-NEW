@@ -1193,7 +1193,7 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
     </div>
     <div class="tb-sep"></div>
     <button class="tbt" onclick="loadDefault()" title="Reset to default layout">🔄</button>
-    <button class="tbt" onclick="document.body.classList.toggle('light')" title="Toggle light/dark theme">🌙</button>
+    <button class="tbt" id="layout-theme-btn" onclick="toggleLayoutTheme()" title="Toggle System Layout light/dark theme">🌙</button>
     <div style="display:flex;gap:3px;align-items:center;margin-left:2px;flex-shrink:0;border-left:1px solid var(--b2);padding-left:8px">
       <button id="undo-btn" onclick="doUndo()" disabled
         style="border:1px solid var(--b2);background:rgba(0,212,255,.06);color:var(--ts);font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:5px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:4px"
@@ -1528,6 +1528,7 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
       <button class="tbt" onclick="pdLoadFromLayout()">📂 Sync from Layout</button>
       <button class="tbt" onclick="pdLoadDemo()">🎲 Demo Data</button>
       <button class="tbt" onclick="pdExportReport()">📤 Export Report</button>
+      <button class="tbt" id="pd-theme-btn" onclick="toggleAnalyticsTheme()" title="Toggle Pit Analytics light/dark theme">🌙 Theme</button>
       <button class="tbt on" onclick="openAnalyticsPrintCtrl()">🖨️ Print</button>
     </div>
   </div>
@@ -1625,11 +1626,26 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
 <script>
 (function tick(){const el=document.getElementById('gbar-clock');if(el)el.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});setTimeout(tick,1000);})();
 
+let currentPage='layout',layoutThemeLight=false,analyticsThemeLight=false;
+function updateThemeButtons(){
+  const l=document.getElementById('layout-theme-btn'),a=document.getElementById('pd-theme-btn');
+  if(l){l.textContent=layoutThemeLight?'☀️':'🌙';l.title='Toggle System Layout light/dark theme';l.classList.toggle('on',layoutThemeLight);}
+  if(a){a.textContent=analyticsThemeLight?'☀️ Theme':'🌙 Theme';a.title='Toggle Pit Analytics light/dark theme';a.classList.toggle('on',analyticsThemeLight);}
+}
+function applyPageTheme(pg=currentPage){
+  currentPage=pg;
+  document.body.classList.toggle('light',pg==='details'?analyticsThemeLight:layoutThemeLight);
+  updateThemeButtons();
+}
+function toggleLayoutTheme(){layoutThemeLight=!layoutThemeLight;applyPageTheme('layout');if(typeof save==='function')save();}
+function toggleAnalyticsTheme(){analyticsThemeLight=!analyticsThemeLight;applyPageTheme('details');if(typeof save==='function')save();}
+
 function switchPage(pg,btn){
   document.querySelectorAll('.mp-page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+pg).classList.add('active');
   document.querySelectorAll('.gnav-btn').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
+  applyPageTheme(pg);
   if(pg==='details'){
     if(typeof pdLoadFromLayout==='function')pdLoadFromLayout();
     setTimeout(function(){
@@ -2369,8 +2385,8 @@ document.addEventListener('keydown',e=>{
 document.querySelectorAll('.mbg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('vis')}));
 
 // ═══ SAVE/LOAD ═══════════════════════════════════════════════════
-function save(){try{localStorage.setItem('msl4',JSON.stringify({pits,nid,snapshots,dailyLog,transfers,notesManual,notesText,panelPins}))}catch(e){}}
-function load(){try{const s=localStorage.getItem('msl4');if(s){const d=JSON.parse(s);pits=d.pits||[];nid=d.nid||pits.length+1;snapshots=d.snapshots||[];dailyLog=d.dailyLog||[];transfers=d.transfers||[];notesManual=d.notesManual||false;notesText=d.notesText||'';panelPins={lp:!!d.panelPins?.lp,rp:!!d.panelPins?.rp,nb:!!d.panelPins?.nb};return true}}catch(e){}return false}
+function save(){try{localStorage.setItem('msl4',JSON.stringify({pits,nid,snapshots,dailyLog,transfers,notesManual,notesText,panelPins,layoutThemeLight,analyticsThemeLight}))}catch(e){}}
+function load(){try{const s=localStorage.getItem('msl4');if(s){const d=JSON.parse(s);pits=d.pits||[];nid=d.nid||pits.length+1;snapshots=d.snapshots||[];dailyLog=d.dailyLog||[];transfers=d.transfers||[];notesManual=d.notesManual||false;notesText=d.notesText||'';panelPins={lp:!!d.panelPins?.lp,rp:!!d.panelPins?.rp,nb:!!d.panelPins?.nb};layoutThemeLight=!!d.layoutThemeLight;analyticsThemeLight=!!d.analyticsThemeLight;return true}}catch(e){}return false}
 
 // ═══ INIT ════════════════════════════════════════════════════════
 /* boot in master */;
@@ -3285,8 +3301,8 @@ window.addEventListener('resize',()=>{
 });
 
 // ═══ SAVE/LOAD ════════════════════════════════════════════════════
-function save(){try{localStorage.setItem('msl4',JSON.stringify({pits,nid,snapshots,dailyLog,transfers,notesManual,notesText,panelPins}))}catch(e){}}
-function load(){try{const s=localStorage.getItem('msl4');if(s){const d=JSON.parse(s);pits=d.pits||[];nid=d.nid||pits.length+1;snapshots=d.snapshots||[];dailyLog=d.dailyLog||[];transfers=d.transfers||[];notesManual=d.notesManual||false;notesText=d.notesText||'';panelPins={lp:!!d.panelPins?.lp,rp:!!d.panelPins?.rp,nb:!!d.panelPins?.nb};return true}}catch(e){}return false}
+function save(){try{localStorage.setItem('msl4',JSON.stringify({pits,nid,snapshots,dailyLog,transfers,notesManual,notesText,panelPins,layoutThemeLight,analyticsThemeLight}))}catch(e){}}
+function load(){try{const s=localStorage.getItem('msl4');if(s){const d=JSON.parse(s);pits=d.pits||[];nid=d.nid||pits.length+1;snapshots=d.snapshots||[];dailyLog=d.dailyLog||[];transfers=d.transfers||[];notesManual=d.notesManual||false;notesText=d.notesText||'';panelPins={lp:!!d.panelPins?.lp,rp:!!d.panelPins?.rp,nb:!!d.panelPins?.nb};layoutThemeLight=!!d.layoutThemeLight;analyticsThemeLight=!!d.analyticsThemeLight;return true}}catch(e){}return false}
 
 // ═══ INIT ════════════════════════════════════════════════════════
 ;
