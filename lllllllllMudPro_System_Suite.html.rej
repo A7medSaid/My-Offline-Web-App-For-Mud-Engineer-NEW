@@ -1,5 +1,80 @@
 diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(rejected hunks)
-@@ -1112,50 +1112,61 @@ body::after{
+@@ -638,71 +638,70 @@ canvas{display:block;width:100%}
+ /* Tooltip */
+ #tooltip{position:fixed;display:none;z-index:999;pointer-events:none;
+   background:linear-gradient(135deg,rgba(10,20,32,.98),rgba(8,15,25,.98));
+   border:1px solid rgba(0,212,255,.3);border-radius:10px;
+   padding:10px 14px;min-width:160px;max-width:260px;
+   box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 0 1px rgba(0,212,255,.06)}
+ .tt-title{font-family:var(--cond);font-size:13px;font-weight:700;margin-bottom:6px}
+ .tt-row{display:flex;justify-content:space-between;gap:12px;padding:3px 0;
+   border-bottom:1px solid rgba(0,212,255,.08);font-size:11px}
+ .tt-row:last-child{border:none}
+ .tt-key{color:var(--ts);font-family:var(--mono)}
+ .tt-val{color:var(--a2);font-family:var(--mono);font-weight:700}
+ 
+ /* TANK VISUAL */
+ .tank-3d{position:relative;width:100%;height:200px;border-radius:12px;overflow:hidden;
+   background:rgba(0,0,0,.4);border:1px solid rgba(0,212,255,.1)}
+ .tank-3d-fill{position:absolute;bottom:0;left:0;right:0;transition:height .8s cubic-bezier(.4,0,.2,1);
+   border-radius:0 0 10px 10px}
+ .tank-3d-dead{position:absolute;bottom:0;left:0;right:0;z-index:2;
+   background:
+     linear-gradient(180deg,rgba(255,220,120,.28) 0%,rgba(255,170,0,.2) 22%,rgba(120,58,0,.78) 100%),
+     repeating-linear-gradient(45deg,rgba(255,210,120,.98) 0,rgba(255,210,120,.98) 7px,rgba(90,38,0,.98) 7px,rgba(90,38,0,.98) 14px);
+   border-top:4px solid rgba(255,226,150,.98);
+   box-shadow:inset 0 0 0 2px rgba(70,26,0,.42),inset 0 12px 18px rgba(255,230,160,.18),0 -10px 22px rgba(255,184,0,.35)}
+ .tank-dead-badge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+-  padding:4px 10px;border-radius:999px;border:1px solid rgba(255,230,160,.7);
+-  background:rgba(50,20,0,.82);color:#ffe4a1;font-family:var(--mono);font-size:10px;font-weight:800;
+-  letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;box-shadow:0 0 16px rgba(255,184,0,.28)}
++  padding:5px 12px;border-radius:999px;border:2px solid rgba(255,230,160,.95);
++  background:linear-gradient(180deg,rgba(80,34,0,.94),rgba(38,16,0,.94));color:#ffe4a1;font-family:var(--mono);font-size:10px;font-weight:900;
++  letter-spacing:.7px;text-transform:uppercase;white-space:nowrap;box-shadow:0 0 0 2px rgba(255,184,0,.16),0 0 22px rgba(255,184,0,.55),0 4px 12px rgba(0,0,0,.55)}
+ .tank-dead-badge.compact{font-size:9px;padding:3px 8px}
+ .tank-3d-labels{position:absolute;right:8px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;padding:8px 0}
+ .tank-3d-lbl{font-size:9px;font-family:var(--mono);color:rgba(255,255,255,.4)}
+ .tank-3d-vol{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+ .tank-3d-vol .big{font-family:var(--mono);font-size:28px;font-weight:700;color:#fff;text-shadow:0 0 20px rgba(0,0,0,.8)}
+ .tank-3d-vol .unit{font-size:12px;color:rgba(255,255,255,.6);font-family:var(--mono)}
+ .tank-3d-vol .pct{font-size:13px;color:rgba(255,255,255,.5);font-family:var(--mono);margin-top:2px}
+ 
+ /* Shimmer wave on fill */
+ .tank-wave{position:absolute;top:-6px;left:-100%;right:-100%;height:12px;opacity:.4;
+   background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+   animation:waveMove 3s linear infinite}
+ @keyframes waveMove{from{left:-100%}to{left:200%}}
+ 
+ /* Cap bar */
+ .cap-marker{position:absolute;left:0;right:0;height:2px;background:rgba(255,71,87,.6);
+   box-shadow:0 0 6px rgba(255,71,87,.4)}
+-.cap-label{position:absolute;left:8px;font-size:8px;font-family:var(--mono);color:rgba(255,71,87,.8)}
+ 
+ /* HISTORY TABLE */
+ .hist-table{width:100%;border-collapse:collapse;font-size:11px}
+ .hist-table th{padding:7px 10px;text-align:left;font-size:8px;letter-spacing:1.5px;
+   text-transform:uppercase;color:var(--td);font-family:var(--mono);
+   border-bottom:1px solid var(--b1);background:rgba(0,0,0,.3);position:sticky;top:0}
+ .hist-table td{padding:7px 10px;border-bottom:1px solid rgba(22,34,56,.4);vertical-align:middle}
+ .hist-table tr:hover td{background:rgba(0,212,255,.03)}
+ .hist-table td.mono{font-family:var(--mono)}
+ .delta-pill{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;
+   border-radius:10px;font-size:10px;font-family:var(--mono);font-weight:700}
+ .dp-gain{background:rgba(255,71,87,.15);color:#ff4757;border:1px solid rgba(255,71,87,.25)}
+ .dp-loss{background:rgba(255,184,0,.12);color:#ffb800;border:1px solid rgba(255,184,0,.2)}
+ .dp-ok{background:rgba(0,255,157,.1);color:#00ff9d;border:1px solid rgba(0,255,157,.18)}
+ 
+ /* GAUGE */
+ .gauge-wrap{position:relative;display:flex;align-items:center;justify-content:center;padding:10px 0}
+ 
+ /* EMPTY STATE */
+ .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+   height:100%;gap:14px;opacity:.5;padding:40px}
+ .empty-icon{font-size:48px}
+ .empty-text{font-size:14px;color:var(--ts);text-align:center;line-height:1.6}
+ 
+ /* CHART TOOLBAR */
+@@ -1112,50 +1111,61 @@ body::after{
    text-shadow:0 1px 8px rgba(0,0,0,.55);
  }
  ::-webkit-scrollbar{
@@ -61,7 +136,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
  <div id="page-layout" class="mp-page active">
  
  <div id="app">
-@@ -1171,51 +1182,51 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
+@@ -1171,51 +1181,51 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
      <div class="tb-group"><div class="tb-lbl">DATE</div><input class="tb-inp" type="date" id="tb-date" style="width:128px;text-align:left" oninput="updHdr()"></div>
      <div class="tb-sep"></div>
      <div class="tb-group"><div class="tb-lbl">SHIFT</div>
@@ -114,7 +189,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
    </div>
    <div style="padding:10px 0 0">
      <div style="padding:0 14px 6px"><div class="lp-t">Drag onto Grid</div></div>
-@@ -1506,50 +1517,51 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
+@@ -1506,50 +1516,51 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
  <div class="mbox" style="width:420px">
    <div class="mt"><span>🧪 Mix Calculator</span><button class="mc" onclick="document.getElementById('mx-modal').classList.remove('vis')">✕</button></div>
    <div class="emf"><div class="eml">Fluid 1 Volume (bbl)</div><input type="number" class="emi" id="mx-v1" oninput="calcMix()"></div>
@@ -166,7 +241,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
          <div style="font-size:14px;color:var(--ts);text-align:center;line-height:1.7">Select a pit from the left<br>or sync from the Layout page</div>
          <button class="tbt on" onclick="pdLoadFromLayout()" style="padding:9px 22px;font-size:11px">📂 Sync from Layout →</button>
        </div>
-@@ -1603,55 +1615,70 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
+@@ -1603,55 +1614,70 @@ body.light .qa-btn,body.light .pit-item,body.light .sum-row,body.light .stat-car
      </div>
    </div>
  </div></div>
@@ -237,7 +312,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
    toast('↩ Undid: '+p.lbl);_updUndo();
  }
  function doRedo(){
-@@ -2051,51 +2078,51 @@ function renderNotes(){
+@@ -2051,51 +2077,51 @@ function renderNotes(){
    nc.innerHTML=parts.join(' &nbsp;|&nbsp; ')
      ||'<span style="color:var(--td)">Click configure to choose notes</span>';
  }
@@ -290,7 +365,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
    const mw=parseFloat(document.getElementById('dl-mw').value)||null;if(mw)p.dens=mw;
    p.history=p.history||[];p.history.push({ts:Date.now(),vol,note:document.getElementById('dl-note').value});if(p.history.length>48)p.history.shift();
    dailyLog.unshift({ts:Date.now(),pitId,pitName:p.name,mud:mLbl(p),dens:p.dens,du:p.du,vol,prev,delta:vol-(prev||0),note:document.getElementById('dl-note').value});
-@@ -2347,52 +2374,52 @@ function doPrint(){
+@@ -2347,52 +2373,52 @@ function doPrint(){
  function exportCSV(){
    const rows=[['Pit Name','Category','Mud Type','Volume (bbl)','Max (bbl)','Dead (bbl)','Density','Unit','Tag','Col','Row','W','H']];
    pits.forEach(p=>rows.push([p.name,p.cat,mLbl(p),p.vol??'',p.max??'',p.dead??'',p.dens??'',p.du||'',p.tag||'',p.x,p.y,p.w,p.h]));
@@ -345,7 +420,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
  function fN(v){return(!isNaN(v)&&v!=null&&isFinite(v))?Math.round(+v).toLocaleString():'---'}
  function fm(v,d=1){return(isNaN(v)||v==null)?'---':(+v).toFixed(d)}
  function mLbl(p){return p.mudCust||(ML[p.mud])||p.mud?.toUpperCase()||'?'}
-@@ -2495,124 +2522,149 @@ function renderPitList(){
+@@ -2495,124 +2521,149 @@ function renderPitList(){
  }
  function filterPits(){
    const q=(document.getElementById('pd-search')?.value||'').toLowerCase();
@@ -504,7 +579,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
      <div class="stat-card sc-amber">
        <div class="sc-val" style="color:var(--wn)">${fN(usable)}</div>
        <div class="sc-lbl">Usable Volume</div>
-@@ -2636,104 +2688,103 @@ function renderDetail(){
+@@ -2636,104 +2687,103 @@ function renderDetail(){
        <div class="sc-sub">${p.history.length} readings logged</div>
      </div>
    </div>
@@ -535,8 +610,9 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
 +          <div class="tank-3d-dead" id="t3dead" style="height:${deadVisualPct}%">
 +            ${p.dead>0?`<div class="tank-dead-badge${deadVisualPct<20?' compact':''}" style="color:${hCol(p)};border-color:${hCol(p)}aa;box-shadow:0 0 0 1px ${hCol(p)}33,0 0 18px ${hCol(p)}33;text-shadow:0 1px 10px rgba(0,0,0,.75),0 0 10px ${hCol(p)}55">⚠ Dead ${fN(p.dead)} bbl</div>`:''}
            </div>
-           ${p.max?`<div class="cap-marker" style="bottom:${Math.min(98,100-1)}%;top:auto"><div class="cap-label" style="margin-top:-12px">MAX ${fN(p.max)} bbl</div></div>`:''}
+-          ${p.max?`<div class="cap-marker" style="bottom:${Math.min(98,100-1)}%;top:auto"><div class="cap-label" style="margin-top:-12px">MAX ${fN(p.max)} bbl</div></div>`:''}
 -          ${p.dead>0?`<div class="cap-marker" style="bottom:${deadPct}%;background:rgba(255,184,0,.95);height:4px;box-shadow:0 0 10px rgba(255,184,0,.55)"><div class="cap-label" style="margin-top:4px;color:#ffd68a;font-weight:700;background:rgba(60,30,0,.9);padding:2px 6px;border-radius:4px">DEAD ${fN(p.dead)} bbl</div></div>`:''}
++          ${p.max?`<div class="cap-marker" aria-label="Max capacity ${fN(p.max)} bbl" style="bottom:${Math.min(98,100-1)}%;top:auto"></div>`:''}
            <div class="tank-3d-labels">
              ${p.max?`<span class="tank-3d-lbl">${fN(p.max)}</span>`:'<span></span>'}
              ${p.max?`<span class="tank-3d-lbl">${fN(p.max/2)}</span>`:'<span></span>'}
@@ -612,7 +688,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
        <div class="cc-actions">
          <span style="font-size:10px;color:var(--ts);font-family:var(--mono)">${p.history.length} readings</span>
          <button class="cc-btn" onclick="exportChartCSV('history')">📤 CSV</button>
-@@ -2767,75 +2818,73 @@ function renderDetail(){
+@@ -2767,75 +2817,73 @@ function renderDetail(){
  // ═══ CHART: VOLUME HISTORY ════════════════════════════════════════
  function setRange(chart,hrs,btn){
    if(!btn)return;
@@ -690,7 +766,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
    const step=Math.max(1,Math.floor(hist.length/6));
    for(let i=0;i<hist.length;i+=step){
      const t=new Date(hist[i].ts);ctx.fillText(t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),px(i),H-4);
-@@ -3240,52 +3289,52 @@ function exportReport(){
+@@ -3240,52 +3288,52 @@ function exportReport(){
    toast('✅ Report opened in new window — Print to save as PDF');
  }
  
@@ -745,7 +821,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
      renderDetail();
      return;
    }
-@@ -3333,52 +3382,53 @@ function pdUpdateCategories(){
+@@ -3333,52 +3381,53 @@ function pdUpdateCategories(){
    }).join('');
  }
  function pdSelectCategory(cat){
@@ -800,7 +876,7 @@ diff a/lllllllllMudPro_System_Suite.html b/lllllllllMudPro_System_Suite.html	(re
    {id:'avg_density',  label:'Avg Mud Density',            on:false},
    {id:'reserve_ratio',label:'Reserve / Active Ratio',     on:false},
    {id:'usable_vol',   label:'Total Usable Volume',        on:false}
-@@ -3742,51 +3792,51 @@ function prSum(c){
+@@ -3742,51 +3791,51 @@ function prSum(c){
    if(!rows.length)return'';
    return'<div style="margin-bottom:7mm"><div style="font-size:9pt;font-weight:700;text-transform:uppercase;color:'+c.acc+';margin-bottom:3mm;padding-bottom:2mm;border-bottom:1pt solid '+c.b+'">Mud Summary</div>'
      +'<table style="width:100%;border-collapse:collapse;font-size:9pt">'
