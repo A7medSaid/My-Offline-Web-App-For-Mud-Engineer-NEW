@@ -680,7 +680,6 @@ canvas{display:block;width:100%}
 /* Cap bar */
 .cap-marker{position:absolute;left:0;right:0;height:2px;background:rgba(255,71,87,.6);
   box-shadow:0 0 6px rgba(255,71,87,.4)}
-.cap-label{position:absolute;left:8px;font-size:8px;font-family:var(--mono);color:rgba(255,71,87,.8)}
 
 /* HISTORY TABLE */
 .hist-table{width:100%;border-collapse:collapse;font-size:11px}
@@ -2587,6 +2586,7 @@ function renderDetail(){
     const totalVol=pitsInCat.reduce((s,pp)=>s+(pp.vol||0),0);
     const totalMax=pitsInCat.reduce((s,pp)=>s+(pp.max||0),0);
     const usableVol=pitsInCat.reduce((s,pp)=>s+Math.max(0,(pp.vol||0)-(pp.dead||0)),0);
+    const totalDead=pitsInCat.reduce((s,pp)=>s+(pp.dead||0),0);
     const catTitle={active:'Active',reserve:'Reserve',premix:'Premix',other:'Other',custom:'Custom'}[selectedCategory]||selectedCategory;
     categoryBlock=`
     <div class="chart-card">
@@ -2602,10 +2602,11 @@ function renderDetail(){
             <div class="pd-cat-pill">${pitsInCat.length} pit${pitsInCat.length!==1?'s':''} selected</div>
           </div>
         </div>
-        <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stats-row" style="grid-template-columns:repeat(5,1fr)">
           <div class="stat-card sc-blue"><div class="sc-val" style="color:var(--ac)">${Math.round(totalVol).toLocaleString()}</div><div class="sc-lbl">Total Volume</div><div class="sc-sub">bbl</div></div>
           <div class="stat-card sc-green"><div class="sc-val" style="color:var(--a2)">${pitsInCat.length}</div><div class="sc-lbl">Pit Count</div><div class="sc-sub">selected category</div></div>
           <div class="stat-card sc-amber"><div class="sc-val" style="color:var(--wn)">${Math.round(usableVol).toLocaleString()}</div><div class="sc-lbl">Usable Volume</div><div class="sc-sub">bbl</div></div>
+          <div class="stat-card sc-or"><div class="sc-val" style="color:var(--or)">${Math.round(totalDead).toLocaleString()}</div><div class="sc-lbl">Dead Volume</div><div class="sc-sub">summed category bbl</div></div>
           <div class="stat-card sc-pu"><div class="sc-val" style="color:var(--pu)">${totalMax?fm(totalVol/totalMax*100,1)+'%':'—'}</div><div class="sc-lbl">Fill Percentage</div><div class="sc-sub">${totalMax?Math.round(totalMax).toLocaleString()+' bbl cap':'No max set'}</div></div>
         </div>
         <div class="pd-cat-pit-grid">
@@ -2639,8 +2640,13 @@ function renderDetail(){
   const pct=pctF(p);
   const usable=Math.max(0,(p.vol||0)-(p.dead||0));
   const headspace=p.max?(p.max-(p.vol||0)):null;
+<<<<<<< ours
   const deadPct=p.max&&p.dead?Math.min(100,p.dead/p.max*100):0;
   const deadVisualPct=p.dead?Math.max(p.max?Math.min(100,deadPct):0,4):0;
+=======
+  const deadPct=p.max&&p.dead?Math.max(0,Math.min(100,(p.dead/p.max)*100)):0;
+  const deadVisualPct=p.dead?Math.max(deadPct||0,4):0;
+>>>>>>> theirs
 
   // Stats from history
   const vols=p.history.map(h=>h.vol);
@@ -2709,10 +2715,16 @@ function renderDetail(){
             <div class="tank-wave"></div>
           </div>
           <div class="tank-3d-dead" id="t3dead" style="height:${deadVisualPct}%">
+<<<<<<< ours
             ${p.dead>0?`<div class="tank-dead-badge${deadVisualPct<20?' compact':''}" style="color:${hCol(p)};border-color:${hCol(p)}aa;box-shadow:0 0 0 1px ${hCol(p)}33,0 0 18px ${hCol(p)}33;text-shadow:0 1px 10px rgba(0,0,0,.75),0 0 10px ${hCol(p)}55">Dead ${fN(p.dead)} bbl</div>`:''}
           </div>
           ${p.max?`<div class="cap-marker" style="bottom:${Math.min(98,100-1)}%;top:auto"><div class="cap-label" style="margin-top:-12px">MAX ${fN(p.max)} bbl</div></div>`:''}
           ${p.dead>0?`<div class="cap-marker" style="bottom:${deadVisualPct}%;background:rgba(255,184,0,.95);height:4px;z-index:5;box-shadow:0 0 10px rgba(255,184,0,.55)"><div class="cap-label" style="margin-top:4px;color:#ffd68a;font-weight:700;background:rgba(60,30,0,.9);padding:2px 6px;border-radius:4px">DEAD ${fN(p.dead)} bbl</div></div>`:''}
+=======
+            ${p.dead>0?`<div class="tank-dead-badge${deadVisualPct<20?' compact':''}" style="color:${hCol(p)};border-color:${hCol(p)}aa;box-shadow:0 0 0 1px ${hCol(p)}33,0 0 18px ${hCol(p)}33;text-shadow:0 1px 10px rgba(0,0,0,.75),0 0 10px ${hCol(p)}55">⚠ Dead ${fN(p.dead)} bbl</div>`:''}
+          </div>
+          ${p.max?`<div class="cap-marker" aria-label="Max capacity ${fN(p.max)} bbl" style="bottom:${Math.min(98,100-1)}%;top:auto"></div>`:''}
+>>>>>>> theirs
           <div class="tank-3d-labels">
             ${p.max?`<span class="tank-3d-lbl">${fN(p.max)}</span>`:'<span></span>'}
             ${p.max?`<span class="tank-3d-lbl">${fN(p.max/2)}</span>`:'<span></span>'}
@@ -2761,7 +2773,7 @@ function renderDetail(){
       <div class="cc-body" style="display:flex;flex-direction:column;align-items:center;padding:16px">
         <canvas id="ch-gauge" width="200" height="200" style="width:200px;height:200px"></canvas>
         <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
-          ${[['Dead Vol',fN(p.dead||0),'var(--wn)'],['Usable',fN(usable),'var(--a2)'],
+          ${[['Current',p.vol!=null?fN(p.vol):'—','var(--ac)'],['Usable',fN(usable),'var(--a2)'],
              ['Headspace',headspace!=null?fN(headspace):'—','var(--ts)'],['Total Cap',p.max?fN(p.max):'—','var(--ac)']
           ].map(([l,v,c])=>`<div style="background:rgba(0,0,0,.25);border:1px solid var(--b1);border-radius:6px;padding:7px;text-align:center">
             <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:${c}">${v}</div>
@@ -2862,8 +2874,6 @@ function drawVolChart(p){
   if(p.dead>0){
     ctx.strokeStyle='rgba(255,184,0,.9)';ctx.setLineDash([]);ctx.lineWidth=3;
     ctx.beginPath();ctx.moveTo(pad.l,py(p.dead));ctx.lineTo(W-pad.r,py(p.dead));ctx.stroke();
-    ctx.setLineDash([]);ctx.fillStyle='rgba(255,184,0,.9)';ctx.font='9px Share Tech Mono';ctx.textAlign='left';
-    ctx.fillText('DEAD',pad.l+4,py(p.dead)-4);
   }
   // Gradient fill
   const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
@@ -3405,6 +3415,7 @@ window.onload=function(){
   if(!pits.length)loadDefault();
   const tbd=document.getElementById('tb-date');if(tbd)tbd.value=new Date().toISOString().slice(0,10);
   applyPanelPins();
+  applyPageTheme('layout');
   updHdr();resGrid();renderTemplates();renderSummary();renderCatCounts();renderNotes();renderSnaps();populateCmpSnap();calcDelta();setupGridDrop();_updUndo();
   if(notesManual&&notesText){notesManual=false;const a=document.getElementById('nb-auto'),ed=document.getElementById('nb-editor'),b=document.getElementById('nb-edit-btn');if(a){a.innerHTML=notesText;a.style.display='block';}if(ed){ed.style.display='none';ed.contentEditable='false';}if(b){b.textContent='Edit';b.classList.remove('on');}}
   const lbl=document.getElementById('zlbl');if(lbl)lbl.textContent=CELL;
