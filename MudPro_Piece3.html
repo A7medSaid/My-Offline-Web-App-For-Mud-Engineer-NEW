@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MudPro — Advanced Piece 3 · UX Enhancements</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080d14;--bgc:#0c1520;--bgi:#060b12;--bga:#101a28;--b1:#1a2840;--b2:#253d5c;
+--ac:#00d4ff;--a2:#00ff9d;--wn:#ffb800;--dg:#ff4757;--pu:#c084fc;
+--tx:#dce8f8;--ts:#5a7a9a;--td:#253040;
+--mono:'Share Tech Mono',monospace;--sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif;
+--glass:rgba(12,21,32,.75);--gb:rgba(0,212,255,.1);
+--ga:linear-gradient(135deg,#00d4ff,#00ff9d);--gw:linear-gradient(135deg,#ffb800,#ff4757)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans)}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+background:radial-gradient(ellipse 70% 50% at 20% 10%,rgba(0,212,255,.04),transparent),
+repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(0,212,255,.015) 49px),
+repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(0,212,255,.015) 49px)}
+#app{position:relative;z-index:1;display:flex;height:100vh;overflow:hidden}
+#sb{width:240px;min-width:240px;background:var(--glass);backdrop-filter:blur(24px);border-right:1px solid var(--gb);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+#mn{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#tb{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--gb);background:var(--glass);backdrop-filter:blur(24px);flex-shrink:0}
+#ct{flex:1;overflow-y:auto;padding:26px}
+.sbl{padding:20px 18px 14px;border-bottom:1px solid var(--gb)}
+.brd{font-family:var(--cond);font-weight:900;font-size:20px;letter-spacing:2px;text-transform:uppercase;background:var(--ga);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.bdg{display:inline-block;margin-top:8px;font-size:9px;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:3px;background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.25);color:var(--wn)}
+.ng{padding:8px 0 4px}
+.ngl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--td);font-family:var(--mono);padding:0 18px 5px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.ngl:hover{color:var(--ac)}.nga{font-size:10px;transition:transform .2s}
+.ng.closed .nga{transform:rotate(-90deg)}
+.ni{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:12px;color:var(--ts);border-left:2px solid transparent;transition:all .15s;user-select:none}
+.ni:hover{background:rgba(0,212,255,.04);color:var(--tx)}
+.ni.act{background:rgba(0,212,255,.07);color:var(--ac);border-left-color:var(--ac);font-weight:600}
+.ni .ic{width:18px;text-align:center;font-size:14px}
+/* ── STATUS DOTS ── */
+.ndot{width:7px;height:7px;border-radius:50%;margin-left:auto;flex-shrink:0;display:none}
+.ndot.ok{display:block;background:var(--a2);box-shadow:0 0 6px var(--a2);animation:dp 2s infinite}
+.ndot.warn{display:block;background:var(--wn);box-shadow:0 0 6px var(--wn);animation:dp 2s infinite}
+.ndot.err{display:block;background:var(--dg);box-shadow:0 0 6px var(--dg);animation:dp 1.2s infinite}
+@keyframes dp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.35)}}
+.nb{font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px;flex-shrink:0;color:var(--wn);background:rgba(255,184,0,.08);border:1px solid rgba(255,184,0,.2)}
+.tbt{padding:5px 14px;border-radius:6px;font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;text-transform:uppercase;border:1px solid var(--b2);color:var(--ts);background:rgba(255,255,255,.02)}
+.tbt:hover{border-color:var(--ac);color:var(--ac);background:rgba(0,212,255,.05)}
+#bc{font-size:11px;color:var(--td);font-family:var(--mono);margin-left:14px}
+#bc span{color:var(--ac)}
+.cs{display:none}.cs.act{display:block;animation:si .22s ease}
+@keyframes si{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.sh{margin-bottom:22px;cursor:pointer;position:relative;padding-right:32px}
+.sh::after{content:'▾';position:absolute;right:2px;top:2px;font-size:18px;color:var(--td);transition:transform .2s}
+.sh.col::after{transform:rotate(-90deg)}.sh:hover::after{color:var(--ac)}
+.sb2.hid{display:none}
+.st{font-family:var(--cond);font-size:27px;font-weight:900;text-transform:uppercase;letter-spacing:1px}
+.ss{font-size:12px;color:var(--ts);font-family:var(--mono);margin-top:4px}
+.cd{background:var(--glass);border:1px solid var(--gb);border-radius:12px;overflow:hidden;margin-bottom:16px;backdrop-filter:blur(20px);position:relative;transition:border-color .2s,box-shadow .2s}
+.cd:hover{border-color:rgba(0,212,255,.2);box-shadow:0 0 28px rgba(0,212,255,.05)}
+.cd::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .2s}
+.cd:hover::before,.cd.at::before{opacity:1;background:var(--ga)}
+.ch{padding:11px 16px;border-bottom:1px solid var(--gb);display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.18)}
+.ct2{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ts)}
+.cb{padding:14px 16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start}
+.fi{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(26,40,64,.5)}
+.fi:last-child{border-bottom:none}.fl{flex:1;font-size:12px;color:var(--ts)}.fw{display:flex;align-items:center;gap:6px}
+/* ── COLOR-CODED INPUTS ── */
+.fi input,.fi select{background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:96px;text-align:right;outline:none;transition:all .22s}
+.fi input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(0,212,255,.07);background:rgba(0,212,255,.03)}
+.fi input.vok{border-color:rgba(0,255,157,.5)!important;background:rgba(0,255,157,.04)!important;color:var(--a2)!important}
+.fi input.vwn{border-color:rgba(255,184,0,.5)!important;background:rgba(255,184,0,.04)!important;color:var(--wn)!important}
+.fi input.ver{border-color:rgba(255,71,87,.5)!important;background:rgba(255,71,87,.04)!important;color:var(--dg)!important}
+.fi select{text-align:left;width:auto;cursor:pointer}
+.fu{font-family:var(--mono);font-size:10px;color:var(--td);min-width:26px}
+.rr{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(26,40,64,.4)}.rr:last-child{border-bottom:none}
+.rl{font-size:12px;color:var(--ts)}.rv{font-family:var(--mono);font-size:14px;color:var(--ac);transition:color .2s}
+.rv.hi{color:var(--a2);font-size:16px}.rv.wn{color:var(--wn)}.rv.dg{color:var(--dg)}
+/* ── ANIMATED NUMBERS ── */
+.rv.anim{animation:nf .35s cubic-bezier(.4,0,.2,1)}
+@keyframes nf{0%{opacity:0;transform:translateY(-8px) scale(.95)}65%{opacity:1;transform:translateY(2px) scale(1.02)}100%{opacity:1;transform:none;scale:1}}
+.ru{font-size:10px;color:var(--td);margin-left:3px}
+.rb{text-align:center;padding:14px 0;border-bottom:1px solid var(--gb);margin-bottom:8px}
+.rb .v{font-family:var(--mono);font-size:28px;letter-spacing:2px;transition:all .3s}
+.rb .v.a{color:var(--a2)}.rb .v.w{color:var(--wn)}.rb .v.d{color:var(--dg)}
+.rb .v.anim{animation:bf .4s cubic-bezier(.4,0,.2,1)}
+@keyframes bf{0%{opacity:0;transform:scale(.82)}70%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+.rb .l{font-size:11px;color:var(--ts);text-transform:uppercase;letter-spacing:1.5px;margin-top:2px}
+.ab{border-radius:7px;padding:10px 14px;font-size:12px;margin-top:10px;line-height:1.6}
+.ab.info{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);color:#7dd3fc}
+.ab.ok{background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.15);color:var(--a2)}
+.ab.wn{background:rgba(255,184,0,.05);border:1px solid rgba(255,184,0,.18);color:var(--wn)}
+.ab.er{background:rgba(255,71,87,.05);border:1px solid rgba(255,71,87,.18);color:var(--dg)}
+.nt{background:rgba(0,212,255,.03);border:1px solid rgba(0,212,255,.08);border-radius:7px;padding:10px 14px;font-size:11px;color:var(--ts);line-height:1.7;margin-top:12px}
+.nt strong{color:var(--ac)}
+/* ── SPARKLINES ── */
+.spk-row{display:grid;grid-template-columns:1fr 80px 60px 110px 50px;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(26,40,64,.35)}
+.spk-row:last-child{border-bottom:none}
+.du{color:var(--dg)}.dd{color:var(--a2)}.df{color:var(--td)}
+/* ── PRINT STYLES ── */
+@media print{
+  #sb,#tb,#print-fab{display:none!important}
+  #ct{padding:0!important;overflow:visible!important}
+  body,html{height:auto!important;overflow:visible!important}
+  #mn{overflow:visible!important;height:auto!important}
+  #app{height:auto!important;overflow:visible!important;display:block!important}
+  .cs{display:block!important}.no-print{display:none!important}
+  .print-page{page-break-after:always;padding:16mm 18mm;min-height:267mm;background:#fff;color:#000;font-family:'Barlow',sans-serif}
+  .print-page:last-child{page-break-after:avoid}
+  .rh{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #003366;padding-bottom:8px;margin-bottom:14px}
+  .rl2{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;color:#003366;letter-spacing:2px}
+  .rm{font-size:11px;color:#444;text-align:right;font-family:monospace;line-height:1.7}
+  .rs{margin-bottom:14px}
+  .rst{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#003366;border-bottom:1px solid #aabbcc;padding-bottom:3px;margin-bottom:7px}
+  .rtb{width:100%;border-collapse:collapse;font-size:10px}
+  .rtb th{background:#e8eef5;padding:5px 7px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#336;border:1px solid #c9d6e3}
+  .rtb td{padding:5px 7px;border:1px solid #c9d6e3;font-family:monospace}
+  .rtb tr:nth-child(even) td{background:#f5f8fc}
+  .rsig{display:flex;gap:40px;margin-top:18px;padding-top:10px;border-top:1px solid #c9d6e3}
+  .rsig-i{flex:1;font-size:10px;color:#444}
+  .rsig-l{border-bottom:1px solid #333;margin-top:24px;margin-bottom:3px}
+  #prpt{display:none}
+  #prpt.printing{display:block}
+  @page{margin:0;size:A4}
+}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--b1);border-radius:3px}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bgc);border:1px solid var(--a2);color:var(--a2);padding:10px 18px;border-radius:8px;font-family:var(--mono);font-size:12px;display:none;z-index:999}
+body.light{--bg:#f0f4f8;--bgc:#fff;--bgi:#f8fafc;--b1:#c9d6e3;--b2:#a8bccf;--ac:#0077aa;--a2:#006633;--wn:#b45309;--dg:#b91c1c;--tx:#1a2a3a;--ts:#4a6080;--td:#8aa0b8;--glass:rgba(255,255,255,.88);--gb:rgba(0,119,170,.12)}
+body.light::before{background:none}
+#print-fab{position:fixed;bottom:24px;right:24px;z-index:200;background:var(--ga);border:none;border-radius:50%;width:52px;height:52px;cursor:pointer;font-size:20px;box-shadow:0 4px 20px rgba(0,212,255,.3);transition:transform .2s;display:flex;align-items:center;justify-content:center}
+#print-fab:hover{transform:scale(1.1)}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="sb">
+  <div class="sbl">
+    <div class="brd">⬡ MudPro</div>
+    <div style="font-size:9px;color:var(--ts);letter-spacing:2px;text-transform:uppercase;font-family:var(--mono);margin-top:3px">Advanced Module · Piece 3</div>
+    <div class="bdg">✨ UX Enhancements</div>
+  </div>
+  <div class="ng">
+    <div class="ngl" onclick="tng(this)"><span>Enhancements</span><span class="nga">▾</span></div>
+    <div class="ngb">
+      <div class="ni act" onclick="gt('anim',this)"><span class="ic">🔢</span><span>Animated Numbers</span><div class="ndot ok"></div></div>
+      <div class="ni" onclick="gt('ci',this)"><span class="ic">🎨</span><span>Color-Coded Inputs</span><div class="ndot ok"></div></div>
+      <div class="ni" onclick="gt('spk',this)"><span class="ic">📈</span><span>Sparkline Trends</span><div class="ndot warn" id="spk-dot"></div></div>
+      <div class="ni" onclick="gt('dots',this)"><span class="ic">🔴</span><span>Section Status Dots</span><div class="ndot ok"></div></div>
+      <div class="ni" onclick="gt('print',this)"><span class="ic">🖨️</span><span>Print / PDF Layout</span><div class="ndot ok"></div></div>
+    </div>
+  </div>
+  <div class="ng">
+    <div class="ngl" onclick="tng(this)"><span>Demo Calculators</span><span class="nga">▾</span></div>
+    <div class="ngb">
+      <div class="ni" onclick="gt('dmw',this)"><span class="ic">⚖️</span><span>MW Increase Demo</span><div class="ndot" id="dot-dmw"></div></div>
+      <div class="ni" onclick="gt('dhyd',this)"><span class="ic">⚡</span><span>Hydraulics Demo</span><div class="ndot" id="dot-dhyd"></div></div>
+    </div>
+  </div>
+</div>
+ 
+<div id="mn">
+  <div id="tb">
+    <div style="display:flex;align-items:center">
+      <div style="font-family:var(--cond);font-size:21px;font-weight:700">UX <span style="background:var(--ga);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Enhancements</span></div>
+      <div id="bc">▸ <span>Animated Numbers</span></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="tbt" onclick="toggleTheme()">🌙 Theme</button>
+      <button class="tbt" onclick="doPrint()">🖨️ Print</button>
+    </div>
+  </div>
+  <div id="ct">
+ 
+<!-- ══ 1. ANIMATED NUMBERS ══════════════════════════════════════ -->
+<div class="cs act" id="sec-anim">
+  <div class="sh" onclick="tsh(this)"><div class="st">🔢 Animated Result Numbers</div><div class="ss">Smooth flip & scale animation on every calculation — no more snapping values</div></div>
+  <div class="sb2">
+    <div class="cd at"><div class="ch"><div class="ct2">⚖️ Live Animation Demo — MW Increase</div></div><div class="cb">
+      <p style="font-size:13px;color:var(--ts);margin-bottom:16px;line-height:1.7">Change any input below and watch the results <strong style="color:var(--ac)">flip in smoothly</strong>. Large values scale in from center; inline values slide down from above.</p>
+      <div class="g3">
+        <div>
+          <div class="fi"><div class="fl">Active Volume</div><div class="fw"><input type="number" id="an-vol" value="1200" oninput="calcAnim()"><span class="fu">bbls</span></div></div>
+          <div class="fi"><div class="fl">From MW</div><div class="fw"><input type="number" id="an-f" value="10.2" step="0.01" oninput="calcAnim()"><span class="fu">ppg</span></div></div>
+          <div class="fi"><div class="fl">To MW</div><div class="fw"><input type="number" id="an-t" value="10.8" step="0.01" oninput="calcAnim()"><span class="fu">ppg</span></div></div>
+          <div class="fi"><div class="fl">WM SG</div><div class="fw"><input type="number" id="an-sg" value="4.2" step="0.01" oninput="calcAnim()"></div></div>
+        </div>
+        <div>
+          <div class="rb"><div class="v a" id="an-bar">—</div><div class="l">Barite Required (lbs)</div></div>
+          <div class="rr"><div class="rl">Sacks (50 lb)</div><div class="rv" id="an-sacks">—</div></div>
+          <div class="rr"><div class="rl">WM Volume Added</div><div class="rv" id="an-wv">—<span class="ru">bbls</span></div></div>
+          <div class="rr"><div class="rl">Final Volume</div><div class="rv hi" id="an-fv">—<span class="ru">bbls</span></div></div>
+        </div>
+        <div style="padding:14px;background:var(--bga);border-radius:8px;border:1px solid var(--b1)">
+          <div style="color:var(--ac);font-weight:700;margin-bottom:10px;font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;font-size:13px">How to use in any calc:</div>
+          <div style="font-family:var(--mono);font-size:10px;background:rgba(0,0,0,.35);padding:10px;border-radius:5px;color:var(--a2);line-height:2">
+            <span style="color:var(--ts)">// Big result box</span><br>
+            setBig(<span style="color:var(--wn)">'id'</span>, value, decimals);<br><br>
+            <span style="color:var(--ts)">// Inline result row</span><br>
+            setVal(<span style="color:var(--wn)">'id'</span>, value, decimals, colorClass);
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--ts);line-height:1.7">Works on any element. Skips animation if value unchanged to avoid flicker.</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+ 
+<!-- ══ 2. COLOR-CODED INPUTS ════════════════════════════════════ -->
+<div class="cs" id="sec-ci">
+  <div class="sh" onclick="tsh(this)"><div class="st">🎨 Color-Coded Inputs</div><div class="ss">Real-time green / amber / red validation against program limits as you type</div></div>
+  <div class="sb2">
+    <div class="cd at"><div class="ch"><div class="ct2">🎨 Live Demo — type values to see colors</div></div><div class="cb">
+      <p style="font-size:13px;color:var(--ts);margin-bottom:16px;line-height:1.7">
+        <span style="color:var(--a2)">🟢 Green</span> = within limits &nbsp;·&nbsp;
+        <span style="color:var(--wn)">🟡 Amber</span> = within 10% of limit &nbsp;·&nbsp;
+        <span style="color:var(--dg)">🔴 Red</span> = out of range
+      </p>
+      <div class="g2">
+        <div>
+          <div class="cd"><div class="ch"><div class="ct2">⚙️ Program Limits</div></div><div class="cb">
+            <div style="display:grid;grid-template-columns:1fr 75px 75px;gap:8px;margin-bottom:8px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--td);font-family:var(--mono)">
+              <div>Property</div><div style="text-align:right">Min</div><div style="text-align:right">Max</div>
+            </div>
+            <div id="ci-lims"></div>
+          </div></div>
+        </div>
+        <div>
+          <div class="cd"><div class="ch"><div class="ct2">🧪 Today's Values — type to test</div></div><div class="cb" id="ci-vals"></div></div>
+          <div class="cd"><div class="ch"><div class="ct2">📊 Status</div></div><div class="cb" id="ci-sum"><div class="ab info">Enter values to see status.</div></div></div>
+        </div>
+      </div>
+      <div class="nt" style="margin-top:0">
+        <strong>Integration:</strong> Add <code style="color:var(--ac)">data-min="X" data-max="Y"</code> to any input, then call <code style="color:var(--ac)">colorCode(this)</code> on <code style="color:var(--ac)">oninput</code>. Works everywhere in the main app with no changes to existing calc logic.
+      </div>
+    </div></div>
+  </div>
+</div>
+ 
+<!-- ══ 3. SPARKLINES ════════════════════════════════════════════ -->
+<div class="cs" id="sec-spk">
+  <div class="sh" onclick="tsh(this)"><div class="st">📈 Sparkline Trends</div><div class="ss">7-point mini charts inline with each mud property — spot trends instantly without a separate chart</div></div>
+  <div class="sb2">
+    <div class="cd at">
+      <div class="ch">
+        <div class="ct2">📈 Live Trend Table — WBM / OBM Properties</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="logSpk()" style="background:rgba(0,255,157,.07);border:1px solid var(--a2);color:var(--a2);border-radius:5px;padding:3px 10px;font-size:10px;cursor:pointer;font-family:var(--mono);text-transform:uppercase">+ Log Sample</button>
+          <button onclick="clearSpk()" style="background:rgba(255,71,87,.06);border:1px solid var(--dg);color:var(--dg);border-radius:5px;padding:3px 10px;font-size:10px;cursor:pointer;font-family:var(--mono);text-transform:uppercase">Clear</button>
+        </div>
+      </div>
+      <div class="cb">
+        <div id="spk-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;padding:12px;background:var(--bga);border-radius:8px;margin-bottom:16px;border:1px solid var(--b1)">
+          <span style="font-size:11px;color:var(--ts);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;align-self:center;flex-shrink:0">New reading:</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px" id="spk-tbl">
+            <thead><tr style="background:rgba(0,0,0,.3)">
+              <th style="padding:7px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--td);font-family:var(--mono);border-bottom:1px solid var(--b1)">Property</th>
+              <th style="padding:7px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--td);font-family:var(--mono);border-bottom:1px solid var(--b1)">Latest</th>
+              <th style="padding:7px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--td);font-family:var(--mono);border-bottom:1px solid var(--b1)">Δ</th>
+              <th style="padding:7px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--td);font-family:var(--mono);border-bottom:1px solid var(--b1)">7-Point Trend</th>
+              <th style="padding:7px 10px;text-align:center;font-size:9px;text-transform:uppercase;color:var(--td);font-family:var(--mono);border-bottom:1px solid var(--b1)">Status</th>
+            </tr></thead>
+            <tbody id="spk-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ══ 4. STATUS DOTS ══════════════════════════════════════════ -->
+<div class="cs" id="sec-dots">
+  <div class="sh" onclick="tsh(this)"><div class="st">🔴 Section Status Dots</div><div class="ss">Pulsing nav dots reflect live calculator status — see problems without opening each section</div></div>
+  <div class="sb2">
+    <div class="cd at"><div class="ch"><div class="ct2">🔴 Live Demo — simulate section states</div></div><div class="cb">
+      <div class="g2">
+        <div>
+          <p style="font-size:13px;color:var(--ts);margin-bottom:14px;line-height:1.7">Each nav item has a small dot that reflects the latest calc result. Change the states below and watch the sidebar update instantly.</p>
+          <div id="dot-rows"></div>
+          <div class="nt" style="margin-top:14px">
+            <strong>Integration:</strong> Call <code style="color:var(--ac)">setDot(id, 'ok'|'warn'|'err'|'')</code> at the end of any calculator function. State persists in localStorage across page reloads.
+          </div>
+        </div>
+        <div>
+          <div class="cd"><div class="ch"><div class="ct2">🗺️ Nav Preview — updates with your selections</div></div>
+            <div class="cb" id="dot-prev" style="padding:10px"></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+ 
+<!-- ══ 5. PRINT LAYOUT ══════════════════════════════════════════ -->
+<div class="cs" id="sec-print">
+  <div class="sh" onclick="tsh(this)"><div class="st">🖨️ Print / PDF Layout</div><div class="ss">Professional A4 daily mud report — press Print or Ctrl+P for formatted output</div></div>
+  <div class="sb2">
+    <div class="cd at no-print"><div class="ch">
+      <div class="ct2">🖨️ Daily Mud Report — A4 formatted</div>
+      <button onclick="doPrint()" style="background:rgba(0,212,255,.07);border:1px solid var(--ac);color:var(--ac);border-radius:5px;padding:4px 14px;font-size:11px;cursor:pointer;font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">🖨️ Print Preview</button>
+    </div><div class="cb">
+      <p style="font-size:13px;color:var(--ts);margin-bottom:16px;line-height:1.7">Fill in the fields below, then click <strong style="color:var(--ac)">Print Preview</strong> or press <kbd style="background:var(--bga);border:1px solid var(--b2);border-radius:3px;padding:2px 6px;font-family:var(--mono);font-size:11px">Ctrl+P</kbd> to see the full A4 report. Sidebar and UI elements are hidden automatically.</p>
+      <div class="g2">
+        <div>
+          <div class="cd"><div class="ch"><div class="ct2">📋 Report Header</div></div><div class="cb">
+            <div class="fi"><div class="fl">Rig</div><div class="fw"><input type="text" id="pr-rig" value="ADM-655" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:130px;outline:none;text-align:left"></div></div>
+            <div class="fi"><div class="fl">Well</div><div class="fw"><input type="text" id="pr-well" value="SFNY-938" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:130px;outline:none;text-align:left"></div></div>
+            <div class="fi"><div class="fl">Date</div><div class="fw"><input type="date" id="pr-date" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none"></div></div>
+            <div class="fi"><div class="fl">Shift</div><div class="fw"><select id="pr-shift" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none"><option>Day</option><option>Night</option></select></div></div>
+            <div class="fi"><div class="fl">Mud Engineer</div><div class="fw"><input type="text" id="pr-eng" placeholder="Your name" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:140px;outline:none;text-align:left"></div></div>
+            <div class="fi"><div class="fl">MD / TVD</div><div class="fw"><input type="number" id="pr-md" placeholder="MD" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 6px;width:75px;text-align:right;outline:none"><span style="color:var(--td);font-size:11px">/</span><input type="number" id="pr-tvd" placeholder="TVD" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 6px;width:75px;text-align:right;outline:none"><span class="fu">ft</span></div></div>
+            <div class="fi"><div class="fl">Hole Size / MW</div><div class="fw"><input type="number" id="pr-hole" value="8.5" step="0.125" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 6px;width:65px;text-align:right;outline:none"><span style="color:var(--td);font-size:11px">in /</span><input type="number" id="pr-mw" value="11.8" step="0.01" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 6px;width:65px;text-align:right;outline:none"><span class="fu">ppg</span></div></div>
+          </div></div>
+          <div class="cd"><div class="ch"><div class="ct2">📝 Operations Summary</div></div><div class="cb">
+            <textarea id="pr-ops" rows="4" placeholder="Describe drilling operations this shift..." style="width:100%;background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-size:12px;padding:8px;outline:none;resize:vertical;font-family:var(--sans);line-height:1.6">Drilled 8700–9120 ft (420 ft) 12-1/4" hole. Circulated bottoms up at 1650 ft from bit. Performed wiper trip to 8000 ft and back. Mud weight maintained at 11.8 ppg. No losses or gains.</textarea>
+          </div></div>
+        </div>
+        <div>
+          <div class="cd"><div class="ch"><div class="ct2">🧪 Mud Properties</div></div><div class="cb" id="pr-mud-inputs"></div></div>
+          <div class="cd"><div class="ch"><div class="ct2">⚙️ Drilling Parameters</div></div><div class="cb">
+            <div class="fi"><div class="fl">WOB</div><div class="fw"><input type="number" id="pr-wob" value="22" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:80px;text-align:right;outline:none"><span class="fu">klbs</span></div></div>
+            <div class="fi"><div class="fl">RPM</div><div class="fw"><input type="number" id="pr-rpm" value="120" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:80px;text-align:right;outline:none"></div></div>
+            <div class="fi"><div class="fl">Flow Rate</div><div class="fw"><input type="number" id="pr-gpm" value="280" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:80px;text-align:right;outline:none"><span class="fu">gpm</span></div></div>
+            <div class="fi"><div class="fl">Standpipe Pressure</div><div class="fw"><input type="number" id="pr-spp" value="2850" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:80px;text-align:right;outline:none"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">ROP</div><div class="fw"><input type="number" id="pr-rop" value="65" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:80px;text-align:right;outline:none"><span class="fu">ft/hr</span></div></div>
+          </div></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+ 
+<!-- ══ 6. MW DEMO ════════════════════════════════════════════════ -->
+<div class="cs" id="sec-dmw">
+  <div class="sh" onclick="tsh(this)"><div class="st">⚖️ MW Increase — All Enhancements</div><div class="ss">Animated numbers + color-coded inputs + status dot — all active simultaneously</div></div>
+  <div class="sb2">
+    <div class="cd at"><div class="ch"><div class="ct2">⚖️ Increase Mud Weight</div></div><div class="cb">
+      <div class="g2">
+        <div>
+          <div class="fi"><div class="fl">Active Volume</div><div class="fw"><input type="number" id="dm-vol" value="1200" data-min="100" data-max="5000" oninput="colorCode(this);cDMW()"><span class="fu">bbls</span></div></div>
+          <div class="fi"><div class="fl">Current MW</div><div class="fw"><input type="number" id="dm-c" value="10.2" step="0.01" data-min="8.33" data-max="18" oninput="colorCode(this);cDMW()"><span class="fu">ppg</span></div></div>
+          <div class="fi"><div class="fl">Target MW</div><div class="fw"><input type="number" id="dm-t" value="10.8" step="0.01" data-min="8.33" data-max="18" oninput="colorCode(this);cDMW()"><span class="fu">ppg</span></div></div>
+          <div class="fi"><div class="fl">WM SG (Barite)</div><div class="fw"><input type="number" id="dm-sg" value="4.2" step="0.01" data-min="2.5" data-max="5.0" oninput="colorCode(this);cDMW()"></div></div>
+          <div class="fi"><div class="fl">Max MW Limit (program)</div><div class="fw"><input type="number" id="dm-mx" value="11.5" step="0.01" oninput="cDMW()"><span class="fu">ppg</span></div></div>
+          <div class="fi"><div class="fl">Min MW Limit (program)</div><div class="fw"><input type="number" id="dm-mn" value="10.0" step="0.01" oninput="cDMW()"><span class="fu">ppg</span></div></div>
+        </div>
+        <div>
+          <div class="rb"><div class="v a" id="dm-bar">—</div><div class="l">Barite to Add (lbs)</div></div>
+          <div class="rr"><div class="rl">Sacks (100 lb)</div><div class="rv" id="dm-sks">—</div></div>
+          <div class="rr"><div class="rl">WM Volume</div><div class="rv" id="dm-wv">—<span class="ru">bbls</span></div></div>
+          <div class="rr"><div class="rl">Final Volume</div><div class="rv hi" id="dm-fv">—<span class="ru">bbls</span></div></div>
+          <div class="rr"><div class="rl">Margin to Max</div><div class="rv" id="dm-mg">—<span class="ru">ppg</span></div></div>
+          <div class="rr"><div class="rl">Status</div><div class="rv" id="dm-st">—</div></div>
+          <div id="dm-alert" class="ab info">Enter mud weight values.</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+ 
+<!-- ══ 7. HYD DEMO ═══════════════════════════════════════════════ -->
+<div class="cs" id="sec-dhyd">
+  <div class="sh" onclick="tsh(this)"><div class="st">⚡ Hydraulics — All Enhancements</div><div class="ss">ECD, ann velocity, hole cleaning — animated + color-coded + nav dot</div></div>
+  <div class="sb2">
+    <div class="cd at"><div class="ch"><div class="ct2">⚡ Hydraulics Calculator</div></div><div class="cb">
+      <div class="g2">
+        <div>
+          <div class="fi"><div class="fl">Mud Weight</div><div class="fw"><input type="number" id="dh-mw" value="12" step="0.01" data-min="8.33" data-max="20" oninput="colorCode(this);cDHyd()"><span class="fu">ppg</span></div></div>
+          <div class="fi"><div class="fl">Flow Rate</div><div class="fw"><input type="number" id="dh-gpm" value="280" data-min="80" data-max="700" oninput="colorCode(this);cDHyd()"><span class="fu">gpm</span></div></div>
+          <div class="fi"><div class="fl">PV</div><div class="fw"><input type="number" id="dh-pv" value="22" data-min="5" data-max="55" oninput="colorCode(this);cDHyd()"><span class="fu">cP</span></div></div>
+          <div class="fi"><div class="fl">YP</div><div class="fw"><input type="number" id="dh-yp" value="14" data-min="5" data-max="35" oninput="colorCode(this);cDHyd()"><span class="fu">lbf/100ft²</span></div></div>
+          <div class="fi"><div class="fl">Hole Diameter</div><div class="fw"><input type="number" id="dh-oh" value="8.5" step="0.125" data-min="4" data-max="26" oninput="colorCode(this);cDHyd()"><span class="fu">in</span></div></div>
+          <div class="fi"><div class="fl">DP OD</div><div class="fw"><input type="number" id="dh-dp" value="5" step="0.001" data-min="2" data-max="8" oninput="colorCode(this);cDHyd()"><span class="fu">in</span></div></div>
+          <div class="fi"><div class="fl">TVD</div><div class="fw"><input type="number" id="dh-tvd" value="12000" data-min="1000" data-max="35000" oninput="colorCode(this);cDHyd()"><span class="fu">ft</span></div></div>
+        </div>
+        <div>
+          <div class="rb"><div class="v a" id="dh-ecd">—</div><div class="l">ECD (ppg)</div></div>
+          <div class="rr"><div class="rl">Hydrostatic Pressure</div><div class="rv" id="dh-hp">—<span class="ru">psi</span></div></div>
+          <div class="rr"><div class="rl">Annular Velocity</div><div class="rv" id="dh-av">—<span class="ru">ft/min</span></div></div>
+          <div class="rr"><div class="rl">Ann Pressure Loss</div><div class="rv wn" id="dh-apl">—<span class="ru">psi</span></div></div>
+          <div class="rr"><div class="rl">Flow Regime</div><div class="rv" id="dh-re">—</div></div>
+          <div class="rr"><div class="rl">Hole Cleaning (PHAR)</div><div class="rv hi" id="dh-ph">—</div></div>
+          <div id="dh-al" class="ab info">Enter hydraulics data.</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+ 
+  </div><!-- /ct -->
+</div><!-- /mn -->
+</div><!-- /app -->
+ 
+<!-- PRINT REPORT (hidden on screen) -->
+<div id="prpt" style="display:none">
+  <div class="print-page">
+    <div class="rh">
+      <div><div class="rl2">⬡ MudPro — Daily Mud Report</div>
+        <div style="font-size:11px;color:#555;margin-top:2px">Rig: <span id="pr2-rig">—</span> &nbsp;|&nbsp; Well: <span id="pr2-well">—</span> &nbsp;|&nbsp; Mud Type: WBM</div>
+      </div>
+      <div class="rm">Date: <span id="pr2-date">—</span><br>Shift: <span id="pr2-shift">Day</span><br>Mud Engineer: <span id="pr2-eng">—</span></div>
+    </div>
+    <div class="rs">
+      <div class="rst">1. Well Status</div>
+      <table class="rtb">
+        <tr><th>MD (ft)</th><th>TVD (ft)</th><th>Hole Size (in)</th><th>MW (ppg)</th><th>Active Vol (bbls)</th><th>Mud Type</th></tr>
+        <tr><td id="pr2-md">—</td><td id="pr2-tvd">—</td><td id="pr2-hole">—</td><td id="pr2-mw">—</td><td>—</td><td>WBM</td></tr>
+      </table>
+    </div>
+    <div class="rs">
+      <div class="rst">2. Mud Properties</div>
+      <table class="rtb" id="pr2-mud">
+        <tr><th>Property</th><th>Unit</th><th>Min</th><th>Max</th><th>Value</th><th>Status</th></tr>
+      </table>
+    </div>
+    <div class="rs">
+      <div class="rst">3. Drilling Parameters</div>
+      <table class="rtb">
+        <tr><th>WOB (klbs)</th><th>RPM</th><th>Flow (gpm)</th><th>SPP (psi)</th><th>ROP (ft/hr)</th></tr>
+        <tr><td id="pr2-wob">—</td><td id="pr2-rpm">—</td><td id="pr2-gpm">—</td><td id="pr2-spp">—</td><td id="pr2-rop">—</td></tr>
+      </table>
+    </div>
+    <div class="rs">
+      <div class="rst">4. Operations Summary</div>
+      <div id="pr2-ops" style="font-size:11px;color:#333;padding:8px;border:1px solid #c9d6e3;border-radius:3px;min-height:50px;line-height:1.7;font-family:sans-serif"></div>
+    </div>
+    <div class="rsig">
+      <div class="rsig-i"><div class="rsig-l"></div>Mud Engineer</div>
+      <div class="rsig-i"><div class="rsig-l"></div>Company Man</div>
+      <div class="rsig-i"><div class="rsig-l"></div>Tool Pusher</div>
+    </div>
+  </div>
+</div>
+ 
+<button id="print-fab" onclick="doPrint()" title="Print / Save PDF">🖨️</button>
+<div id="toast"></div>
+ 
+<script>
+// ─── CORE HELPERS ─────────────────────────────────
+const fmt=(v,d=2)=>(v===null||isNaN(v)||!isFinite(v))?'—':(+v).toFixed(d);
+const fmtN=v=>isFinite(v)&&!isNaN(v)?Math.round(v).toLocaleString():'—';
+const vv=id=>parseFloat(document.getElementById(id)?.value)||0;
+const sv=id=>document.getElementById(id)?.value||'';
+let _tt;
+function toast(m){clearTimeout(_tt);let t=document.getElementById('toast');t.textContent=m;t.style.display='block';_tt=setTimeout(()=>t.style.display='none',2500)}
+ 
+// ─── ANIMATED RESULT SETTERS ──────────────────────
+// Use these throughout the main app on any result element
+function setVal(id, value, decimals=2, cls='') {
+  const el = document.getElementById(id); if(!el) return;
+  const nv = fmt(value, decimals);
+  if(el.dataset.last === nv) return;
+  el.dataset.last = nv;
+  const unit = el.querySelector('.ru')?.outerHTML || '';
+  el.classList.remove('anim'); void el.offsetWidth; el.classList.add('anim');
+  el.innerHTML = nv + unit;
+  if(cls) el.className = 'rv ' + cls + ' anim';
+}
+function setBig(id, value, decimals=2, cls='a') {
+  const el = document.getElementById(id); if(!el) return;
+  const nv = fmt(value, decimals);
+  if(el.dataset.last === nv) return;
+  el.dataset.last = nv;
+  el.classList.remove('anim'); void el.offsetWidth; el.classList.add('anim');
+  el.textContent = nv;
+  el.className = 'v ' + cls + ' anim';
+}
+ 
+// ─── COLOR-CODED INPUTS ───────────────────────────
+function colorCode(inp) {
+  const v=parseFloat(inp.value),mn=parseFloat(inp.dataset.min),mx=parseFloat(inp.dataset.max);
+  if(isNaN(v)||isNaN(mn)||isNaN(mx)){inp.classList.remove('vok','vwn','ver');return}
+  const r=mx-mn;
+  inp.classList.remove('vok','vwn','ver');
+  if(v<mn||v>mx) inp.classList.add('ver');
+  else if(v<mn+r*.1||v>mx-r*.1) inp.classList.add('vwn');
+  else inp.classList.add('vok');
+}
+function initCC(){document.querySelectorAll('input[data-min]').forEach(colorCode)}
+ 
+// ─── STATUS DOTS ──────────────────────────────────
+function setDot(id,st){
+  const d=document.getElementById('dot-'+id);
+  if(d){d.className='ndot'+(st?' '+st:'');}
+  const d2=document.getElementById('pdot-'+id);
+  if(d2){d2.className='ndot'+(st?' '+st:'');d2.style.display=st?'block':'none'}
+  const saved=JSON.parse(localStorage.getItem('p3dots')||'{}');
+  saved[id]=st; localStorage.setItem('p3dots',JSON.stringify(saved));
+}
+ 
+// ─── NAV ──────────────────────────────────────────
+const NM={anim:'Animated Numbers',ci:'Color-Coded Inputs',spk:'Sparklines',dots:'Status Dots',print:'Print Layout',dmw:'MW Demo',dhyd:'Hydraulics Demo'};
+function gt(id,el){
+  document.querySelectorAll('.cs').forEach(s=>s.classList.remove('act'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('act'));
+  const s=document.getElementById('sec-'+id);if(s)s.classList.add('act');
+  if(el)el.classList.add('act');
+  const bc=document.getElementById('bc');if(bc)bc.innerHTML='▸ <span>'+(NM[id]||id)+'</span>';
+}
+function tng(l){const p=l.parentElement;p.classList.toggle('closed');const b=l.nextElementSibling;if(b)b.style.display=p.classList.contains('closed')?'none':''}
+function tsh(h){if(event?.target?.tagName==='BUTTON'||event?.target?.closest?.('button'))return;const b=h.nextElementSibling;if(!b)return;b.classList.toggle('hid');h.classList.toggle('col',b.classList.contains('hid'))}
+function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('p3th',document.body.classList.contains('light')?'l':'d')}
+ 
+// ─── 1. ANIMATED NUMBERS DEMO ─────────────────────
+function calcAnim(){
+  const vol=vv('an-vol'),f=vv('an-f'),t=vv('an-t'),sg=vv('an-sg');
+  if(!vol||f>=t)return;
+  const D2=sg*8.345,V2=(t-f)*vol/(D2-t),lbs=V2*D2*42;
+  setBig('an-bar',lbs,0,'a');
+  setVal('an-sacks',Math.ceil(lbs/50),0);
+  setVal('an-wv',V2,3);
+  setVal('an-fv',vol+V2,2,'hi');
+}
+ 
+// ─── 2. COLOR-CODED INPUTS DEMO ───────────────────
+const CI=[
+  {k:'mw',l:'Mud Weight',u:'ppg',mn:10,mx:13,c:11.5},
+  {k:'pv',l:'PV',u:'cP',mn:10,mx:30,c:22},
+  {k:'yp',l:'YP',u:'lbf/100ft²',mn:8,mx:25,c:14},
+  {k:'api',l:'API Filtrate',u:'mL',mn:2,mx:12,c:6},
+  {k:'ph',l:'pH',u:'—',mn:8.5,mx:9.5,c:9.1},
+  {k:'cl',l:'Chlorides',u:'mg/L',mn:0,mx:35000,c:15000},
+  {k:'mbt',l:'MBT',u:'lb/bbl',mn:15,mx:50,c:32},
+  {k:'gel',l:'Gel 10s',u:'lbf/100ft²',mn:8,mx:20,c:12},
+];
+function initCI(){
+  const li=document.getElementById('ci-lims'),vl=document.getElementById('ci-vals');if(!li||!vl)return;
+  const is=`background:var(--bgi);border:1px solid var(--b1);border-radius:3px;color:var(--tx);font-family:var(--mono);font-size:11px;padding:3px 6px;width:72px;text-align:right;outline:none;transition:all .2s`;
+  li.innerHTML=CI.map(p=>`<div style="display:grid;grid-template-columns:1fr 72px 72px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(26,40,64,.35)">
+    <div style="font-size:12px;color:var(--ts)">${p.l}</div>
+    <input type="number" id="ci-mn-${p.k}" value="${p.mn}" step="any" style="${is}" oninput="updCI()">
+    <input type="number" id="ci-mx-${p.k}" value="${p.mx}" step="any" style="${is}" oninput="updCI()">
+  </div>`).join('');
+  vl.innerHTML=CI.map(p=>`<div class="fi">
+    <div class="fl">${p.l} <span style="color:var(--td);font-size:10px">(${p.u})</span></div>
+    <div class="fw">
+      <input type="number" id="ci-v-${p.k}" value="${p.c}" step="any" oninput="updCI()"
+        style="width:88px;background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 7px;text-align:right;outline:none;transition:all .22s"
+        onfocus="this.style.borderColor='var(--ac)'" onblur="this.style.borderColor='var(--b1)'">
+      <span style="font-size:10px;color:var(--td)">${p.u}</span>
+      <span id="ci-ic-${p.k}" style="font-size:14px;min-width:18px;text-align:center">—</span>
+    </div>
+  </div>`).join('');
+}
+function updCI(){
+  let ok=0,wn=0,er=0;
+  CI.forEach(p=>{
+    const v=parseFloat(document.getElementById('ci-v-'+p.k)?.value);
+    const mn=parseFloat(document.getElementById('ci-mn-'+p.k)?.value);
+    const mx=parseFloat(document.getElementById('ci-mx-'+p.k)?.value);
+    const inp=document.getElementById('ci-v-'+p.k);
+    const ico=document.getElementById('ci-ic-'+p.k);
+    if(!inp||isNaN(v)||isNaN(mn)||isNaN(mx))return;
+    inp.classList.remove('vok','vwn','ver');
+    if(v<mn||v>mx){inp.classList.add('ver');if(ico)ico.textContent='❌';er++;}
+    else{const r=mx-mn,lo=mn+r*.1,hi=mx-r*.1;
+      if(v<lo||v>hi){inp.classList.add('vwn');if(ico)ico.textContent='⚠️';wn++;}
+      else{inp.classList.add('vok');if(ico)ico.textContent='✅';ok++;}
+    }
+  });
+  const su=document.getElementById('ci-sum');
+  if(su)su.innerHTML=`<div style="display:flex;gap:10px">
+    <div style="flex:1;text-align:center;padding:10px;background:rgba(0,255,157,.06);border:1px solid rgba(0,255,157,.15);border-radius:6px"><div style="font-family:var(--mono);font-size:20px;color:var(--a2)">${ok}</div><div style="font-size:10px;color:var(--ts);text-transform:uppercase">OK</div></div>
+    <div style="flex:1;text-align:center;padding:10px;background:rgba(255,184,0,.05);border:1px solid rgba(255,184,0,.15);border-radius:6px"><div style="font-family:var(--mono);font-size:20px;color:var(--wn)">${wn}</div><div style="font-size:10px;color:var(--ts);text-transform:uppercase">Warning</div></div>
+    <div style="flex:1;text-align:center;padding:10px;background:rgba(255,71,87,.05);border:1px solid rgba(255,71,87,.15);border-radius:6px"><div style="font-family:var(--mono);font-size:20px;color:var(--dg)">${er}</div><div style="font-size:10px;color:var(--ts);text-transform:uppercase">Out of Range</div></div>
+  </div>`;
+}
+ 
+// ─── 3. SPARKLINES ────────────────────────────────
+const SP=[
+  {k:'mw',l:'Mud Weight',u:'ppg',mn:10,mx:13,c:11.5},
+  {k:'pv',l:'PV',u:'cP',mn:10,mx:30,c:22},
+  {k:'yp',l:'YP',u:'lbf',mn:8,mx:25,c:14},
+  {k:'api',l:'API FL',u:'mL',mn:2,mx:12,c:6},
+  {k:'ph',l:'pH',u:'—',mn:8.5,mx:9.5,c:9.1},
+  {k:'gel',l:'Gel 10s',u:'lbf',mn:8,mx:20,c:12},
+  {k:'cl',l:'Cl⁻',u:'kppm',mn:0,mx:35,c:15},
+  {k:'mbt',l:'MBT',u:'lb/bbl',mn:15,mx:50,c:32},
+];
+let spkD=[];
+function initSpk(){
+  const frm=document.getElementById('spk-form');if(!frm)return;
+  const is=`background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:11px;padding:3px 6px;width:68px;text-align:right;outline:none;transition:border-color .15s`;
+  frm.innerHTML+=SP.map(p=>`<div style="display:flex;flex-direction:column;gap:2px">
+    <label style="font-size:9px;color:var(--td);font-family:var(--mono);text-transform:uppercase">${p.l}</label>
+    <input type="number" id="si-${p.k}" value="${p.c}" step="any" style="${is}" onfocus="this.style.borderColor='var(--ac)'" onblur="this.style.borderColor='var(--b1)'">
+  </div>`).join('')+`<button onclick="logSpk()" style="align-self:flex-end;background:rgba(0,255,157,.07);border:1px solid var(--a2);color:var(--a2);border-radius:5px;padding:5px 14px;font-size:11px;cursor:pointer;font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px">Log</button>`;
+  // Seed 6 historical points
+  for(let i=6;i>0;i--){
+    const d={ts:Date.now()-i*6*3600000};
+    SP.forEach(p=>{d[p.k]=p.c+(Math.random()-.5)*(p.mx-p.mn)*.14});
+    spkD.push(d);
+  }
+  renderSpk();
+}
+function logSpk(){
+  const d={ts:Date.now()};
+  SP.forEach(p=>{d[p.k]=parseFloat(document.getElementById('si-'+p.k)?.value)||p.c});
+  spkD.push(d);if(spkD.length>20)spkD.shift();
+  renderSpk();toast('✅ Sample logged');
+  // Update status dot
+  const oors=SP.filter(p=>d[p.k]<p.mn||d[p.k]>p.mx);
+  const warns=SP.filter(p=>{const r=p.mx-p.mn;return!oors.includes(p)&&(d[p.k]<p.mn+r*.1||d[p.k]>p.mx-r*.1)});
+  const spkDot=document.getElementById('spk-dot');
+  if(spkDot)spkDot.className='ndot'+(oors.length?'  err':warns.length?' warn':' ok');
+}
+function clearSpk(){spkD=[];renderSpk();const spkDot=document.getElementById('spk-dot');if(spkDot)spkDot.className='ndot warn'}
+function drawSpk(cid,data,mn,mx){
+  const c=document.getElementById(cid);if(!c||!data.length)return;
+  const ctx=c.getContext('2d'),W=c.width,H=c.height;ctx.clearRect(0,0,W,H);
+  if(data.length<2){ctx.fillStyle='rgba(0,212,255,.5)';ctx.beginPath();ctx.arc(W/2,H/2,2,0,Math.PI*2);ctx.fill();return}
+  const vs=data.map(d=>d.v);
+  const lo=Math.min(...vs,mn)*.97,hi=Math.max(...vs,mx)*1.03,rng=hi-lo||1;
+  const px=i=>(i/(data.length-1))*(W-2)+1;
+  const py=v=>H-1-(v-lo)/rng*(H-2);
+  ctx.fillStyle='rgba(0,255,157,.07)';
+  ctx.fillRect(0,py(mx),W,py(mn)-py(mx));
+  ctx.lineWidth=1.5;
+  data.forEach((d,i)=>{
+    if(i===0)return;
+    const oor=d.v<mn||d.v>mx;
+    ctx.strokeStyle=oor?'rgba(255,71,87,.8)':'rgba(0,212,255,.75)';
+    ctx.beginPath();ctx.moveTo(px(i-1),py(data[i-1].v));ctx.lineTo(px(i),py(d.v));ctx.stroke();
+  });
+  const last=data[data.length-1];
+  ctx.fillStyle=last.v<mn||last.v>mx?'rgba(255,71,87,.9)':'rgba(0,212,255,.9)';
+  ctx.beginPath();ctx.arc(px(data.length-1),py(last.v),2.5,0,Math.PI*2);ctx.fill();
+}
+function renderSpk(){
+  const tb=document.getElementById('spk-body');if(!tb)return;
+  if(!spkD.length){tb.innerHTML='<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--ts)">No samples yet — click Log above</td></tr>';return}
+  tb.innerHTML=SP.map(p=>{
+    const vals=spkD.map(d=>({v:+(d[p.k])||0}));
+    const last=vals[vals.length-1]?.v,prev=vals[vals.length-2]?.v;
+    const delta=(prev!==undefined)?last-prev:0;
+    const arrow=delta>0.05?'⬆':delta<-0.05?'⬇':'→';
+    const acls=delta>0.05?'du':delta<-0.05?'dd':'df';
+    const oor=last<p.mn||last>p.mx;
+    const ico=oor?'❌':(Math.abs(last-p.mn)<(p.mx-p.mn)*.1||Math.abs(last-p.mx)<(p.mx-p.mn)*.1)?'⚠️':'✅';
+    return`<tr style="border-bottom:1px solid rgba(26,40,64,.3)">
+      <td style="padding:6px 10px;color:var(--ts)">${p.l} <span style="color:var(--td);font-size:10px">${p.u}</span></td>
+      <td style="padding:6px 10px;text-align:right;font-family:var(--mono);font-size:13px;color:${oor?'var(--dg)':'var(--ac)'}">${fmt(last,p.k==='ph'?1:0)}</td>
+      <td style="padding:6px 10px;text-align:right;font-family:var(--mono);font-size:11px" class="${acls}">${arrow} ${fmt(Math.abs(delta),p.k==='ph'?2:1)}</td>
+      <td style="padding:4px 10px"><canvas id="spkc-${p.k}" width="110" height="28"></canvas></td>
+      <td style="padding:6px 10px;text-align:center;font-size:14px">${ico}</td>
+    </tr>`;
+  }).join('');
+  requestAnimationFrame(()=>{SP.forEach(p=>drawSpk('spkc-'+p.k,spkD.map(d=>({v:+(d[p.k])||0})),p.mn,p.mx))});
+}
+ 
+// ─── 4. STATUS DOTS DEMO ──────────────────────────
+const DS=[{id:'wbm',l:'WBM Test Log'},{id:'obm',l:'OBM Test Log'},{id:'kill',l:'Kill Sheet'},{id:'hyd',l:'Hydraulics'},{id:'lgs',l:'LGS & HGS'},{id:'pit',l:'Pit Volume'},{id:'dil',l:'Dilution & SCE'},{id:'ecd',l:'ECD Profile'}];
+function initDots(){
+  const rows=document.getElementById('dot-rows'),prev=document.getElementById('dot-prev');
+  if(!rows||!prev)return;
+  rows.innerHTML=DS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(26,40,64,.35)">
+    <div style="font-size:12px;color:var(--ts);flex:1">${s.l}</div>
+    <select id="sim-${s.id}" onchange="simDot('${s.id}')" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:11px;padding:3px 8px;outline:none">
+      <option value="ok">✅ OK</option>
+      <option value="warn">⚠️ Warning</option>
+      <option value="err">❌ Alert</option>
+      <option value="">⬜ No data</option>
+    </select>
+    <div id="sim-d-${s.id}" class="ndot ok" style="display:block"></div>
+  </div>`).join('');
+  prev.innerHTML=DS.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:6px;background:var(--bga);margin-bottom:5px;border:1px solid var(--b1)">
+    <span style="font-size:13px">📊</span>
+    <span style="font-size:12px;color:var(--ts);flex:1">${s.l}</span>
+    <div id="pdot-${s.id}" class="ndot ok" style="display:block"></div>
+  </div>`).join('');
+}
+function simDot(id){
+  const st=document.getElementById('sim-'+id)?.value||'';
+  const d1=document.getElementById('sim-d-'+id);
+  const d2=document.getElementById('pdot-'+id);
+  [d1,d2].forEach(d=>{if(d){d.className='ndot'+(st?' '+st:'');d.style.display=st?'block':'none'}});
+}
+ 
+// ─── 5. PRINT ─────────────────────────────────────
+const PR_PROPS=[{l:'Mud Weight',u:'ppg',k:'mw',mn:10,mx:13},{l:'PV',u:'cP',k:'pv',mn:10,mx:30},{l:'YP',u:'lbf/100ft²',k:'yp',mn:8,mx:25},{l:'API Filtrate',u:'mL',k:'api',mn:2,mx:12},{l:'pH',u:'—',k:'ph',mn:8.5,mx:9.5},{l:'Chlorides',u:'mg/L',k:'cl2',mn:0,mx:35000},{l:'MBT',u:'lb/bbl',k:'mbt',mn:15,mx:50},{l:'Gel 10s',u:'lbf/100ft²',k:'gel2',mn:8,mx:20}];
+const PR_VALS={mw:11.8,pv:24,yp:16,api:5.5,ph:9.2,cl2:18000,mbt:35,gel2:14};
+function initPrint(){
+  const now=new Date(),ds=now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  document.querySelectorAll('[id^="pr-date"],[id^="pr2-date"]').forEach(e=>{if(e.tagName==='INPUT')e.value=now.toISOString().slice(0,10);else e.textContent=ds});
+  const mc=document.getElementById('pr-mud-inputs');
+  if(mc){
+    const is=`background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;width:90px;text-align:right;outline:none;transition:all .2s`;
+    mc.innerHTML=PR_PROPS.map(p=>`<div class="fi"><div class="fl">${p.l} <span style="color:var(--td);font-size:10px">(${p.u})</span></div>
+      <div class="fw"><input type="number" id="prm-${p.k}" value="${PR_VALS[p.k]}" step="any" style="${is}" onfocus="this.style.borderColor='var(--ac)'" onblur="this.style.borderColor='var(--b1)'"></div></div>`).join('');
+  }
+  window.addEventListener('beforeprint',buildPrintReport);
+}
+function buildPrintReport(){
+  const G=id=>document.getElementById(id)?.value||document.getElementById(id)?.textContent||'—';
+  ['rig','well','shift','eng','md','tvd','hole','mw','wob','rpm','gpm','spp','rop'].forEach(k=>{
+    const el=document.getElementById('pr2-'+k);if(el)el.textContent=G('pr-'+k)||'—';
+  });
+  const now=new Date();
+  const ds=now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  const dt=document.getElementById('pr2-date');if(dt)dt.textContent=G('pr-date')||ds;
+  const tb=document.getElementById('pr2-mud');
+  if(tb){
+    const rows=PR_PROPS.map(p=>{
+      const v=parseFloat(document.getElementById('prm-'+p.k)?.value)||PR_VALS[p.k];
+      const ok=v>=p.mn&&v<=p.mx;
+      return`<tr><td>${p.l}</td><td>${p.u}</td><td>${p.mn}</td><td>${p.mx}</td><td style="font-weight:700">${fmt(v,p.k==='ph'?1:0)}</td><td style="color:${ok?'green':'red'};font-weight:700">${ok?'OK':'⚠ OOR'}</td></tr>`;
+    });
+    tb.innerHTML=tb.rows[0].outerHTML+rows.join('');
+  }
+  const ops=document.getElementById('pr2-ops');
+  if(ops)ops.textContent=document.getElementById('pr-ops')?.value||'—';
+  const prpt=document.getElementById('prpt');if(prpt)prpt.style.display='block';
+}
+function doPrint(){buildPrintReport();window.print()}
+window.addEventListener('afterprint',()=>{const p=document.getElementById('prpt');if(p)p.style.display='none'});
+ 
+// ─── DEMO MW ──────────────────────────────────────
+function cDMW(){
+  const vol=vv('dm-vol'),c=vv('dm-c'),t=vv('dm-tgt')||vv('dm-t');
+  const sg=vv('dm-sg'),mx=vv('dm-mx'),mn=vv('dm-mn');
+  document.querySelectorAll('#sec-dmw input[data-min]').forEach(colorCode);
+  if(!vol||c>=t)return;
+  const D2=sg*8.345,V2=(t-c)*vol/(D2-t),lbs=V2*D2*42,mg=mx-t;
+  setBig('dm-bar',lbs,0,'a');
+  setVal('dm-sks',Math.ceil(lbs/100),0);
+  setVal('dm-wv',V2,3);
+  setVal('dm-fv',vol+V2,2,'hi');
+  setVal('dm-mg',mg,3,mg<0.3?'dg':mg<0.8?'wn':'hi');
+  const st=document.getElementById('dm-st'),al=document.getElementById('dm-alert');
+  let status,cls,ac,msg;
+  if(t<mn){status='BELOW MIN';cls='dg';ac='err';msg=`❌ Target ${t} ppg below minimum ${mn} ppg`}
+  else if(t>mx){status='ABOVE MAX';cls='dg';ac='err';msg=`❌ Target ${t} ppg exceeds fracture limit ${mx} ppg`}
+  else if(mg<0.5){status='TIGHT WINDOW';cls='wn';ac='warn';msg=`⚠ Only ${fmt(mg,2)} ppg margin to fracture. Proceed carefully.`}
+  else{status='SAFE';cls='hi';ac='ok';msg=`✅ ${fmtN(lbs)} lbs Barite | ${Math.ceil(lbs/100)} sacks | Final: ${fmt(vol+V2,2)} bbls`}
+  if(st){st.textContent=status;st.className='rv '+cls}
+  if(al){al.className='ab '+ac;al.innerHTML=msg}
+  setDot('dmw',ac==='ok'?'ok':ac==='warn'?'warn':'err');
+}
+// Fix: add fallback for id names
+document.addEventListener('change',e=>{if(e.target.id==='dm-t')cDMW()});
+ 
+// ─── DEMO HYDRAULICS ──────────────────────────────
+function cDHyd(){
+  const mw=vv('dh-mw'),gpm=vv('dh-gpm'),pv=vv('dh-pv'),yp=vv('dh-yp');
+  const oh=vv('dh-oh'),dp=vv('dh-dp'),tvd=vv('dh-tvd');
+  document.querySelectorAll('#sec-dhyd input[data-min]').forEach(colorCode);
+  if(!mw||!tvd||oh<=dp)return;
+  const hp=0.052*mw*tvd;
+  const annArea=Math.PI*(oh**2-dp**2)/(4*144);
+  const annVel=gpm/(7.48052*annArea);
+  const n=3.32*Math.log10((2*pv+yp)/Math.max(pv,1));
+  const apl_lam=(pv*annVel/1000+yp*(oh-dp)/200)*tvd/(300*(oh-dp));
+  const apl_tur=mw*annVel**1.8*(pv/mw)**0.2*tvd/(144000*(oh-dp)**1.2);
+  const Re_app=109*mw*annVel*(oh-dp)/(pv+6*yp*(oh-dp)/annVel);
+  const lam=Re_app<2100;
+  const apl=lam?apl_lam:apl_tur;
+  const ecd=mw+apl/(0.052*tvd);
+  const phar=annVel/(mw*0.065+0.38);
+  setBig('dh-ecd',ecd,3,ecd>13?'d':'a');
+  setVal('dh-hp',hp,0);
+  setVal('dh-av',annVel*60,1);
+  setVal('dh-apl',apl,0,'wn');
+  const re=document.getElementById('dh-re');if(re){re.textContent=(lam?'Laminar':'Turbulent')+' (Re='+fmtN(Re_app)+')';re.className='rv '+(lam?'hi':'wn')}
+  const ph=document.getElementById('dh-ph');if(ph){ph.textContent=(phar>1?'✅ ':'⚠ ')+fmt(phar,2);ph.className='rv '+(phar>1?'hi':'wn')}
+  const al=document.getElementById('dh-al');
+  if(al){const st=ecd>13?'er':phar<1?'wn':'ok';al.className='ab '+st;al.innerHTML=ecd>13?`❌ ECD ${fmt(ecd,3)} ppg may exceed fracture gradient!`:phar<1?`⚠ Poor hole cleaning (PHAR=${fmt(phar,2)}). Increase flow rate or reduce ROP.`:`✅ ECD: ${fmt(ecd,3)} ppg | PHAR: ${fmt(phar,2)} | ${lam?'Laminar':'Turbulent'} flow`}
+  setDot('dhyd',ecd>13?'err':phar<1?'warn':'ok');
+}
+ 
+// ─── INIT ─────────────────────────────────────────
+window.onload=function(){
+  if(localStorage.getItem('p3th')==='l')document.body.classList.add('light');
+  calcAnim();
+  initCI();updCI();
+  initSpk();
+  initDots();
+  initPrint();
+  initCC();
+  cDMW();
+  cDHyd();
+};
+</script>
+</body>
+</html>

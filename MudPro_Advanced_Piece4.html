@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MudPro — Piece 4 · Well Control & Monitoring</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080d14;--bgc:#0c1520;--bgi:#060b12;--bga:#101a28;--b1:#1a2840;--b2:#253d5c;
+--ac:#00d4ff;--a2:#00ff9d;--wn:#ffb800;--dg:#ff4757;--pu:#c084fc;--or:#ff8c00;
+--tx:#dce8f8;--ts:#5a7a9a;--td:#253040;
+--mono:'Share Tech Mono',monospace;--sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif;
+--glass:rgba(12,21,32,.75);--gb:rgba(0,212,255,.1);
+--ga:linear-gradient(135deg,#00d4ff,#00ff9d);--gw:linear-gradient(135deg,#ffb800,#ff4757)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans)}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+background:radial-gradient(ellipse 70% 50% at 20% 10%,rgba(0,212,255,.04),transparent),
+repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(0,212,255,.015) 49px),
+repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(0,212,255,.015) 49px)}
+#app{position:relative;z-index:1;display:flex;height:100vh;overflow:hidden}
+#sb{width:240px;min-width:240px;background:var(--glass);backdrop-filter:blur(24px);border-right:1px solid var(--gb);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+#mn{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#tb{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--gb);background:var(--glass);backdrop-filter:blur(24px);flex-shrink:0}
+#ct{flex:1;overflow-y:auto;padding:26px}
+.sbl{padding:20px 18px 14px;border-bottom:1px solid var(--gb)}
+.brd{font-family:var(--cond);font-weight:900;font-size:20px;letter-spacing:2px;text-transform:uppercase;background:var(--ga);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.bdg{display:inline-block;margin-top:8px;font-size:9px;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:3px;background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.25);color:var(--dg)}
+.ng{padding:8px 0 4px}
+.ngl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--td);font-family:var(--mono);padding:0 18px 5px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.ngl:hover{color:var(--ac)}.nga{font-size:10px;transition:transform .2s}
+.ng.closed .nga{transform:rotate(-90deg)}
+.ni{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:12px;color:var(--ts);border-left:2px solid transparent;transition:all .15s;user-select:none}
+.ni:hover{background:rgba(0,212,255,.04);color:var(--tx)}
+.ni.act{background:rgba(0,212,255,.07);color:var(--ac);border-left-color:var(--ac);font-weight:600}
+.ni .ic{width:18px;text-align:center;font-size:14px}
+.nb{margin-left:auto;font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px}
+.nb-r{color:var(--dg);background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2)}
+.nb-o{color:var(--or);background:rgba(255,140,0,.08);border:1px solid rgba(255,140,0,.2)}
+.nb-g{color:var(--a2);background:rgba(0,255,157,.08);border:1px solid rgba(0,255,157,.18)}
+.tbt{padding:5px 14px;border-radius:6px;font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;text-transform:uppercase;border:1px solid var(--b2);color:var(--ts);background:rgba(255,255,255,.02)}
+.tbt:hover{border-color:var(--ac);color:var(--ac);background:rgba(0,212,255,.05)}
+#bc{font-size:11px;color:var(--td);font-family:var(--mono);margin-left:14px}
+#bc span{color:var(--ac)}
+.cs{display:none}.cs.act{display:block;animation:si .22s ease}
+@keyframes si{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.sh{margin-bottom:22px;cursor:pointer;position:relative;padding-right:32px}
+.sh::after{content:'▾';position:absolute;right:2px;top:2px;font-size:18px;color:var(--td);transition:transform .2s}
+.sh.col::after{transform:rotate(-90deg)}.sh:hover::after{color:var(--ac)}
+.sb2.hid{display:none}
+.st{font-family:var(--cond);font-size:27px;font-weight:900;text-transform:uppercase;letter-spacing:1px}
+.ss{font-size:12px;color:var(--ts);font-family:var(--mono);margin-top:4px}
+.cd{background:var(--glass);border:1px solid var(--gb);border-radius:12px;overflow:hidden;margin-bottom:16px;backdrop-filter:blur(20px);position:relative;transition:border-color .2s,box-shadow .2s}
+.cd:hover{border-color:rgba(0,212,255,.2);box-shadow:0 0 28px rgba(0,212,255,.05)}
+.cd::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .2s}
+.cd:hover::before,.cd.at::before{opacity:1;background:var(--ga)}
+.cd.rt::before{opacity:1;background:var(--gw)}
+.cd.ot::before{opacity:1;background:linear-gradient(135deg,var(--or),var(--wn))}
+.ch{padding:11px 16px;border-bottom:1px solid var(--gb);display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.18)}
+.ct2{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ts)}
+.cb{padding:14px 16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start}
+.gw{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;align-items:start}
+.gn{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:start}
+.fi{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(26,40,64,.5)}
+.fi:last-child{border-bottom:none}.fl{flex:1;font-size:12px;color:var(--ts)}.fw{display:flex;align-items:center;gap:6px}
+.fi input,.fi select,.fi textarea{background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none;transition:all .15s}
+.fi input,.fi select{width:96px;text-align:right}
+.fi input:focus,.fi select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(0,212,255,.07);background:rgba(0,212,255,.03)}
+.fi select{text-align:left;width:auto;cursor:pointer}
+.fi textarea{width:100%;text-align:left;resize:vertical;min-height:60px}
+.fu{font-family:var(--mono);font-size:10px;color:var(--td);min-width:26px}
+.rr{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(26,40,64,.4)}.rr:last-child{border-bottom:none}
+.rl{font-size:12px;color:var(--ts)}.rv{font-family:var(--mono);font-size:14px;color:var(--ac)}
+.rv.hi{color:var(--a2);font-size:16px}.rv.wn{color:var(--wn)}.rv.dg{color:var(--dg)}.rv.or{color:var(--or)}
+.ru{font-size:10px;color:var(--td);margin-left:3px}
+.rb{text-align:center;padding:14px 0;border-bottom:1px solid var(--gb);margin-bottom:8px}
+.rb .v{font-family:var(--mono);font-size:28px;letter-spacing:2px}
+.rb .v.a{color:var(--a2)}.rb .v.w{color:var(--wn)}.rb .v.d{color:var(--dg)}.rb .v.o{color:var(--or)}
+.rb .l{font-size:11px;color:var(--ts);text-transform:uppercase;letter-spacing:1.5px;margin-top:2px}
+.ab{border-radius:7px;padding:10px 14px;font-size:12px;margin-top:10px;line-height:1.6}
+.ab.info{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);color:#7dd3fc}
+.ab.ok{background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.15);color:var(--a2)}
+.ab.wn{background:rgba(255,184,0,.05);border:1px solid rgba(255,184,0,.18);color:var(--wn)}
+.ab.er{background:rgba(255,71,87,.05);border:1px solid rgba(255,71,87,.18);color:var(--dg)}
+.nt{background:rgba(0,212,255,.03);border:1px solid rgba(0,212,255,.08);border-radius:7px;padding:10px 14px;font-size:11px;color:var(--ts);line-height:1.7;margin-top:12px}
+.nt strong{color:var(--ac)}
+.btn{padding:5px 13px;border-radius:5px;font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.4px;border:1px solid}
+.btn-a{background:rgba(0,212,255,.07);border-color:var(--ac);color:var(--ac)}.btn-a:hover{background:var(--ac);color:#000}
+.btn-g{background:rgba(0,255,157,.06);border-color:var(--a2);color:var(--a2)}.btn-g:hover{background:var(--a2);color:#000}
+.btn-r{background:rgba(255,71,87,.06);border-color:var(--dg);color:var(--dg)}.btn-r:hover{background:var(--dg);color:#fff}
+.btn-o{background:rgba(255,140,0,.07);border-color:var(--or);color:var(--or)}.btn-o:hover{background:var(--or);color:#000}
+canvas{display:block;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--gb)}
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{background:rgba(0,0,0,.3);padding:6px 9px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--td);font-family:var(--mono);border-bottom:1px solid var(--gb)}
+.tbl td{padding:6px 9px;border-bottom:1px solid rgba(26,40,64,.35);vertical-align:middle}
+.tbl tr:hover td{background:rgba(0,212,255,.02)}
+.tbl td.mono{font-family:var(--mono);font-size:11px}
+.tinp{background:var(--bgi);border:1px solid var(--b1);border-radius:3px;color:var(--tx);font-family:var(--mono);font-size:11px;padding:3px 6px;text-align:right;outline:none;transition:border-color .15s}
+.tinp:focus{border-color:var(--ac)}
+/* ALERT BANNERS */
+.banner{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:12px;font-family:var(--mono);animation:si .3s ease}
+.banner.ok{background:rgba(0,255,157,.08);border:1px solid rgba(0,255,157,.25);color:var(--a2)}
+.banner.wn{background:rgba(255,184,0,.08);border:1px solid rgba(255,184,0,.25);color:var(--wn)}
+.banner.er{background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.25);color:var(--dg)}
+.banner .bi{font-size:18px}
+.trend-up{color:var(--dg)}.trend-dn{color:var(--a2)}.trend-flat{color:var(--td)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--b1);border-radius:3px}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bgc);border:1px solid var(--a2);color:var(--a2);padding:10px 18px;border-radius:8px;font-family:var(--mono);font-size:12px;display:none;z-index:999}
+body.light{--bg:#f0f4f8;--bgc:#fff;--bgi:#f8fafc;--b1:#c9d6e3;--b2:#a8bccf;--ac:#0077aa;--a2:#006633;--wn:#b45309;--dg:#b91c1c;--tx:#1a2a3a;--ts:#4a6080;--td:#8aa0b8;--glass:rgba(255,255,255,.88);--gb:rgba(0,119,170,.12)}
+body.light::before{background:none}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="sb">
+  <div class="sbl">
+    <div class="brd">⬡ MudPro</div>
+    <div style="font-size:9px;color:var(--ts);letter-spacing:2px;text-transform:uppercase;font-family:var(--mono);margin-top:3px">Advanced Module · Piece 4</div>
+    <div class="bdg">🚨 Well Control &amp; Monitoring</div>
+  </div>
+  <div class="ng">
+    <div class="ngl" onclick="tng(this)"><span>Monitoring</span><span class="nga">▾</span></div>
+    <div class="ngb">
+      <div class="ni act" onclick="gt('mvt',this)"><span class="ic">📊</span><span>Mud Volume Tracker</span><span class="nb nb-r">LIVE</span></div>
+      <div class="ni" onclick="gt('chem',this)"><span class="ic">🧪</span><span>Daily Chemical Use</span><span class="nb nb-g">NEW</span></div>
+      <div class="ni" onclick="gt('sidpp',this)"><span class="ic">📈</span><span>SIDPP/SICP Monitor</span><span class="nb nb-r">WC</span></div>
+      <div class="ni" onclick="gt('feval',this)"><span class="ic">🪨</span><span>Formation Eval Scratchpad</span></div>
+    </div>
+  </div>
+  <div class="ng">
+    <div class="ngl" onclick="tng(this)"><span>Well Control Calcs</span><span class="nga">▾</span></div>
+    <div class="ngb">
+      <div class="ni" onclick="gt('strip',this)"><span class="ic">⬇️</span><span>Stripping Calculator</span><span class="nb nb-r">WC</span></div>
+      <div class="ni" onclick="gt('vkm',this)"><span class="ic">🔄</span><span>Volumetric Kill Method</span><span class="nb nb-r">WC</span></div>
+    </div>
+  </div>
+  <div class="ng">
+    <div class="ngl" onclick="tng(this)"><span>Drilling Optimization</span><span class="nga">▾</span></div>
+    <div class="ngb">
+      <div class="ni" onclick="gt('bho',this)"><span class="ic">⚡</span><span>Bit Hydraulics Optimizer</span><span class="nb nb-o">OPT</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="mn">
+  <div id="tb">
+    <div style="display:flex;align-items:center">
+      <div style="font-family:var(--cond);font-size:21px;font-weight:700">Well Control <span style="background:var(--gw);-webkit-background-clip:text;-webkit-text-fill-color:transparent">&amp; Monitoring</span></div>
+      <div id="bc">▸ <span>Mud Volume Tracker</span></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="tbt" onclick="document.body.classList.toggle('light')">🌙 Theme</button>
+      <button class="tbt" onclick="window.print()">🖨️ Print</button>
+    </div>
+  </div>
+  <div id="ct">
+
+<!-- ══ 1. MUD VOLUME TRACKER ══════════════════════════════════ -->
+<div class="cs act" id="sec-mvt">
+  <div class="sh" onclick="tsh(this)"><div class="st">📊 Mud Volume Tracker</div><div class="ss">Log pit volumes every 30 min — auto-flag gains and losses before they become incidents</div></div>
+  <div class="sb2">
+    <div id="mvt-banners"></div>
+    <div class="g2">
+      <div>
+        <div class="cd">
+          <div class="ch">
+            <div class="ct2">🔧 System Configuration</div>
+          </div>
+          <div class="cb">
+            <div class="fi"><div class="fl">Rig / Well</div><div class="fw"><input type="text" id="mvt-rig" value="ADM-655 / SFNY-938" style="width:170px;text-align:left"></div></div>
+            <div class="fi"><div class="fl">Gain Alert Threshold</div><div class="fw"><input type="number" id="mvt-gain-thr" value="10" oninput="mvtCheck()"><span class="fu">bbls</span></div></div>
+            <div class="fi"><div class="fl">Loss Alert Threshold</div><div class="fw"><input type="number" id="mvt-loss-thr" value="15" oninput="mvtCheck()"><span class="fu">bbls</span></div></div>
+            <div class="fi"><div class="fl">Gain Warning (caution)</div><div class="fw"><input type="number" id="mvt-gain-warn" value="5" oninput="mvtCheck()"><span class="fu">bbls</span></div></div>
+            <div class="fi"><div class="fl">Loss Warning (caution)</div><div class="fw"><input type="number" id="mvt-loss-warn" value="8" oninput="mvtCheck()"><span class="fu">bbls</span></div></div>
+          </div>
+        </div>
+        <div class="cd">
+          <div class="ch">
+            <div class="ct2">➕ Log Reading</div>
+            <button class="btn btn-a" onclick="mvtLog()">Log Now</button>
+          </div>
+          <div class="cb">
+            <div class="fi"><div class="fl">Time</div><div class="fw"><input type="time" id="mvt-time" style="width:100px;text-align:left"></div></div>
+            <div class="fi"><div class="fl">Active Volume</div><div class="fw"><input type="number" id="mvt-vol" value="" placeholder="bbls"><span class="fu">bbls</span></div></div>
+            <div class="fi"><div class="fl">Depth</div><div class="fw"><input type="number" id="mvt-depth" placeholder="ft"><span class="fu">ft</span></div></div>
+            <div class="fi"><div class="fl">Note</div><div class="fw"><input type="text" id="mvt-note" placeholder="Optional" style="width:160px;text-align:left"></div></div>
+          </div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">📊 Stats</div></div>
+          <div class="cb">
+            <div class="rr"><div class="rl">Last Reading</div><div class="rv hi" id="mvt-last">—<span class="ru">bbls</span></div></div>
+            <div class="rr"><div class="rl">Change (last 2 readings)</div><div class="rv" id="mvt-delta">—<span class="ru">bbls</span></div></div>
+            <div class="rr"><div class="rl">Trend (last 4 readings)</div><div class="rv" id="mvt-trend">—</div></div>
+            <div class="rr"><div class="rl">Total readings logged</div><div class="rv" id="mvt-count">0</div></div>
+            <div class="rr"><div class="rl">Status</div><div class="rv" id="mvt-status" style="font-size:12px;font-weight:700">—</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="cd at">
+          <div class="ch">
+            <div class="ct2">📈 Volume Trend Chart</div>
+            <button class="btn btn-r" onclick="mvtClear()" style="font-size:10px;padding:2px 8px">Clear</button>
+          </div>
+          <div class="cb" style="padding:10px"><canvas id="mvt-canvas" width="440" height="220" style="width:100%"></canvas></div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">📋 Reading Log</div></div>
+          <div style="overflow-x:auto;max-height:280px;overflow-y:auto">
+            <table class="tbl">
+              <thead><tr><th>Time</th><th>Vol (bbls)</th><th>Δ</th><th>Depth (ft)</th><th>Status</th><th>Note</th><th></th></tr></thead>
+              <tbody id="mvt-log"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 2. DAILY CHEMICAL CONSUMPTION ═════════════════════════ -->
+<div class="cs" id="sec-chem">
+  <div class="sh" onclick="tsh(this)"><div class="st">🧪 Daily Chemical Consumption</div><div class="ss">Track sack/drum usage per shift — burn rate, stock alert, cost running total</div></div>
+  <div class="sb2">
+    <div class="gw">
+      <div>
+        <div class="cd">
+          <div class="ch">
+            <div class="ct2">🧪 Chemical Register</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-a" onclick="chemAdd()">+ Add</button>
+              <button class="btn btn-r" onclick="chemClear()" style="font-size:10px;padding:3px 8px">Clear</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr>
+                <th>Chemical</th><th>Unit</th><th>Opening Stock</th><th>Used Today</th><th>Closing</th><th>$/Unit</th><th>Cost Today</th><th>Days Left</th><th></th>
+              </tr></thead>
+              <tbody id="chem-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">⚙️ System</div></div>
+          <div class="cb">
+            <div class="fi"><div class="fl">Active Mud Volume</div><div class="fw"><input type="number" id="ch-vol" value="1400" oninput="chemCalc()"><span class="fu">bbls</span></div></div>
+            <div class="fi"><div class="fl">Footage Drilled Today</div><div class="fw"><input type="number" id="ch-ft" value="420" oninput="chemCalc()"><span class="fu">ft</span></div></div>
+            <div class="fi"><div class="fl">Min Stock Alert (days)</div><div class="fw"><input type="number" id="ch-alert-days" value="3" oninput="chemCalc()"><span class="fu">days</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="cd at">
+          <div class="ch"><div class="ct2">📊 Summary</div></div>
+          <div class="cb">
+            <div class="rb"><div class="v a" id="ch-total-cost">—</div><div class="l">Total Chemical Cost Today ($)</div></div>
+            <div class="rr"><div class="rl">Cost / ft Drilled</div><div class="rv" id="ch-cost-ft">—<span class="ru">$/ft</span></div></div>
+            <div class="rr"><div class="rl">Cost / bbl Active</div><div class="rv" id="ch-cost-bbl">—<span class="ru">$/bbl</span></div></div>
+            <div class="rr"><div class="rl">Items Below Min Stock</div><div class="rv" id="ch-low" style="font-size:13px;font-weight:700">—</div></div>
+            <div id="ch-alerts" style="margin-top:10px"></div>
+          </div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">📈 Usage Breakdown</div></div>
+          <div class="cb" style="padding:10px"><canvas id="ch-canvas" width="360" height="200" style="width:100%"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 3. SIDPP/SICP TREND MONITOR ════════════════════════════ -->
+<div class="cs" id="sec-sidpp">
+  <div class="sh" onclick="tsh(this)"><div class="st">📈 SIDPP / SICP Trend Monitor</div><div class="ss">Plot shut-in pressures over time — detect slow-build kicks before PVT alarm</div></div>
+  <div class="sb2">
+    <div id="sidpp-banners"></div>
+    <div class="g2">
+      <div>
+        <div class="cd">
+          <div class="ch">
+            <div class="ct2">📝 Log Pressure Reading</div>
+            <button class="btn btn-a" onclick="sidppLog()">Log</button>
+          </div>
+          <div class="cb">
+            <div class="fi"><div class="fl">Time</div><div class="fw"><input type="time" id="si-time" style="width:100px;text-align:left"></div></div>
+            <div class="fi"><div class="fl">SIDPP</div><div class="fw"><input type="number" id="si-sidpp" placeholder="psi"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">SICP</div><div class="fw"><input type="number" id="si-sicp" placeholder="psi"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">Mud Weight</div><div class="fw"><input type="number" id="si-mw" value="11" step="0.01"><span class="fu">ppg</span></div></div>
+            <div class="fi"><div class="fl">TVD</div><div class="fw"><input type="number" id="si-tvd" value="11000"><span class="fu">ft</span></div></div>
+          </div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">⚠️ Well Control Parameters</div></div>
+          <div class="cb">
+            <div class="fi"><div class="fl">Max Allowable SIDPP</div><div class="fw"><input type="number" id="si-max-sidpp" value="500" oninput="sidppCheck()"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">SIDPP Warning Level</div><div class="fw"><input type="number" id="si-warn-sidpp" value="350" oninput="sidppCheck()"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">Max SICP</div><div class="fw"><input type="number" id="si-max-sicp" value="700" oninput="sidppCheck()"><span class="fu">psi</span></div></div>
+          </div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">📊 Latest Values</div></div>
+          <div class="cb">
+            <div class="rr"><div class="rl">Latest SIDPP</div><div class="rv hi" id="si-last-sidpp">—<span class="ru">psi</span></div></div>
+            <div class="rr"><div class="rl">Latest SICP</div><div class="rv" id="si-last-sicp">—<span class="ru">psi</span></div></div>
+            <div class="rr"><div class="rl">Influx Volume (est.)</div><div class="rv wn" id="si-influx">—<span class="ru">bbls</span></div></div>
+            <div class="rr"><div class="rl">Kill MW</div><div class="rv hi" id="si-kmw">—<span class="ru">ppg</span></div></div>
+            <div class="rr"><div class="rl">SIDPP Trend</div><div class="rv" id="si-trend">—</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="cd at">
+          <div class="ch">
+            <div class="ct2">📈 SIDPP &amp; SICP vs Time</div>
+            <button class="btn btn-r" onclick="sidppClear()" style="font-size:10px;padding:2px 8px">Clear</button>
+          </div>
+          <div class="cb" style="padding:10px"><canvas id="si-canvas" width="440" height="260" style="width:100%"></canvas></div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">📋 Pressure Log</div></div>
+          <div style="overflow-x:auto;max-height:200px;overflow-y:auto">
+            <table class="tbl">
+              <thead><tr><th>Time</th><th>SIDPP (psi)</th><th>SICP (psi)</th><th>Kill MW</th><th>Status</th><th></th></tr></thead>
+              <tbody id="si-log"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 4. FORMATION EVALUATION SCRATCHPAD ════════════════════ -->
+<div class="cs" id="sec-feval">
+  <div class="sh" onclick="tsh(this)"><div class="st">🪨 Formation Evaluation Scratchpad</div><div class="ss">Digital driller's log — cuttings, gas, ROP per stand, tied to depth</div></div>
+  <div class="sb2">
+    <div class="g2">
+      <div>
+        <div class="cd">
+          <div class="ch">
+            <div class="ct2">📝 Log Stand / Interval</div>
+            <button class="btn btn-a" onclick="fevalLog()">Log Stand</button>
+          </div>
+          <div class="cb">
+            <div class="fi"><div class="fl">Depth From</div><div class="fw"><input type="number" id="fe-from" placeholder="ft"><span class="fu">ft</span></div></div>
+            <div class="fi"><div class="fl">Depth To</div><div class="fw"><input type="number" id="fe-to" placeholder="ft"><span class="fu">ft</span></div></div>
+            <div class="fi"><div class="fl">ROP</div><div class="fw"><input type="number" id="fe-rop" placeholder="ft/hr"><span class="fu">ft/hr</span></div></div>
+            <div class="fi"><div class="fl">Gas Reading</div><div class="fw"><input type="number" id="fe-gas" placeholder="units"><span class="fu">units</span></div></div>
+            <div class="fi"><div class="fl">Cuttings Color</div><div class="fw">
+              <select id="fe-color" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none;width:140px">
+                <option>Gray</option><option>Brown</option><option>White</option><option>Green</option><option>Black</option><option>Red/Brown</option><option>Tan</option>
+              </select>
+            </div></div>
+            <div class="fi"><div class="fl">Cuttings Shape</div><div class="fw">
+              <select id="fe-shape" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none;width:140px">
+                <option>Angular</option><option>Sub-angular</option><option>Sub-rounded</option><option>Rounded</option><option>Platy</option>
+              </select>
+            </div></div>
+            <div class="fi"><div class="fl">Lithology</div><div class="fw">
+              <select id="fe-lith" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none;width:140px">
+                <option>Shale</option><option>Sandstone</option><option>Limestone</option><option>Dolomite</option><option>Anhydrite</option><option>Salt</option><option>Coal</option><option>Granite</option>
+              </select>
+            </div></div>
+            <div class="fi"><div class="fl">Fluorescence</div><div class="fw">
+              <select id="fe-fluor" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none;width:140px">
+                <option>None</option><option>Weak</option><option>Moderate</option><option>Strong</option><option>Dead oil</option>
+              </select>
+            </div></div>
+            <div class="fi"><div class="fl">Notes</div><div class="fw"><input type="text" id="fe-notes" placeholder="Any observations..." style="width:200px;text-align:left"></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="cd at">
+          <div class="ch">
+            <div class="ct2">📊 ROP &amp; Gas vs Depth</div>
+            <button class="btn btn-r" onclick="fevalClear()" style="font-size:10px;padding:2px 8px">Clear</button>
+          </div>
+          <div class="cb" style="padding:10px"><canvas id="fe-canvas" width="420" height="280" style="width:100%"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="cd">
+      <div class="ch"><div class="ct2">📋 Formation Log</div></div>
+      <div style="overflow-x:auto;max-height:300px;overflow-y:auto">
+        <table class="tbl">
+          <thead><tr><th>Depth (ft)</th><th>ROP (ft/hr)</th><th>Gas</th><th>Lithology</th><th>Color</th><th>Shape</th><th>Fluor.</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="fe-log"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 5. STRIPPING CALCULATOR ═══════════════════════════════ -->
+<div class="cs" id="sec-strip">
+  <div class="sh" onclick="tsh(this)"><div class="st">⬇️ Stripping Calculator</div><div class="ss">Pressure calculations for stripping drill pipe into the well under closed BOP</div></div>
+  <div class="sb2">
+    <div class="g2">
+      <div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">🔧 Well &amp; String Data</div></div>
+          <div class="cb">
+            <div class="fi"><div class="fl">Current Mud Weight</div><div class="fw"><input type="number" id="st-mw" value="11" step="0.01" oninput="calcStrip()"><span class="fu">ppg</span></div></div>
+            <div class="fi"><div class="fl">SICP (before stripping)</div><div class="fw"><input type="number" id="st-sicp" value="420" oninput="calcStrip()"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">Drill Pipe OD</div><div class="fw"><input type="number" id="st-dp-od" value="5" step="0.001" oninput="calcStrip()"><span class="fu">in</span></div></div>
+            <div class="fi"><div class="fl">Drill Pipe ID</div><div class="fw"><input type="number" id="st-dp-id" value="4.276" step="0.001" oninput="calcStrip()"><span class="fu">in</span></div></div>
+            <div class="fi"><div class="fl">Hole Size</div><div class="fw"><input type="number" id="st-oh" value="8.5" step="0.125" oninput="calcStrip()"><span class="fu">in</span></div></div>
+            <div class="fi"><div class="fl">TVD</div><div class="fw"><input type="number" id="st-tvd" value="11000" oninput="calcStrip()"><span class="fu">ft</span></div></div>
+            <div class="fi"><div class="fl">Length to Strip In</div><div class="fw"><input type="number" id="st-len" value="930" oninput="calcStrip()"><span class="fu">ft</span></div></div>
+            <div class="fi"><div class="fl">BOP Type</div><div class="fw">
+              <select id="st-bop" onchange="calcStrip()" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none">
+                <option value="annular">Annular (closed)</option>
+                <option value="pipe_ram">Pipe Ram</option>
+              </select>
+            </div></div>
+          </div>
+        </div>
+        <div class="nt">
+          <strong>Stripping In:</strong> As DP enters, steel displaces fluid → pressure RISES. Bleed off excess.<br>
+          <strong>Stripping Out:</strong> As DP leaves, volume drops → pressure FALLS. Pump to maintain.<br>
+          <strong>Steel displacement</strong> = π/4 × OD² × length / 231 gal/ft³
+        </div>
+      </div>
+      <div>
+        <div class="cd rt">
+          <div class="ch"><div class="ct2">📊 Stripping Results</div></div>
+          <div class="cb">
+            <div class="rb"><div class="v o" id="st-dp-disp">—</div><div class="l">DP Steel Displacement (bbls)</div></div>
+            <div class="rr"><div class="rl">Pressure Rise per Stand</div><div class="rv wn" id="st-dp-press">—<span class="ru">psi</span></div></div>
+            <div class="rr"><div class="rl">Volume to Bleed per Stand</div><div class="rv" id="st-bleed">—<span class="ru">bbls</span></div></div>
+            <div class="rr"><div class="rl">Total Volume for Full Strip</div><div class="rv hi" id="st-total-bleed">—<span class="ru">bbls</span></div></div>
+            <div class="rr"><div class="rl">Surface Pressure Limit</div><div class="rv" id="st-press-limit">—<span class="ru">psi</span></div></div>
+            <div class="rr"><div class="rl">Stands to Strip</div><div class="rv" id="st-stands">—</div></div>
+            <div class="rr"><div class="rl">New HP after Strip In</div><div class="rv" id="st-new-hp">—<span class="ru">psi</span></div></div>
+            <div id="st-alert" class="ab info">Enter well and string data to calculate.</div>
+          </div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">📋 Bleed Schedule (per stand 93 ft)</div></div>
+          <div style="overflow-x:auto;max-height:220px;overflow-y:auto">
+            <table class="tbl" id="st-sched">
+              <thead><tr><th>Stand #</th><th>DP In (ft)</th><th>HP Before (psi)</th><th>Bleed Vol (bbls)</th><th>HP After (psi)</th></tr></thead>
+              <tbody id="st-sched-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 6. VOLUMETRIC KILL METHOD ══════════════════════════════ -->
+<div class="cs" id="sec-vkm">
+  <div class="sh" onclick="tsh(this)"><div class="st">🔄 Volumetric Kill Method</div><div class="ss">Pressure bleed schedule when circulation is not possible — step-by-step guide</div></div>
+  <div class="sb2">
+    <div class="g2">
+      <div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">🔧 Well Control Data</div></div>
+          <div class="cb">
+            <div class="fi"><div class="fl">Current Mud Weight</div><div class="fw"><input type="number" id="vk-mw" value="11" step="0.01" oninput="calcVKM()"><span class="fu">ppg</span></div></div>
+            <div class="fi"><div class="fl">SIDPP (shut-in)</div><div class="fw"><input type="number" id="vk-sidpp" value="280" oninput="calcVKM()"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">SICP (shut-in)</div><div class="fw"><input type="number" id="vk-sicp" value="420" oninput="calcVKM()"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">Shoe Fracture Pressure</div><div class="fw"><input type="number" id="vk-frac" value="7500" oninput="calcVKM()"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">Casing Shoe TVD</div><div class="fw"><input type="number" id="vk-shoe-tvd" value="8500" oninput="calcVKM()"><span class="fu">ft</span></div></div>
+            <div class="fi"><div class="fl">Current TVD</div><div class="fw"><input type="number" id="vk-tvd" value="11000" oninput="calcVKM()"><span class="fu">ft</span></div></div>
+            <div class="fi"><div class="fl">Annulus Capacity (OH)</div><div class="fw"><input type="number" id="vk-ann-cap" value="0.0459" step="0.0001" oninput="calcVKM()"><span class="fu">bbl/ft</span></div></div>
+            <div class="fi"><div class="fl">Safety Margin</div><div class="fw"><input type="number" id="vk-safety" value="100" oninput="calcVKM()"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">Lubrication Volume per Cycle</div><div class="fw"><input type="number" id="vk-lub-vol" value="5" step="0.5" oninput="calcVKM()"><span class="fu">bbls</span></div></div>
+          </div>
+        </div>
+        <div class="nt">
+          <strong>Volumetric Method:</strong> When circulation is not possible (plugged string, no DP).<br>
+          1. Lubricate mud to bottom — add mud on top of influx<br>
+          2. Wait for mud to fall (influx rises)<br>
+          3. Bleed gas at surface keeping CASING pressure constant<br>
+          4. Repeat until influx is out<br>
+          <strong>Key:</strong> Allow casing pressure to rise by the LUBRICANT HP equivalent before bleeding.
+        </div>
+      </div>
+      <div>
+        <div class="cd rt">
+          <div class="ch"><div class="ct2">📊 Kill Parameters</div></div>
+          <div class="cb">
+            <div class="rb"><div class="v o" id="vk-lub-hp">—</div><div class="l">HP per Lubrication Cycle (psi)</div></div>
+            <div class="rr"><div class="rl">Target MAASP</div><div class="rv wn" id="vk-maasp">—<span class="ru">psi</span></div></div>
+            <div class="rr"><div class="rl">Allow CASING P to Rise To</div><div class="rv hi" id="vk-rise-to">—<span class="ru">psi</span></div></div>
+            <div class="rr"><div class="rl">Then Bleed to</div><div class="rv" id="vk-bleed-to">—<span class="ru">psi</span></div></div>
+            <div class="rr"><div class="rl">Estimated Cycles to Kill</div><div class="rv" id="vk-cycles">—</div></div>
+            <div class="rr"><div class="rl">Total Mud Lubricated</div><div class="rv" id="vk-total-mud">—<span class="ru">bbls</span></div></div>
+            <div class="rr"><div class="rl">Gas Migration Rate (est.)</div><div class="rv wn" id="vk-mig">—<span class="ru">psi/hr</span></div></div>
+            <div id="vk-alert" class="ab info">Enter shut-in data to calculate.</div>
+          </div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">📋 Bleed &amp; Lubricate Schedule</div></div>
+          <div style="overflow-x:auto;max-height:240px;overflow-y:auto">
+            <table class="tbl">
+              <thead><tr><th>Cycle</th><th>Lubricate (bbls)</th><th>Allow CASP to rise to</th><th>Bleed to</th><th>Approx Gas Out</th></tr></thead>
+              <tbody id="vk-sched"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 7. BIT HYDRAULICS OPTIMIZER ═══════════════════════════ -->
+<div class="cs" id="sec-bho">
+  <div class="sh" onclick="tsh(this)"><div class="st">⚡ Bit Hydraulics Optimizer</div><div class="ss">Find optimal nozzle combination to maximize HSI, Impact Force, and Jet Velocity</div></div>
+  <div class="sb2">
+    <div class="g2">
+      <div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">🔧 System Data</div></div>
+          <div class="cb">
+            <div class="fi"><div class="fl">Mud Weight</div><div class="fw"><input type="number" id="bh-mw" value="12" step="0.01" oninput="calcBHO()"><span class="fu">ppg</span></div></div>
+            <div class="fi"><div class="fl">Flow Rate</div><div class="fw"><input type="number" id="bh-gpm" value="280" oninput="calcBHO()"><span class="fu">gpm</span></div></div>
+            <div class="fi"><div class="fl">Available Bit Pressure Drop</div><div class="fw"><input type="number" id="bh-bpd" value="1800" oninput="calcBHO()"><span class="fu">psi</span></div></div>
+            <div class="fi"><div class="fl">Number of Nozzles</div><div class="fw">
+              <select id="bh-nn" onchange="calcBHO()" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none">
+                <option value="3">3 nozzles</option><option value="4">4 nozzles</option><option value="2">2 nozzles</option>
+              </select>
+            </div></div>
+            <div class="fi"><div class="fl">Optimization Target</div><div class="fw">
+              <select id="bh-opt" onchange="calcBHO()" style="background:var(--bgi);border:1px solid var(--b1);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:12px;padding:4px 8px;outline:none">
+                <option value="hhp">Max HHP (Hydraulic Horsepower)</option>
+                <option value="jv">Max Jet Velocity</option>
+                <option value="if">Max Impact Force</option>
+              </select>
+            </div></div>
+            <div class="fi"><div class="fl">Nozzle 1 Size (1/32")</div><div class="fw"><input type="number" id="bh-n1" value="13" min="8" max="22" oninput="calcBHO()"></div></div>
+            <div class="fi"><div class="fl">Nozzle 2 Size (1/32")</div><div class="fw"><input type="number" id="bh-n2" value="13" min="8" max="22" oninput="calcBHO()"></div></div>
+            <div class="fi"><div class="fl">Nozzle 3 Size (1/32")</div><div class="fw"><input type="number" id="bh-n3" value="13" min="8" max="22" oninput="calcBHO()"></div></div>
+          </div>
+        </div>
+        <div class="nt">
+          <strong>TFA</strong> = Total Flow Area = Σ(π × d²/4) in²<br>
+          <strong>Jet Vel</strong> = Q / (3.117 × TFA) ft/s<br>
+          <strong>Impact Force</strong> = 0.000516 × ρ × Q × Vj lbs<br>
+          <strong>HSI</strong> = ΔPbit × Q / (1714 × A_hole) HP/in²<br>
+          Optimal bit HP: ~65% of total HP for soft formations
+        </div>
+      </div>
+      <div>
+        <div class="cd at">
+          <div class="ch"><div class="ct2">📊 Current Configuration</div></div>
+          <div class="cb">
+            <div class="rb"><div class="v a" id="bh-hhp">—</div><div class="l">Bit HHP (Hydraulic Horsepower)</div></div>
+            <div class="rr"><div class="rl">TFA (Total Flow Area)</div><div class="rv hi" id="bh-tfa">—<span class="ru">in²</span></div></div>
+            <div class="rr"><div class="rl">Jet Velocity</div><div class="rv hi" id="bh-jv">—<span class="ru">ft/s</span></div></div>
+            <div class="rr"><div class="rl">Impact Force</div><div class="rv" id="bh-if">—<span class="ru">lbs</span></div></div>
+            <div class="rr"><div class="rl">Bit Pressure Drop</div><div class="rv" id="bh-dp">—<span class="ru">psi</span></div></div>
+            <div class="rr"><div class="rl">HSI (HP/in²)</div><div class="rv" id="bh-hsi">—<span class="ru">HP/in²</span></div></div>
+            <div class="rr"><div class="rl">Bit % of Total HHP</div><div class="rv" id="bh-pct">—<span class="ru">%</span></div></div>
+            <div id="bh-alert" class="ab info">Enter system data.</div>
+          </div>
+        </div>
+        <div class="cd">
+          <div class="ch"><div class="ct2">🏆 Top 5 Nozzle Combinations</div></div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr><th>Nozzles (1/32")</th><th>TFA (in²)</th><th>Jet Vel (ft/s)</th><th>HHP</th><th>Impact Force (lbs)</th><th>HSI</th></tr></thead>
+              <tbody id="bh-top5"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div><!-- /ct -->
+</div><!-- /mn -->
+</div><!-- /app -->
+<div id="toast"></div>
+
+<script>
+// ─── HELPERS ──────────────────────────────────────
+const fmt=(v,d=2)=>(v===null||isNaN(v)||!isFinite(v))?'—':(+v).toFixed(d);
+const fmtN=v=>isFinite(v)&&!isNaN(v)?Math.round(v).toLocaleString():'—';
+const vv=id=>parseFloat(document.getElementById(id)?.value)||0;
+const sv=id=>document.getElementById(id)?.value||'';
+const S=(id,h)=>{const e=document.getElementById(id);if(e)e.innerHTML=h};
+const Lc=id=>{const v=document.getElementById(id);if(!v)return null;const ctx=v.getContext('2d');ctx.clearRect(0,0,v.width,v.height);return{ctx,W:v.width,H:v.height}};
+const DL=(ctx,pts,col,lw=2)=>{if(!pts.length)return;ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke()};
+let _tt;function toast(m){clearTimeout(_tt);const t=document.getElementById('toast');t.textContent=m;t.style.display='block';_tt=setTimeout(()=>t.style.display='none',2500)}
+
+// NAV
+const NM={mvt:'Mud Volume Tracker',chem:'Daily Chemical Use',sidpp:'SIDPP/SICP Monitor',feval:'Formation Eval',strip:'Stripping Calc',vkm:'Volumetric Kill',bho:'Bit Hydraulics Optimizer'};
+function gt(id,el){
+  document.querySelectorAll('.cs').forEach(s=>s.classList.remove('act'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('act'));
+  const s=document.getElementById('sec-'+id);if(s)s.classList.add('act');
+  if(el)el.classList.add('act');
+  const bc=document.getElementById('bc');if(bc)bc.innerHTML='▸ <span>'+(NM[id]||id)+'</span>';
+}
+function tng(l){const p=l.parentElement;p.classList.toggle('closed');const b=l.nextElementSibling;if(b)b.style.display=p.classList.contains('closed')?'none':''}
+function tsh(h){if(event?.target?.tagName==='BUTTON'||event?.target?.closest?.('button'))return;const b=h.nextElementSibling;if(!b)return;b.classList.toggle('hid');h.classList.toggle('col',b.classList.contains('hid'))}
+
+function banner(containerId, type, icon, msg) {
+  const el = document.getElementById(containerId); if(!el) return;
+  el.innerHTML = `<div class="banner ${type}"><span class="bi">${icon}</span><span>${msg}</span></div>`;
+}
+
+// ════════════════════════════════════════════
+// 1. MUD VOLUME TRACKER
+// ════════════════════════════════════════════
+let mvtData = [];
+function mvtInit() {
+  const now = new Date();
+  document.getElementById('mvt-time').value = now.toTimeString().slice(0,5);
+  // Seed with demo data
+  const base = 1420;
+  for(let i=8; i>=0; i--) {
+    const t = new Date(now - i*30*60000);
+    const v = base + (Math.random()-0.48)*6;
+    mvtData.push({time: t.toTimeString().slice(0,5), vol: +v.toFixed(1), depth: 11200+(8-i)*45, note:''});
+  }
+  mvtRender(); mvtCheck();
+}
+function mvtLog() {
+  const time = sv('mvt-time'), vol = vv('mvt-vol'), depth = vv('mvt-depth'), note = sv('mvt-note');
+  if(!vol) { toast('Enter volume'); return; }
+  mvtData.push({time, vol, depth, note});
+  if(mvtData.length > 50) mvtData.shift();
+  mvtRender(); mvtCheck();
+  document.getElementById('mvt-vol').value = '';
+  toast('✅ Reading logged');
+}
+function mvtClear() { mvtData = []; mvtRender(); mvtCheck(); }
+function mvtCheck() {
+  if(mvtData.length < 2) return;
+  const gainThr = vv('mvt-gain-thr'), lossThr = vv('mvt-loss-thr');
+  const gainWarn = vv('mvt-gain-warn'), lossWarn = vv('mvt-loss-warn');
+  const last = mvtData[mvtData.length-1], prev = mvtData[mvtData.length-2];
+  const delta = last.vol - prev.vol;
+  const bc = document.getElementById('mvt-banners');
+  if(!bc) return;
+  if(delta >= gainThr) {
+    bc.innerHTML = `<div class="banner er"><span class="bi">🚨</span><span><strong>GAIN ALERT:</strong> +${fmt(delta,1)} bbls in last reading. Possible influx. MONITOR PVT IMMEDIATELY.</span></div>`;
+  } else if(delta >= gainWarn) {
+    bc.innerHTML = `<div class="banner wn"><span class="bi">⚠️</span><span><strong>GAIN WARNING:</strong> +${fmt(delta,1)} bbls. Investigate before continuing.</span></div>`;
+  } else if(delta <= -lossThr) {
+    bc.innerHTML = `<div class="banner er"><span class="bi">🚨</span><span><strong>LOSS ALERT:</strong> ${fmt(delta,1)} bbls. Possible lost circulation. Check shakers and returns.</span></div>`;
+  } else if(delta <= -lossWarn) {
+    bc.innerHTML = `<div class="banner wn"><span class="bi">⚠️</span><span><strong>LOSS WARNING:</strong> ${fmt(delta,1)} bbls. Monitor returns closely.</span></div>`;
+  } else {
+    bc.innerHTML = `<div class="banner ok"><span class="bi">✅</span><span>Volume stable. Last change: ${delta>=0?'+':''}${fmt(delta,1)} bbls.</span></div>`;
+  }
+}
+function mvtRender() {
+  S('mvt-count', mvtData.length);
+  if(!mvtData.length) { S('mvt-log','<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--ts)">No readings yet</td></tr>'); return; }
+  const last = mvtData[mvtData.length-1];
+  const prev = mvtData.length>1 ? mvtData[mvtData.length-2] : null;
+  const delta = prev ? last.vol - prev.vol : 0;
+  S('mvt-last', fmt(last.vol,1));
+  const de = document.getElementById('mvt-delta');
+  if(de){de.innerHTML=(delta>=0?'+':'')+fmt(delta,1)+'<span class="ru">bbls</span>';de.className='rv '+(Math.abs(delta)>10?'dg':Math.abs(delta)>5?'wn':'hi')}
+  // Trend (last 4)
+  if(mvtData.length >= 4) {
+    const last4 = mvtData.slice(-4);
+    const avg_delta = (last4[3].vol - last4[0].vol) / 3;
+    const tre = document.getElementById('mvt-trend');
+    if(tre){tre.textContent=avg_delta>2?'⬆ Rising (GAIN)':avg_delta<-2?'⬇ Falling (LOSS)':'→ Stable';tre.className='rv '+(avg_delta>2?'dg':avg_delta<-2?'wn':'hi')}
+  }
+  const gainThr=vv('mvt-gain-thr'),lossThr=vv('mvt-loss-thr'),gainWarn=vv('mvt-gain-warn'),lossWarn=vv('mvt-loss-warn');
+  // Log table
+  S('mvt-log', [...mvtData].reverse().slice(0,20).map((r,i)=>{
+    const idx = mvtData.length-1-i;
+    const prev2 = idx>0 ? mvtData[idx-1] : null;
+    const d = prev2 ? r.vol - prev2.vol : 0;
+    const st = d>=gainThr?'🚨 GAIN':d>=gainWarn?'⚠ +gain':d<=-lossThr?'🚨 LOSS':d<=-lossWarn?'⚠ -loss':'✅ OK';
+    const sc = d>=gainThr||d<=-lossThr?'var(--dg)':d>=gainWarn||d<=-lossWarn?'var(--wn)':'var(--a2)';
+    return `<tr>
+      <td class="mono">${r.time}</td>
+      <td class="mono" style="color:var(--ac)">${fmt(r.vol,1)}</td>
+      <td class="mono" style="color:${d>=0?'var(--dg)':'var(--a2)'}">${d>=0?'+':''}${fmt(d,1)}</td>
+      <td class="mono">${r.depth?fmtN(r.depth):'—'}</td>
+      <td style="color:${sc};font-size:11px">${st}</td>
+      <td style="font-size:11px;color:var(--ts)">${r.note||'—'}</td>
+      <td><button onclick="mvtData.splice(${idx},1);mvtRender();mvtCheck()" style="background:none;border:none;color:var(--dg);cursor:pointer;font-size:12px">✕</button></td>
+    </tr>`;
+  }).join(''));
+  // Chart
+  const r = Lc('mvt-canvas'); if(!r) return;
+  const {ctx,W,H} = r; const pad={l:50,r:14,t:14,b:30};
+  const vols = mvtData.map(d=>d.vol);
+  const minV=Math.min(...vols)*0.998, maxV=Math.max(...vols)*1.002;
+  const px=i=>pad.l+(i/(mvtData.length-1))*(W-pad.l-pad.r);
+  const py=v=>pad.t+(1-(v-minV)/(maxV-minV))*(H-pad.t-pad.b);
+  // Grid
+  ctx.strokeStyle='rgba(26,40,64,.6)';ctx.lineWidth=1;
+  [minV,(minV+maxV)/2,maxV].forEach(v=>{ctx.beginPath();ctx.moveTo(pad.l,py(v));ctx.lineTo(W-pad.r,py(v));ctx.stroke();ctx.fillStyle='rgba(90,122,154,.6)';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(fmt(v,1),pad.l-2,py(v)+3)});
+  // Gain/loss threshold lines
+  if(mvtData.length>1) {
+    const ref = vols[0];
+    [ref+gainWarn, ref+gainThr].forEach((v,i)=>{if(v<maxV){ctx.strokeStyle=i?'rgba(255,71,87,.5)':'rgba(255,184,0,.4)';ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(pad.l,py(v));ctx.lineTo(W-pad.r,py(v));ctx.stroke();ctx.setLineDash([])}});
+    [ref-lossWarn, ref-lossThr].forEach((v,i)=>{if(v>minV){ctx.strokeStyle=i?'rgba(255,71,87,.5)':'rgba(255,184,0,.4)';ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(pad.l,py(v));ctx.lineTo(W-pad.r,py(v));ctx.stroke();ctx.setLineDash([])}});
+  }
+  // Volume line
+  const pts = mvtData.map((d,i)=>[px(i),py(d.vol)]);
+  DL(ctx,pts,'rgba(0,212,255,.8)',2);
+  // Color dots
+  mvtData.forEach((d,i)=>{
+    const p2=i>0?mvtData[i-1]:null;const delta2=p2?d.vol-p2.vol:0;
+    ctx.fillStyle=delta2>=gainThr||delta2<=-lossThr?'rgba(255,71,87,.9)':delta2>=gainWarn||delta2<=-lossWarn?'rgba(255,184,0,.9)':'rgba(0,212,255,.8)';
+    ctx.beginPath();ctx.arc(px(i),py(d.vol),3,0,Math.PI*2);ctx.fill();
+  });
+  // Time labels
+  ctx.fillStyle='rgba(90,122,154,.6)';ctx.font='9px monospace';ctx.textAlign='center';
+  [0,Math.floor(mvtData.length/2),mvtData.length-1].forEach(i=>{if(mvtData[i])ctx.fillText(mvtData[i].time,px(i),H-5)});
+}
+
+// ════════════════════════════════════════════
+// 2. DAILY CHEMICAL CONSUMPTION
+// ════════════════════════════════════════════
+let chemData = [];
+function chemInit() {
+  chemData = [
+    {name:'Barite',unit:'sack',open:450,used:80,price:5.0},
+    {name:'PHPA (Plug)',unit:'sack',open:120,used:12,price:28.0},
+    {name:'KCl',unit:'sack',open:200,used:18,price:12.5},
+    {name:'NaOH',unit:'sack',open:60,used:4,price:8.0},
+    {name:'Lubricant',unit:'drum',open:8,used:1,price:180},
+  ];
+  chemRender();
+}
+function chemAdd() {
+  chemData.push({name:'New Chemical',unit:'sack',open:100,used:0,price:0});
+  chemRender();
+}
+function chemClear() { chemData=[]; chemRender(); }
+function chemRender() {
+  const is=`background:var(--bgi);border:1px solid var(--b1);border-radius:3px;color:var(--tx);font-family:var(--mono);font-size:11px;padding:3px 6px;text-align:right;outline:none;transition:border-color .15s`;
+  const minDays = vv('ch-alert-days')||3;
+  S('chem-body', chemData.map((r,i)=>{
+    const closing = r.open - r.used;
+    const burnRate = r.used; // per day
+    const daysLeft = burnRate>0 ? closing/burnRate : 999;
+    const cost = r.used * r.price;
+    const low = daysLeft <= minDays && daysLeft < 999;
+    return `<tr style="${low?'background:rgba(255,71,87,.05)':''}">
+      <td><input type="text" value="${r.name}" oninput="chemData[${i}].name=this.value" style="${is};width:120px;text-align:left"></td>
+      <td><select oninput="chemData[${i}].unit=this.value" style="${is};text-align:left;width:60px"><option${r.unit==='sack'?' selected':''}>sack</option><option${r.unit==='drum'?' selected':''}>drum</option><option${r.unit==='bag'?' selected':''}>bag</option></select></td>
+      <td><input type="number" value="${r.open}" oninput="chemData[${i}].open=+this.value;chemCalc()" style="${is};width:70px"></td>
+      <td><input type="number" value="${r.used}" oninput="chemData[${i}].used=+this.value;chemCalc()" style="${is};width:60px"></td>
+      <td class="mono" style="color:${closing<10?'var(--dg)':closing<20?'var(--wn)':'var(--ac)'}">${closing}</td>
+      <td><input type="number" value="${r.price}" step="0.01" oninput="chemData[${i}].price=+this.value;chemCalc()" style="${is};width:65px"></td>
+      <td class="mono" style="color:var(--a2)">$${fmt(cost,2)}</td>
+      <td class="mono" style="color:${daysLeft<=1?'var(--dg)':daysLeft<=3?'var(--wn)':'var(--ts)'}">${daysLeft<999?fmt(daysLeft,1):'>30'}</td>
+      <td><button onclick="chemData.splice(${i},1);chemRender()" style="background:none;border:none;color:var(--dg);cursor:pointer;font-size:12px">✕</button></td>
+    </tr>`;
+  }).join(''));
+  chemCalc();
+}
+function chemCalc() {
+  const vol=vv('ch-vol'),ft=vv('ch-ft'),minDays=vv('ch-alert-days')||3;
+  const total = chemData.reduce((s,r)=>s+r.used*r.price,0);
+  S('ch-total-cost', fmt(total,2));
+  S('ch-cost-ft', ft>0?'$'+fmt(total/ft,2):' —');
+  S('ch-cost-bbl', vol>0?'$'+fmt(total/vol,2):' —');
+  const low = chemData.filter(r=>r.used>0&&(r.open-r.used)/r.used<=minDays);
+  const lowEl=document.getElementById('ch-low');
+  if(lowEl){lowEl.textContent=low.length?low.length+' LOW STOCK':' All OK';lowEl.className='rv '+(low.length?'dg':'hi')}
+  const alerts=document.getElementById('ch-alerts');
+  if(alerts){alerts.innerHTML=low.map(r=>`<div class="ab er" style="margin-bottom:6px;padding:7px 12px">⚠ <strong>${r.name}</strong> — ${fmt((r.open-r.used)/Math.max(r.used,.01),1)} days left (${r.open-r.used} ${r.unit}s)</div>`).join('')}
+  // Bar chart
+  const rc=Lc('ch-canvas');if(!rc)return;
+  const{ctx,W,H}=rc;
+  const n=chemData.length;if(!n)return;
+  const maxCost=Math.max(...chemData.map(r=>r.used*r.price))*1.2||100;
+  const bw=Math.min(40,(W-40)/n-8),gap=(W-40-n*bw)/Math.max(n-1,1);
+  chemData.forEach((r,i)=>{
+    const x=20+i*(bw+gap),cost=r.used*r.price,bh=(cost/maxCost)*(H-50);
+    ctx.fillStyle=`hsla(${180+i*30},70%,60%,.5)`;
+    ctx.fillRect(x,H-30-bh,bw,bh);
+    ctx.fillStyle='rgba(90,122,154,.8)';ctx.font='9px monospace';ctx.textAlign='center';
+    ctx.fillText(r.name.slice(0,6),x+bw/2,H-14);
+    ctx.fillStyle='rgba(0,255,157,.8)';
+    if(bh>12)ctx.fillText('$'+Math.round(cost),x+bw/2,H-32-bh);
+  });
+}
+
+// ════════════════════════════════════════════
+// 3. SIDPP/SICP TREND MONITOR
+// ════════════════════════════════════════════
+let siData = [];
+function siInit() {
+  document.getElementById('si-time').value = new Date().toTimeString().slice(0,5);
+}
+function sidppLog() {
+  const time=sv('si-time'),sidpp=vv('si-sidpp'),sicp=vv('si-sicp'),mw=vv('si-mw'),tvd=vv('si-tvd');
+  if(!sidpp) { toast('Enter SIDPP value'); return; }
+  const kmw = mw + sidpp/(0.052*tvd);
+  siData.push({time,sidpp,sicp,mw,tvd,kmw});
+  if(siData.length>30) siData.shift();
+  sidppRender(); sidppCheck();
+  toast('✅ Pressure logged');
+}
+function sidppClear() { siData=[]; sidppRender(); sidppCheck(); document.getElementById('sidpp-banners').innerHTML=''; }
+function sidppCheck() {
+  if(!siData.length) return;
+  const last=siData[siData.length-1];
+  const maxSIDPP=vv('si-max-sidpp'),warnSIDPP=vv('si-warn-sidpp'),maxSICP=vv('si-max-sicp');
+  const bc=document.getElementById('sidpp-banners');
+  if(!bc)return;
+  if(last.sidpp>=maxSIDPP||last.sicp>=maxSICP){
+    bc.innerHTML=`<div class="banner er"><span class="bi">🚨</span><span><strong>WELL CONTROL ALERT:</strong> SIDPP=${last.sidpp} psi / SICP=${last.sicp} psi exceeds limit. INITIATE WELL CONTROL PROCEDURES.</span></div>`;
+  } else if(siData.length>=3) {
+    const trend=(siData[siData.length-1].sidpp-siData[siData.length-3].sidpp)/2;
+    if(trend>50){bc.innerHTML=`<div class="banner er"><span class="bi">🚨</span><span><strong>RISING SIDPP:</strong> Increasing +${fmt(trend,0)} psi/reading. Possible slow influx or gas migration. Monitor closely.</span></div>`}
+    else if(trend>20){bc.innerHTML=`<div class="banner wn"><span class="bi">⚠️</span><span><strong>SIDPP RISING:</strong> +${fmt(trend,0)} psi/reading. Investigate cause.</span></div>`}
+    else if(last.sidpp>=warnSIDPP){bc.innerHTML=`<div class="banner wn"><span class="bi">⚠️</span><span>SIDPP ${last.sidpp} psi approaching maximum ${maxSIDPP} psi. Stay alert.</span></div>`}
+    else{bc.innerHTML=`<div class="banner ok"><span class="bi">✅</span><span>SIDPP ${last.sidpp} psi / SICP ${last.sicp} psi — stable.</span></div>`}
+  }
+}
+function sidppRender() {
+  if(!siData.length){ S('si-log','<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--ts)">No readings yet</td></tr>'); return; }
+  const last=siData[siData.length-1];
+  S('si-last-sidpp',last.sidpp+'<span class="ru">psi</span>');
+  S('si-last-sicp',last.sicp+'<span class="ru">psi</span>');
+  S('si-kmw',fmt(last.kmw,3)+'<span class="ru">ppg</span>');
+  // Influx vol estimate: V_influx ≈ (SICP-SIDPP)/(MW×0.052) × annular cap
+  const infP=last.sicp-last.sidpp;
+  const infVol=infP>0?infP/(last.mw*0.052*0.0459)*0.1:0;
+  S('si-influx',fmt(infVol,1)+'<span class="ru">bbls (est.)</span>');
+  // Trend
+  if(siData.length>=3){
+    const tr=(siData[siData.length-1].sidpp-siData[siData.length-3].sidpp)/2;
+    const te=document.getElementById('si-trend');
+    if(te){te.textContent=tr>20?`⬆ +${fmt(tr,0)} psi/reading`:tr<-20?`⬇ ${fmt(tr,0)} psi/reading`:'→ Stable';te.className='rv '+(tr>20?'dg':tr<-20?'hi':'ts')}
+  }
+  const maxSIDPP=vv('si-max-sidpp'),warnSIDPP=vv('si-warn-sidpp'),maxSICP=vv('si-max-sicp');
+  S('si-log',[...siData].reverse().map((r,i)=>{
+    const st=r.sidpp>=maxSIDPP||r.sicp>=maxSICP?'🚨 ALERT':r.sidpp>=warnSIDPP?'⚠ WARN':'✅ OK';
+    const sc=r.sidpp>=maxSIDPP?'var(--dg)':r.sidpp>=warnSIDPP?'var(--wn)':'var(--a2)';
+    return`<tr><td class="mono">${r.time}</td><td class="mono" style="color:${sc}">${r.sidpp}</td><td class="mono">${r.sicp}</td><td class="mono" style="color:var(--a2)">${fmt(r.kmw,3)}</td><td style="color:${sc};font-size:11px">${st}</td><td><button onclick="siData.splice(${siData.length-1-i},1);sidppRender();sidppCheck()" style="background:none;border:none;color:var(--dg);cursor:pointer;font-size:12px">✕</button></td></tr>`;
+  }).join(''));
+  // Chart
+  const rc=Lc('si-canvas');if(!rc)return;
+  const{ctx,W,H}=rc;const pad={l:52,r:16,t:14,b:30};
+  const allP=[...siData.map(d=>d.sidpp),...siData.map(d=>d.sicp)];
+  const minP=0,maxP=Math.max(...allP,maxSIDPP)*1.1;
+  const px=i=>pad.l+(i/(siData.length-1||1))*(W-pad.l-pad.r);
+  const py=p=>pad.t+(1-p/maxP)*(H-pad.t-pad.b);
+  // Threshold lines
+  [maxSIDPP,warnSIDPP].forEach((v,i)=>{
+    ctx.strokeStyle=i?'rgba(255,184,0,.4)':'rgba(255,71,87,.5)';ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(pad.l,py(v));ctx.lineTo(W-pad.r,py(v));ctx.stroke();
+    ctx.setLineDash([]);ctx.fillStyle=i?'rgba(255,184,0,.6)':'rgba(255,71,87,.6)';
+    ctx.font='9px monospace';ctx.textAlign='left';ctx.fillText(i?'WARN':'MAX',pad.l+3,py(v)-3);
+  });
+  // SIDPP line (cyan), SICP line (orange)
+  if(siData.length>1){
+    DL(ctx,siData.map((d,i)=>[px(i),py(d.sidpp)]),'rgba(0,212,255,.8)',2);
+    DL(ctx,siData.map((d,i)=>[px(i),py(d.sicp)]),'rgba(255,140,0,.7)',2);
+  }
+  siData.forEach((d,i)=>{
+    ctx.fillStyle='rgba(0,212,255,.9)';ctx.beginPath();ctx.arc(px(i),py(d.sidpp),3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,140,0,.9)';ctx.beginPath();ctx.arc(px(i),py(d.sicp),3,0,Math.PI*2);ctx.fill();
+  });
+  // Axes
+  ctx.fillStyle='rgba(90,122,154,.6)';ctx.font='9px monospace';ctx.textAlign='right';
+  [0,maxP/4,maxP/2,maxP*3/4,maxP].forEach(p=>ctx.fillText(Math.round(p),pad.l-2,py(p)+3));
+  ctx.textAlign='center';ctx.fillStyle='rgba(0,212,255,.7)';ctx.fillText('SIDPP',px(siData.length/2),pad.t+10);
+  ctx.fillStyle='rgba(255,140,0,.7)';ctx.fillText('SICP',px(siData.length/2)+40,pad.t+10);
+}
+
+// ════════════════════════════════════════════
+// 4. FORMATION EVAL SCRATCHPAD
+// ════════════════════════════════════════════
+let feData = [];
+function fevalLog() {
+  const from=vv('fe-from'),to=vv('fe-to'),rop=vv('fe-rop'),gas=vv('fe-gas');
+  if(!to) { toast('Enter depth'); return; }
+  feData.push({from,to,rop,gas,color:sv('fe-color'),shape:sv('fe-shape'),lith:sv('fe-lith'),fluor:sv('fe-fluor'),notes:sv('fe-notes')});
+  feRender();
+  document.getElementById('fe-from').value = to;
+  document.getElementById('fe-to').value = '';
+  toast('✅ Stand logged');
+}
+function fevalClear() { feData=[]; feRender(); }
+function feRender() {
+  if(!feData.length){ S('fe-log','<tr><td colspan="9" style="padding:20px;text-align:center;color:var(--ts)">No stands logged yet</td></tr>'); return; }
+  S('fe-log',[...feData].reverse().map((r,i)=>{
+    const idx=feData.length-1-i;
+    const fc=r.fluor==='Strong'?'var(--dg)':r.fluor==='Moderate'?'var(--wn)':r.fluor==='Weak'?'var(--ac)':'var(--td)';
+    return`<tr>
+      <td class="mono">${r.from?r.from+'-':' '}${r.to}</td>
+      <td class="mono" style="color:${r.rop>150?'var(--dg)':r.rop>80?'var(--wn)':'var(--ac)'}">${r.rop||'—'}</td>
+      <td class="mono" style="color:${r.gas>200?'var(--dg)':r.gas>50?'var(--wn)':'var(--ts)'}">${r.gas||'—'}</td>
+      <td style="font-size:11px">${r.lith}</td>
+      <td style="font-size:11px">${r.color}</td>
+      <td style="font-size:11px">${r.shape}</td>
+      <td style="font-size:11px;color:${fc}">${r.fluor}</td>
+      <td style="font-size:11px;color:var(--ts)">${r.notes||'—'}</td>
+      <td><button onclick="feData.splice(${idx},1);feRender()" style="background:none;border:none;color:var(--dg);cursor:pointer;font-size:12px">✕</button></td>
+    </tr>`;
+  }).join(''));
+  // Chart: ROP and Gas vs Depth
+  const rc=Lc('fe-canvas');if(!rc)return;
+  const{ctx,W,H}=rc;const pad={l:52,r:50,t:14,b:24};
+  const maxDepth=Math.max(...feData.map(d=>d.to));
+  const minDepth=Math.min(...feData.map(d=>d.from||d.to));
+  const maxROP=Math.max(...feData.map(d=>d.rop),1)*1.1;
+  const maxGas=Math.max(...feData.map(d=>d.gas),1)*1.1;
+  const py=d=>pad.t+(d-minDepth)/(maxDepth-minDepth+1)*(H-pad.t-pad.b);
+  const pxR=v=>pad.l+(v/maxROP)*(W/2-pad.l-10);
+  const pxG=v=>W/2+10+(v/maxGas)*(W/2-pad.r-10);
+  // Grid
+  ctx.strokeStyle='rgba(26,40,64,.6)';ctx.lineWidth=1;
+  [minDepth,(minDepth+maxDepth)/2,maxDepth].forEach(d=>{ctx.beginPath();ctx.moveTo(pad.l,py(d));ctx.lineTo(W-pad.r,py(d));ctx.stroke();ctx.fillStyle='rgba(90,122,154,.6)';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(Math.round(d),pad.l-2,py(d)+3)});
+  // Divider
+  ctx.strokeStyle='rgba(26,40,64,.4)';ctx.beginPath();ctx.moveTo(W/2,pad.t);ctx.lineTo(W/2,H-pad.b);ctx.stroke();
+  ctx.fillStyle='rgba(0,212,255,.5)';ctx.font='9px monospace';ctx.textAlign='center';ctx.fillText('ROP',W/4,pad.t+10);
+  ctx.fillStyle='rgba(255,184,0,.5)';ctx.fillText('GAS',W*3/4,pad.t+10);
+  // ROP bars
+  feData.forEach(d=>{if(!d.rop)return;ctx.fillStyle='rgba(0,212,255,.4)';ctx.fillRect(pad.l,py(d.from||d.to),pxR(d.rop)-pad.l,Math.max(2,py(d.to)-py(d.from||d.to)))});
+  // Gas bars
+  feData.forEach(d=>{if(!d.gas)return;ctx.fillStyle='rgba(255,184,0,.5)';ctx.fillRect(W/2+10,py(d.from||d.to),pxG(d.gas)-(W/2+10),Math.max(2,py(d.to)-py(d.from||d.to)))});
+}
+
+// ════════════════════════════════════════════
+// 5. STRIPPING CALCULATOR
+// ════════════════════════════════════════════
+function calcStrip() {
+  const mw=vv('st-mw'),sicp=vv('st-sicp'),dpOd=vv('st-dp-od'),dpId=vv('st-dp-id');
+  const oh=vv('st-oh'),tvd=vv('st-tvd'),len=vv('st-len');
+  if(!mw||!dpOd) return;
+  // Steel displacement per foot (not open-ended, DP body)
+  const dpArea=Math.PI*(dpOd**2-dpId**2)/(4*144); // ft²
+  const dispPerFt = dpArea; // ft³/ft = ft²
+  const dispBblPerFt = dispPerFt/5.61458*0.178107; // bbl/ft  
+  // Annular cap (approx, per ft)
+  const annCap = Math.PI*(oh**2-dpOd**2)/(4*144)/5.61458*42; // gal/ft → bbl/ft
+  const standLen = 93; // ft per stand
+  const dispPerStand = dispBblPerFt * standLen;
+  // Pressure rise per stand: ΔP = displacement_volume / annular_vol × hydrostatic
+  const hp = 0.052 * mw * tvd;
+  const annVol = annCap * tvd;
+  const pressRisePerStand = annVol > 0 ? dispPerStand / annVol * hp : 0;
+  const bleedPerStand = dispPerStand;
+  const stands = Math.ceil(len / standLen);
+  const totalBleed = bleedPerStand * stands;
+  const pressLimit = sicp * 1.1; // 10% safety margin
+  const newHP = hp + pressRisePerStand * stands;
+
+  S('st-dp-disp', fmt(dispPerStand, 4));
+  S('st-dp-press', fmt(pressRisePerStand, 1)+'<span class="ru">psi</span>');
+  S('st-bleed', fmt(bleedPerStand, 4)+'<span class="ru">bbls</span>');
+  S('st-total-bleed', fmt(totalBleed, 3)+'<span class="ru">bbls</span>');
+  S('st-press-limit', fmt(pressLimit, 0)+'<span class="ru">psi</span>');
+  S('st-stands', stands);
+  S('st-new-hp', fmtN(newHP)+'<span class="ru">psi</span>');
+
+  const a=document.getElementById('st-alert');
+  if(a){a.className='ab ok';a.innerHTML=`✅ Bleed ${fmt(bleedPerStand,4)} bbls per stand to maintain SICP. Total ${fmt(totalBleed,3)} bbls for ${stands} stands.`}
+
+  // Build schedule
+  let rows='',hp_curr=sicp;
+  for(let i=1;i<=Math.min(stands,15);i++){
+    const hp_before=hp_curr;
+    const hp_after=hp_before+pressRisePerStand-bleedPerStand/(annVol/hp)*hp;
+    rows+=`<tr><td class="mono">${i}</td><td class="mono">${fmtN(i*standLen)}</td><td class="mono" style="color:var(--wn)">${fmt(hp_before,0)}</td><td class="mono" style="color:var(--ac)">${fmt(bleedPerStand,4)}</td><td class="mono" style="color:var(--a2)">${fmt(hp_before,0)}</td></tr>`;
+    hp_curr=hp_before;
+  }
+  S('st-sched-body', rows);
+}
+
+// ════════════════════════════════════════════
+// 6. VOLUMETRIC KILL METHOD
+// ════════════════════════════════════════════
+function calcVKM() {
+  const mw=vv('vk-mw'),sidpp=vv('vk-sidpp'),sicp=vv('vk-sicp');
+  const frac=vv('vk-frac'),shoeTVD=vv('vk-shoe-tvd'),tvd=vv('vk-tvd');
+  const annCap=vv('vk-ann-cap'),safety=vv('vk-safety'),lubVol=vv('vk-lub-vol');
+  if(!mw||!sidpp) return;
+
+  // HP increase per bbl of mud lubricated
+  const lubHP = mw * 0.052 * tvd / (annCap * tvd); // psi/bbl
+  const lubHPPerVol = lubVol * lubHP;
+  // MAASP = max casing pressure we can allow (limited by shoe FP)
+  const shoeFP = frac;
+  const HP_shoe = mw * 0.052 * shoeTVD;
+  const maasp = shoeFP - HP_shoe;
+  // Current casing pressure
+  const currCASP = sicp;
+  // Allow rise to: currCASP + lubHPPerVol (HP of lubricated mud)
+  const riseTarget = currCASP + lubHPPerVol;
+  // Bleed to: riseTarget - lubHPPerVol (back to original + safety)
+  const bleedTarget = currCASP + safety;
+  // Cycles to kill: influx height / (migration per cycle)
+  const influxP = sicp - sidpp;
+  const influxH = influxP / (mw * 0.052);
+  const cycles = Math.ceil(influxH / (lubVol / annCap));
+  const totalMud = cycles * lubVol;
+  // Gas migration estimate
+  const migRate = sidpp > 0 ? sidpp / 4 : 50; // rough estimate
+
+  S('vk-lub-hp', fmt(lubHPPerVol, 1));
+  S('vk-maasp', fmtN(maasp)+'<span class="ru">psi</span>');
+  S('vk-rise-to', fmt(riseTarget, 0)+'<span class="ru">psi</span>');
+  S('vk-bleed-to', fmt(bleedTarget, 0)+'<span class="ru">psi</span>');
+  S('vk-cycles', cycles);
+  S('vk-total-mud', fmt(totalMud, 1)+'<span class="ru">bbls</span>');
+  S('vk-mig', fmt(migRate, 0)+'<span class="ru">psi/hr (est.)</span>');
+
+  const a=document.getElementById('vk-alert');
+  if(riseTarget>maasp){if(a){a.className='ab er';a.innerHTML=`❌ Allow pressure (${fmt(riseTarget,0)} psi) exceeds MAASP (${fmtN(maasp)} psi). Reduce lubricant volume to ${fmt(maasp-currCASP-safety,0)>0?fmt((maasp-currCASP-safety)/lubHP,1):'<1'} bbls.`}}
+  else if(a){a.className='ab ok';a.innerHTML=`✅ ${cycles} lubrication cycles needed. Lubricate ${lubVol} bbls each cycle. Allow CASP to reach ${fmt(riseTarget,0)} psi then bleed to ${fmt(bleedTarget,0)} psi.`}
+
+  // Build schedule table
+  let rows='',caspNow=sicp;
+  for(let c=1;c<=Math.min(cycles,12);c++){
+    const riseTo=caspNow+lubHPPerVol;
+    const bleedTo2=caspNow+safety;
+    const gasOut=lubVol/annCap;
+    rows+=`<tr><td class="mono">${c}</td><td class="mono" style="color:var(--ac)">${lubVol}</td><td class="mono" style="color:var(--wn)">${fmt(riseTo,0)} psi</td><td class="mono" style="color:var(--a2)">${fmt(bleedTo2,0)} psi</td><td class="mono">${fmt(gasOut,1)} ft</td></tr>`;
+    caspNow=bleedTo2;
+  }
+  S('vk-sched',rows);
+}
+
+// ════════════════════════════════════════════
+// 7. BIT HYDRAULICS OPTIMIZER
+// ════════════════════════════════════════════
+function calcBHO() {
+  const mw=vv('bh-mw'),gpm=vv('bh-gpm'),bpd=vv('bh-bpd'),nn=parseInt(sv('bh-nn'))||3;
+  const n1=vv('bh-n1'),n2=vv('bh-n2'),n3=vv('bh-n3');
+  if(!mw||!gpm) return;
+
+  function calcConfig(sizes, gpm, mw, bpd) {
+    const tfa = sizes.reduce((s,n)=>s+Math.PI*(n/32)**2/4, 0); // in²
+    const jv = gpm / (3.117 * tfa); // ft/s
+    const dp_actual = 0.000216 * mw * gpm**2 / (tfa**2); // actual pressure drop
+    const hhp = dp_actual * gpm / 1714;
+    const impact = 0.000516 * mw * gpm * jv;
+    const hsi_val = hhp / (Math.PI * 8.5**2 / 4); // assuming 8.5" bit
+    return {tfa, jv, dp:dp_actual, hhp, impact, hsi:hsi_val};
+  }
+
+  const curr = calcConfig([n1,n2,n3].slice(0,nn), gpm, mw, bpd);
+  S('bh-tfa', fmt(curr.tfa, 4)+'<span class="ru">in²</span>');
+  S('bh-jv', fmt(curr.jv, 1)+'<span class="ru">ft/s</span>');
+  S('bh-if', fmt(curr.impact, 0)+'<span class="ru">lbs</span>');
+  S('bh-dp', fmt(curr.dp, 0)+'<span class="ru">psi</span>');
+  S('bh-hsi', fmt(curr.hsi, 3)+'<span class="ru">HP/in²</span>');
+  const bigEl=document.getElementById('bh-hhp');if(bigEl){bigEl.textContent=fmt(curr.hhp,1);bigEl.className='v '+(curr.hhp>500?'a':'w')}
+  const totalHHP = bpd * gpm / 1714;
+  const pct = totalHHP>0?curr.hhp/totalHHP*100:0;
+  S('bh-pct', fmt(pct,1)+'<span class="ru">%</span>');
+
+  const a=document.getElementById('bh-alert');
+  const opt=sv('bh-opt');
+  if(a){
+    if(pct<50){a.className='ab wn';a.innerHTML=`⚠ Bit HHP ${fmt(pct,1)}% of total — too low. Reduce nozzle size to increase bit ΔP.`}
+    else if(pct>80){a.className='ab wn';a.innerHTML=`⚠ Bit HHP ${fmt(pct,1)}% of total — very high. Ensure surface equipment can handle the pressure.`}
+    else{a.className='ab ok';a.innerHTML=`✅ Bit HHP ${fmt(pct,1)}% — Good. Jet velocity: ${fmt(curr.jv,1)} ft/s | Impact force: ${fmt(curr.impact,0)} lbs`}
+  }
+
+  // Generate top 5 combinations
+  const opt_target=opt;
+  let combos=[];
+  const sizes=Array.from({length:nn===3?15:10},(_,i)=>8+i);
+  // For 3 nozzles: try combinations
+  for(let a2=8;a2<=20;a2++) for(let b=a2;b<=20;b++) for(let c=b;c<=20;c++) {
+    if(nn===2&&c!==b)continue;
+    const s=nn===3?[a2,b,c]:nn===2?[a2,b]:[a2,b,c];
+    const res=calcConfig(s.slice(0,nn),gpm,mw,bpd);
+    const score=opt_target==='hhp'?res.hhp:opt_target==='jv'?res.jv:res.impact;
+    combos.push({sizes:s.slice(0,nn),score,...res});
+    if(combos.length>2000)break;
+    if(combos.length>2000)break;
+  }
+  combos.sort((a2,b)=>b.score-a2.score);
+  const top5=combos.slice(0,5);
+  S('bh-top5', top5.map((c,i)=>`<tr style="${i===0?'background:rgba(0,255,157,.04)':''}">
+    <td class="mono" style="color:${i===0?'var(--a2)':'var(--ac)'}">${c.sizes.join(' × ')} = ${fmt(c.sizes.reduce((s,n)=>s+n,0)/c.sizes.length,1)} avg</td>
+    <td class="mono">${fmt(c.tfa,4)}</td>
+    <td class="mono">${fmt(c.jv,1)}</td>
+    <td class="mono" style="color:var(--a2)">${fmt(c.hhp,1)}</td>
+    <td class="mono">${fmt(c.impact,0)}</td>
+    <td class="mono">${fmt(c.hsi,3)}</td>
+  </tr>`).join(''));
+}
+
+// ─── INIT ─────────────────────────────────────────
+window.onload = function() {
+  if(localStorage.getItem('p4th')==='l') document.body.classList.add('light');
+  mvtInit(); chemInit(); siInit(); feRender();
+  calcStrip(); calcVKM(); calcBHO();
+  document.getElementById('si-time').value = new Date().toTimeString().slice(0,5);
+  document.getElementById('mvt-time').value = new Date().toTimeString().slice(0,5);
+};
+</script>
+</body>
+</html>

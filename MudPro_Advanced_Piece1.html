@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MudPro — Advanced Module Piece 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&family=Barlow+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0e17; --bg-card:#0f1724; --bg-input:#080e18; --bg-alt:#131d2e;
+  --border:#1e2d45; --border-hi:#2a4060;
+  --accent:#00d4ff; --accent2:#00ff9d; --warn:#ffb800; --danger:#ff4757; --purple:#a855f7;
+  --text:#e2eaf8; --text-soft:#6b83a3; --text-dim:#2d4060;
+  --mono:'Share Tech Mono',monospace; --sans:'Barlow',sans-serif; --cond:'Barlow Condensed',sans-serif;
+  --glass-bg: rgba(15,23,36,0.7);
+  --glass-border: rgba(0,212,255,0.12);
+  --gradient-accent: linear-gradient(90deg, var(--accent), var(--accent2));
+  --gradient-warn: linear-gradient(90deg, var(--warn), var(--danger));
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; overflow-x:hidden; }
+
+/* ── ANIMATED BACKGROUND GRID ── */
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+}
+
+/* ── LAYOUT ── */
+#app { position:relative; z-index:1; display:flex; height:100vh; overflow:hidden; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width:240px; min-width:240px; background:var(--glass-bg);
+  border-right:1px solid var(--glass-border);
+  backdrop-filter:blur(20px); display:flex; flex-direction:column;
+  overflow-y:auto; flex-shrink:0;
+}
+.sidebar-logo { padding:22px 18px 16px; border-bottom:1px solid var(--glass-border); }
+.brand { font-family:var(--cond); font-weight:900; font-size:20px; letter-spacing:2px; text-transform:uppercase; }
+.brand span { background:var(--gradient-accent); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.sub { font-size:9px; color:var(--text-soft); letter-spacing:3px; text-transform:uppercase; margin-top:4px; font-family:var(--mono); }
+.badge { display:inline-block; margin-top:8px; font-size:9px; font-family:var(--mono); letter-spacing:1px; text-transform:uppercase; padding:3px 10px; border-radius:3px; background:linear-gradient(90deg,rgba(0,212,255,.12),rgba(0,255,157,.08)); border:1px solid rgba(0,212,255,.2); color:var(--accent); }
+
+.nav-group { padding:10px 0 4px; }
+.nav-group-label {
+  font-size:9px; letter-spacing:2.5px; text-transform:uppercase;
+  color:var(--text-dim); font-family:var(--mono); padding:0 18px 6px;
+  display:flex; align-items:center; justify-content:space-between; cursor:pointer;
+}
+.nav-group-label:hover { color:var(--accent); }
+.ng-arr { font-size:10px; transition:transform .2s; }
+.nav-group-label.closed .ng-arr { transform:rotate(-90deg); }
+.nav-body { overflow:hidden; }
+.nav-item {
+  display:flex; align-items:center; gap:10px; padding:9px 18px;
+  cursor:pointer; font-size:13px; color:var(--text-soft);
+  border-left:2px solid transparent; transition:all .18s; user-select:none;
+  position:relative;
+}
+.nav-item:hover { background:rgba(0,212,255,.05); color:var(--text); }
+.nav-item.active { background:rgba(0,212,255,.07); color:var(--accent); border-left-color:var(--accent); font-weight:600; }
+.nav-item .icon { width:18px; text-align:center; font-size:15px; }
+.nav-badge { margin-left:auto; font-size:9px; font-family:var(--mono); color:var(--accent2); background:rgba(0,255,157,.08); border:1px solid rgba(0,255,157,.18); border-radius:3px; padding:1px 6px; }
+.nav-badge.hot { color:var(--danger); background:rgba(255,71,87,.08); border-color:rgba(255,71,87,.2); }
+/* status dot on nav */
+.nav-dot { width:6px; height:6px; border-radius:50%; margin-left:auto; flex-shrink:0; display:none; }
+.nav-item.active .nav-dot { display:block; background:var(--accent2); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
+
+/* ── TOPBAR ── */
+#topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px; height:54px; border-bottom:1px solid var(--glass-border);
+  background:var(--glass-bg); backdrop-filter:blur(20px); flex-shrink:0;
+}
+.topbar-title { font-family:var(--cond); font-size:22px; font-weight:700; }
+.topbar-title span { background:var(--gradient-accent); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.topbar-right { display:flex; align-items:center; gap:12px; }
+.tb-btn {
+  padding:6px 16px; border-radius:6px; font-size:11px; font-family:var(--mono);
+  cursor:pointer; transition:all .18s; text-transform:uppercase; letter-spacing:.5px;
+  border:1px solid var(--border-hi); color:var(--text-soft); background:rgba(255,255,255,.03);
+}
+.tb-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(0,212,255,.06); }
+.tb-btn.primary { border-color:var(--accent); color:var(--accent); background:rgba(0,212,255,.08); }
+.tb-btn.primary:hover { background:var(--accent); color:#000; }
+
+/* ── MAIN ── */
+#main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+#content { flex:1; overflow-y:auto; padding:28px; }
+
+/* ── SECTIONS ── */
+.calc-section { display:none; }
+.calc-section.active { display:block; animation:slideIn .25s ease; }
+@keyframes slideIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+
+.section-hdr { margin-bottom:24px; cursor:pointer; position:relative; padding-right:36px; }
+.section-hdr:hover .shdr-toggle { color:var(--accent); }
+.shdr-toggle { position:absolute; right:0; top:0; font-size:20px; color:var(--text-dim); transition:transform .2s; }
+.section-hdr.collapsed .shdr-toggle { transform:rotate(-90deg); }
+.section-body.hidden { display:none; }
+.section-title { font-family:var(--cond); font-size:28px; font-weight:900; text-transform:uppercase; letter-spacing:1px; }
+.section-subtitle { font-size:12px; color:var(--text-soft); font-family:var(--mono); margin-top:4px; }
+
+/* ── GLASSMORPHISM CARDS ── */
+.card {
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  border-radius:12px; overflow:hidden; margin-bottom:16px;
+  backdrop-filter:blur(16px);
+  position:relative;
+  transition:border-color .2s, box-shadow .2s;
+}
+.card:hover { border-color:rgba(0,212,255,.22); box-shadow:0 0 24px rgba(0,212,255,.06); }
+/* Gradient accent bar on card top */
+.card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:var(--gradient-accent); opacity:0;
+  transition:opacity .2s;
+}
+.card:hover::before { opacity:1; }
+.card.result-card::before { opacity:1; background:var(--gradient-accent); }
+.card.warn-card::before { opacity:1; background:var(--gradient-warn); }
+
+.card-header {
+  padding:12px 18px; border-bottom:1px solid var(--glass-border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(0,0,0,.15);
+}
+.card-title { font-family:var(--cond); font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-soft); }
+.card-body { padding:16px 18px; }
+
+/* ── CALC GRID ── */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+.gw { display:grid; grid-template-columns:1.3fr .7fr; gap:20px; align-items:start; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; align-items:start; }
+
+/* ── FORM FIELDS ── */
+.field { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid rgba(30,45,69,.4); }
+.field:last-child { border-bottom:none; }
+.field-label { flex:1; font-size:12px; color:var(--text-soft); }
+.field-wrap { display:flex; align-items:center; gap:6px; }
+/* Color-coded input states */
+.field input, .field select {
+  background:var(--bg-input); border:1px solid var(--border);
+  border-radius:5px; color:var(--text); font-family:var(--mono);
+  font-size:13px; padding:5px 9px; width:100px; text-align:right;
+  outline:none; transition:border-color .15s, box-shadow .15s, background .15s;
+}
+.field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,212,255,.08); background:rgba(0,212,255,.03); }
+.field input.val-ok   { border-color:rgba(0,255,157,.4); background:rgba(0,255,157,.04); }
+.field input.val-warn { border-color:rgba(255,184,0,.4); background:rgba(255,184,0,.04); }
+.field input.val-err  { border-color:rgba(255,71,87,.4); background:rgba(255,71,87,.04); }
+.field select { text-align:left; width:auto; cursor:pointer; }
+.field-unit { font-family:var(--mono); font-size:10px; color:var(--text-dim); min-width:26px; }
+
+/* ── RESULTS ── */
+.rrow { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(30,45,69,.35); }
+.rrow:last-child { border-bottom:none; }
+.rlabel { font-size:12px; color:var(--text-soft); }
+.rval { font-family:var(--mono); font-size:14px; color:var(--accent); transition:color .3s; }
+.rval.hi { color:var(--accent2); font-size:17px; }
+.rval.warn { color:var(--warn); }
+.rval.danger { color:var(--danger); }
+.runit { font-size:10px; color:var(--text-dim); margin-left:3px; }
+/* Animated counter */
+.rval.animating { animation:numFlip .3s ease; }
+@keyframes numFlip { 0%{opacity:0;transform:translateY(-6px)} 100%{opacity:1;transform:none} }
+
+.rbig { text-align:center; padding:16px 0; border-bottom:1px solid var(--glass-border); margin-bottom:10px; }
+.rbig .val { font-family:var(--mono); font-size:30px; letter-spacing:2px; transition:all .3s; }
+.rbig .val.accent  { color:var(--accent2); }
+.rbig .val.warning { color:var(--warn); }
+.rbig .val.danger  { color:var(--danger); }
+.rbig .lbl { font-size:11px; color:var(--text-soft); text-transform:uppercase; letter-spacing:1.5px; margin-top:3px; }
+
+.abox { border-radius:7px; padding:10px 14px; font-size:12px; margin-top:10px; line-height:1.6; }
+.abox.info { background:rgba(0,212,255,.06); border:1px solid rgba(0,212,255,.18); color:#7dd3fc; }
+.abox.ok   { background:rgba(0,255,157,.06); border:1px solid rgba(0,255,157,.18); color:var(--accent2); }
+.abox.warn { background:rgba(255,184,0,.06); border:1px solid rgba(255,184,0,.22); color:var(--warn); }
+.abox.err  { background:rgba(255,71,87,.06); border:1px solid rgba(255,71,87,.22); color:var(--danger); }
+.abox strong { font-weight:700; }
+
+.note { background:rgba(0,212,255,.04); border:1px solid rgba(0,212,255,.1); border-radius:7px; padding:10px 14px; font-size:11px; color:var(--text-soft); line-height:1.7; margin-top:12px; }
+.note strong { color:var(--accent); }
+
+/* ── CHART CANVAS ── */
+canvas { display:block; border-radius:8px; background:rgba(0,0,0,.3); border:1px solid var(--glass-border); }
+
+/* ── MW WINDOW BAR ── */
+.mw-window-bar { height:28px; border-radius:6px; overflow:hidden; position:relative; background:var(--bg-alt); border:1px solid var(--border); margin:8px 0; }
+.mw-window-bar .zone { position:absolute; top:0; bottom:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:10px; font-weight:700; }
+.zone-collapse { background:rgba(255,71,87,.3); }
+.zone-safe    { background:rgba(0,255,157,.2); }
+.zone-frac    { background:rgba(255,184,0,.25); }
+.mw-marker { position:absolute; top:0; bottom:0; width:3px; background:var(--accent); border-radius:2px; transition:left .3s; z-index:2; }
+
+/* ── D-EXPONENT CHART ── */
+.dc-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:12px; }
+
+/* ── TOAST ── */
+#toast { position:fixed; bottom:24px; right:24px; background:var(--bg-card); border:1px solid var(--accent2); color:var(--accent2); padding:10px 20px; border-radius:8px; font-family:var(--mono); font-size:12px; display:none; z-index:999; animation:toastIn .2s ease; backdrop-filter:blur(16px); }
+@keyframes toastIn { from{transform:translateY(10px);opacity:0} to{transform:none;opacity:1} }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+/* ── SPARKLINE ── */
+.sparkline { display:inline-block; vertical-align:middle; }
+
+/* ── TABLE ── */
+.adv-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+.adv-tbl th { background:rgba(0,0,0,.35); padding:7px 10px; text-align:left; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); font-family:var(--mono); border-bottom:1px solid var(--glass-border); }
+.adv-tbl td { padding:7px 10px; border-bottom:1px solid rgba(30,45,69,.3); vertical-align:middle; }
+.adv-tbl td.mono { font-family:var(--mono); font-size:12px; }
+.adv-tbl tr:hover td { background:rgba(0,212,255,.03); }
+
+/* ── LIGHT THEME ── */
+body.light {
+  --bg:#f0f4f8; --bg-card:#ffffff; --bg-input:#f8fafc; --bg-alt:#e8eef5;
+  --border:#c9d6e3; --border-hi:#a8bccf; --accent:#0077aa; --accent2:#00875a;
+  --warn:#d97706; --danger:#dc2626; --text:#1a2a3a; --text-soft:#4a6080; --text-dim:#8aa0b8;
+  --glass-bg:rgba(255,255,255,0.85); --glass-border:rgba(0,119,170,0.15);
+}
+body.light::before { background-image: linear-gradient(rgba(0,119,170,.04) 1px,transparent 1px), linear-gradient(90deg,rgba(0,119,170,.04) 1px,transparent 1px); }
+
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<div id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">⬡ <span>MudPro</span></div>
+    <div class="sub">Advanced Module · Piece 1</div>
+    <div class="badge">🚀 NEW CALCS</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label" onclick="toggleNG(this)"><span>Well Engineering</span><span class="ng-arr">▾</span></div>
+    <div class="nav-body">
+      <div class="nav-item active" onclick="goTo('lot',this)"><span class="icon">🪨</span><span>LOT / FIT — Shoe Test</span><span class="nav-dot"></span></div>
+      <div class="nav-item" onclick="goTo('kick-tol',this)"><span class="icon">⚠️</span><span>Kick Tolerance</span><span class="nav-badge hot">CRITICAL</span></div>
+      <div class="nav-item" onclick="goTo('dexp',this)"><span class="icon">📉</span><span>D-Exponent (FP)</span></div>
+      <div class="nav-item" onclick="goTo('swab-surge',this)"><span class="icon">🔁</span><span>Swab &amp; Surge</span></div>
+      <div class="nav-item" onclick="goTo('temp-profile',this)"><span class="icon">🌡️</span><span>BHCT / BHST Profile</span></div>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label" onclick="toggleNG(this)"><span>Fluid Analysis</span><span class="ng-arr">▾</span></div>
+    <div class="nav-body">
+      <div class="nav-item" onclick="goTo('fann6',this)"><span class="icon">🔬</span><span>Fann 6-Speed</span><span class="nav-badge">RHEOLOGY</span></div>
+      <div class="nav-item" onclick="goTo('retort',this)"><span class="icon">⚗️</span><span>Retort Calculator</span></div>
+      <div class="nav-item" onclick="goTo('mbt',this)"><span class="icon">🧫</span><span>MBT Test</span></div>
+      <div class="nav-item" onclick="goTo('ph-alk',this)"><span class="icon">🧪</span><span>pH &amp; Alkalinity Tx</span></div>
+      <div class="nav-item" onclick="goTo('cl-treat',this)"><span class="icon">🧂</span><span>Chloride Treatment</span></div>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label" onclick="toggleNG(this)"><span>Well Window</span><span class="ng-arr">▾</span></div>
+    <div class="nav-body">
+      <div class="nav-item" onclick="goTo('frac-mw',this)"><span class="icon">🪟</span><span>Frac Gradient &amp; MW</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+  <div id="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="topbar-title">Well Engineering <span>Advanced</span></div>
+      <span id="breadcrumb" style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">▸ LOT / FIT</span>
+    </div>
+    <div class="topbar-right">
+      <button class="tb-btn" onclick="toggleTheme()">🌙 Theme</button>
+      <button class="tb-btn primary" onclick="window.print()">🖨️ Print</button>
+    </div>
+  </div>
+  <div id="content">
+
+<!-- ═══════════════════════════════════════════════════════
+     1. CASING SHOE TEST — LOT / FIT
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section active" id="sec-lot">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">🪨 LOT / FIT — Casing Shoe Test</div>
+    <div class="section-subtitle">Leak-Off Test &amp; Formation Integrity Test — fracture gradient &amp; safe MW window</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="gw">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Test Data</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label">Test Type</div><div class="field-wrap"><select id="lot-type" onchange="calcLOT()" style="background:var(--bg-input);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;outline:none"><option value="lot">LOT (Leak-Off Test)</option><option value="fit">FIT (Formation Integrity)</option><option value="xlot">XLOT (Extended LOT)</option></select></div></div>
+            <div class="field"><div class="field-label">Shoe TVD</div><div class="field-wrap"><input type="number" id="lot-tvd" value="8500" oninput="calcLOT()"><span class="field-unit">ft</span></div></div>
+            <div class="field"><div class="field-label">Shoe MD</div><div class="field-wrap"><input type="number" id="lot-md" value="8600" oninput="calcLOT()"><span class="field-unit">ft</span></div></div>
+            <div class="field"><div class="field-label">Mud Weight (test)</div><div class="field-wrap"><input type="number" id="lot-mw" value="9.5" step="0.01" oninput="calcLOT()"><span class="field-unit">ppg</span></div></div>
+            <div class="field"><div class="field-label">Surface Leak-Off Pressure</div><div class="field-wrap"><input type="number" id="lot-lop" value="480" oninput="calcLOT()"><span class="field-unit">psi</span></div></div>
+            <div class="field"><div class="field-label">Current Mud Weight (drilling)</div><div class="field-wrap"><input type="number" id="lot-curr-mw" value="9.5" step="0.01" oninput="calcLOT()"><span class="field-unit">ppg</span></div></div>
+            <div class="field"><div class="field-label">Pore Pressure Gradient</div><div class="field-wrap"><input type="number" id="lot-pp-grad" value="0.465" step="0.001" oninput="calcLOT()"><span class="field-unit">psi/ft</span></div></div>
+            <div class="field"><div class="field-label">Max Desired MW (program)</div><div class="field-wrap"><input type="number" id="lot-max-mw" value="12" step="0.01" oninput="calcLOT()"><span class="field-unit">ppg</span></div></div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>LOT:</strong> Pump until pressure loss — gives true fracture gradient.<br>
+          <strong>FIT:</strong> Pump to a predetermined pressure — confirms formation can hold a target MW.<br>
+          <strong>Fracture Gradient</strong> = (HP + LOP) / (0.052 × TVD)<br>
+          <strong>MASP</strong> = (Frac Grad × 0.052 × TVD) − (MW × 0.052 × TVD)
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 Test Results</div></div>
+          <div class="card-body">
+            <div class="rbig">
+              <div class="val accent" id="lot-frac-grad">—</div>
+              <div class="lbl">Fracture Gradient (psi/ft)</div>
+            </div>
+            <div class="rrow"><div class="rlabel">Frac Gradient (ppg EMW)</div><div class="rval hi" id="lot-frac-ppg">—<span class="runit">ppg</span></div></div>
+            <div class="rrow"><div class="rlabel">LOT Pressure (surface)</div><div class="rval" id="lot-lop-out">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">BH Pressure at LO</div><div class="rval" id="lot-bhp">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">MASP (Max Allow. Surface P)</div><div class="rval warn" id="lot-masp">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">Safe MW Upper Limit</div><div class="rval hi" id="lot-mw-limit">—<span class="runit">ppg</span></div></div>
+            <div class="rrow"><div class="rlabel">Pore Pressure (BH)</div><div class="rval" id="lot-pp">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">MW Window Width</div><div class="rval" id="lot-window">—<span class="runit">ppg</span></div></div>
+            <div id="lot-alert" class="abox info" style="margin-top:10px">Enter shoe TVD, mud weight, and LOP to calculate.</div>
+          </div>
+        </div>
+        <!-- MW Window visual bar -->
+        <div class="card" style="margin-top:0">
+          <div class="card-header"><div class="card-title">🪟 MW Window Visual</div></div>
+          <div class="card-body">
+            <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);margin-bottom:6px;display:flex;justify-content:space-between"><span id="lot-bar-min">—</span><span id="lot-bar-mid">Current MW</span><span id="lot-bar-max">—</span></div>
+            <div class="mw-window-bar" id="lot-mw-bar">
+              <div class="zone zone-collapse" id="lot-zone-collapse" style="left:0;width:25%">COLLAPSE</div>
+              <div class="zone zone-safe" id="lot-zone-safe" style="left:25%;width:50%">SAFE WINDOW</div>
+              <div class="zone zone-frac" id="lot-zone-frac" style="left:75%;width:25%">FRAC</div>
+              <div class="mw-marker" id="lot-mw-marker" style="left:40%"></div>
+            </div>
+            <canvas id="lot-canvas" width="400" height="160" style="width:100%;margin-top:10px"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     2. KICK TOLERANCE
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-kick-tol">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">⚠️ Kick Tolerance Calculator</div>
+    <div class="section-subtitle">Max influx volume the well can sustain before fracturing the shoe</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="gw">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Well &amp; Shoe Data</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label">Current Mud Weight</div><div class="field-wrap"><input type="number" id="kt-mw" value="10" step="0.01" oninput="calcKT()"><span class="field-unit">ppg</span></div></div>
+            <div class="field"><div class="field-label">Shoe TVD</div><div class="field-wrap"><input type="number" id="kt-shoe-tvd" value="8500" oninput="calcKT()"><span class="field-unit">ft</span></div></div>
+            <div class="field"><div class="field-label">Current Depth TVD</div><div class="field-wrap"><input type="number" id="kt-curr-tvd" value="12000" oninput="calcKT()"><span class="field-unit">ft</span></div></div>
+            <div class="field"><div class="field-label">Shoe Fracture Gradient</div><div class="field-wrap"><input type="number" id="kt-frac-grad" value="0.782" step="0.001" oninput="calcKT()"><span class="field-unit">psi/ft</span></div></div>
+            <div class="field"><div class="field-label">Formation Pore Pressure</div><div class="field-wrap"><input type="number" id="kt-pp" value="5200" oninput="calcKT()"><span class="field-unit">psi</span></div></div>
+            <div class="field"><div class="field-label">Annulus Capacity (OH section)</div><div class="field-wrap"><input type="number" id="kt-ann-cap" value="0.0459" step="0.0001" oninput="calcKT()"><span class="field-unit">bbl/ft</span></div></div>
+            <div class="field"><div class="field-label">Influx Type</div><div class="field-wrap"><select id="kt-influx" onchange="calcKT()" style="background:var(--bg-input);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;outline:none"><option value="gas">Gas (0.1 ppg)</option><option value="oil">Oil (4.0 ppg)</option><option value="water">Saltwater (8.7 ppg)</option></select></div></div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>KT</strong> = [(FG × 0.052 × TVD_shoe) − (MW × 0.052 × TVD_shoe)] / [(MW − Influx_density) × 0.052 × (TVD_curr − TVD_shoe) / Ann_Cap]<br>
+          A KT &lt; 20 bbls for gas influx is generally considered risky.
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 Kick Tolerance Results</div></div>
+          <div class="card-body">
+            <div class="rbig">
+              <div class="val accent" id="kt-result">—</div>
+              <div class="lbl">Kick Tolerance (bbls)</div>
+            </div>
+            <div class="rrow"><div class="rlabel">Max Allowable SIDPP</div><div class="rval hi" id="kt-max-sidpp">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">Shoe Frac Pressure</div><div class="rval" id="kt-shoe-fp">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">Current HP at Shoe</div><div class="rval" id="kt-hp-shoe">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">Max Influx Height</div><div class="rval" id="kt-influx-ht">—<span class="runit">ft</span></div></div>
+            <div class="rrow"><div class="rlabel">Risk Level</div><div class="rval" id="kt-risk" style="font-size:13px;font-weight:700">—</div></div>
+            <div id="kt-alert" class="abox info" style="margin-top:10px">Enter well data to calculate kick tolerance.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📈 KT vs Influx Density Chart</div></div>
+          <div class="card-body" style="padding:10px"><canvas id="kt-canvas" width="400" height="180" style="width:100%"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     3. D-EXPONENT (FORMATION PRESSURE)
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-dexp">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">📉 D-Exponent (Formation Pressure)</div>
+    <div class="section-subtitle">Detect overpressure from drilling parameters — dc-exponent trend analysis</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Drilling Parameters</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label">ROP (Rate of Penetration)</div><div class="field-wrap"><input type="number" id="dc-rop" value="80" oninput="calcDc()"><span class="field-unit">ft/hr</span></div></div>
+            <div class="field"><div class="field-label">WOB (Weight on Bit)</div><div class="field-wrap"><input type="number" id="dc-wob" value="20000" oninput="calcDc()"><span class="field-unit">lbs</span></div></div>
+            <div class="field"><div class="field-label">RPM</div><div class="field-wrap"><input type="number" id="dc-rpm" value="100" oninput="calcDc()"></div></div>
+            <div class="field"><div class="field-label">Bit Diameter</div><div class="field-wrap"><input type="number" id="dc-bit" value="12.25" step="0.125" oninput="calcDc()"><span class="field-unit">in</span></div></div>
+            <div class="field"><div class="field-label">Current Mud Weight</div><div class="field-wrap"><input type="number" id="dc-mw" value="10" step="0.01" oninput="calcDc()"><span class="field-unit">ppg</span></div></div>
+            <div class="field"><div class="field-label">Normal Pressure Gradient</div><div class="field-wrap"><input type="number" id="dc-normal-grad" value="8.5" step="0.01" oninput="calcDc()"><span class="field-unit">ppg</span></div></div>
+            <div class="field"><div class="field-label">Normal Trend d-exp (from offset)</div><div class="field-wrap"><input type="number" id="dc-normal-dexp" value="1.45" step="0.01" oninput="calcDc()"></div></div>
+            <div class="field"><div class="field-label">Current Depth TVD</div><div class="field-wrap"><input type="number" id="dc-tvd" value="11500" oninput="calcDc()"><span class="field-unit">ft</span></div></div>
+          </div>
+        </div>
+        <!-- D-exp log table -->
+        <div class="card" style="margin-top:0">
+          <div class="card-header">
+            <div class="card-title">📋 D-Exp Log (last 5 readings)</div>
+            <button onclick="addDcLog()" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.3);color:var(--accent);border-radius:5px;padding:3px 10px;font-size:10px;cursor:pointer;font-family:var(--mono)">+ Log Point</button>
+          </div>
+          <div class="card-body" style="padding:8px">
+            <table class="adv-tbl" id="dc-log-tbl">
+              <thead><tr><th>Depth (ft)</th><th>ROP</th><th>d-exp</th><th>dc-exp</th><th>FP Est.</th><th></th></tr></thead>
+              <tbody id="dc-log-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 D-Exponent Results</div></div>
+          <div class="card-body">
+            <div class="rbig">
+              <div class="val accent" id="dc-dexp-out">—</div>
+              <div class="lbl">d-exponent (current)</div>
+            </div>
+            <div class="rrow"><div class="rlabel">dc-exponent (corrected)</div><div class="rval hi" id="dc-dcexp-out">—</div></div>
+            <div class="rrow"><div class="rlabel">Normal Trend dc-exp</div><div class="rval" id="dc-normal-out">—</div></div>
+            <div class="rrow"><div class="rlabel">Deviation from Normal</div><div class="rval" id="dc-dev-out">—</div></div>
+            <div class="rrow"><div class="rlabel">Est. Formation Pressure</div><div class="rval hi" id="dc-fp-out">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">Est. FP Gradient</div><div class="rval" id="dc-fp-grad">—<span class="runit">ppg</span></div></div>
+            <div class="rrow"><div class="rlabel">Required Kill MW</div><div class="rval warn" id="dc-kill-mw">—<span class="runit">ppg</span></div></div>
+            <div id="dc-alert" class="abox info" style="margin-top:10px">Enter drilling parameters to calculate.</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="card-header"><div class="card-title">📈 dc-exp Trend Chart</div></div>
+          <div class="card-body" style="padding:10px"><canvas id="dc-canvas" width="400" height="220" style="width:100%"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     4. SWAB & SURGE PRESSURE
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-swab-surge">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">🔁 Swab &amp; Surge Pressure</div>
+    <div class="section-subtitle">Pressure changes during POOH / RIH — Power Law model (ft &amp; ppg)</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="gw">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Well &amp; String Data</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label">Mud Weight</div><div class="field-wrap"><input type="number" id="ss-mw" value="13" step="0.01" oninput="calcSS()"><span class="field-unit">ppg</span></div></div>
+            <div class="field"><div class="field-label">Fann 600 rpm</div><div class="field-wrap"><input type="number" id="ss-r600" value="65" oninput="calcSS()"></div></div>
+            <div class="field"><div class="field-label">Fann 300 rpm</div><div class="field-wrap"><input type="number" id="ss-r300" value="45" oninput="calcSS()"></div></div>
+            <div class="field"><div class="field-label">Pipe Speed (POOH/RIH)</div><div class="field-wrap"><input type="number" id="ss-speed" value="2" step="0.1" oninput="calcSS()"><span class="field-unit">ft/s</span></div></div>
+            <div class="field"><div class="field-label">Hole Diameter</div><div class="field-wrap"><input type="number" id="ss-oh" value="8.5" step="0.125" oninput="calcSS()"><span class="field-unit">in</span></div></div>
+            <div class="field"><div class="field-label">Pipe OD</div><div class="field-wrap"><input type="number" id="ss-dp-od" value="5" step="0.001" oninput="calcSS()"><span class="field-unit">in</span></div></div>
+            <div class="field"><div class="field-label">Pipe ID (if open-ended)</div><div class="field-wrap"><input type="number" id="ss-dp-id" value="4.276" step="0.001" oninput="calcSS()"><span class="field-unit">in</span></div></div>
+            <div class="field"><div class="field-label">Pipe End Type</div><div class="field-wrap"><select id="ss-pipe-type" onchange="calcSS()" style="background:var(--bg-input);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;outline:none"><option value="open">Open-ended (DP)</option><option value="closed">Closed-ended (Plugged/BHA)</option></select></div></div>
+            <div class="field"><div class="field-label">True Vertical Depth</div><div class="field-wrap"><input type="number" id="ss-tvd" value="12000" oninput="calcSS()"><span class="field-unit">ft</span></div></div>
+            <div class="field"><div class="field-label">Current Mud HP</div><div class="field-wrap"><input type="number" id="ss-hp" value="7488" oninput="calcSS()"><span class="field-unit">psi</span></div></div>
+            <div class="field"><div class="field-label">Shoe Fracture Pressure</div><div class="field-wrap"><input type="number" id="ss-frac-p" value="9200" oninput="calcSS()"><span class="field-unit">psi</span></div></div>
+            <div class="field"><div class="field-label">Pore Pressure</div><div class="field-wrap"><input type="number" id="ss-pp" value="6800" oninput="calcSS()"><span class="field-unit">psi</span></div></div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>Swab</strong> (POOH) reduces BH pressure — risk of kick if BHP &lt; Pore Pressure.<br>
+          <strong>Surge</strong> (RIH) increases BH pressure — risk of fracture if BHP &gt; Frac Pressure.<br>
+          <strong>Power Law</strong> model used — accounts for non-Newtonian flow behavior in annulus.
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 Pressure Results</div></div>
+          <div class="card-body">
+            <div class="rbig">
+              <div class="val accent" id="ss-surge-out">—</div>
+              <div class="lbl">Surge Pressure (psi)</div>
+            </div>
+            <div class="rrow"><div class="rlabel">Swab Pressure</div><div class="rval hi" id="ss-swab-out">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">BHP during Surge (RIH)</div><div class="rval" id="ss-bhp-surge">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">BHP during Swab (POOH)</div><div class="rval" id="ss-bhp-swab">—<span class="runit">psi</span></div></div>
+            <div class="rrow"><div class="rlabel">ECD during Surge</div><div class="rval" id="ss-ecd-surge">—<span class="runit">ppg</span></div></div>
+            <div class="rrow"><div class="rlabel">ECD during Swab</div><div class="rval" id="ss-ecd-swab">—<span class="runit">ppg</span></div></div>
+            <div class="rrow"><div class="rlabel">Max Safe Trip Speed</div><div class="rval hi" id="ss-max-speed">—<span class="runit">ft/s</span></div></div>
+            <div class="rrow"><div class="rlabel">Swab — Kick Risk</div><div class="rval" id="ss-swab-risk" style="font-size:12px;font-weight:700">—</div></div>
+            <div class="rrow"><div class="rlabel">Surge — Frac Risk</div><div class="rval" id="ss-surge-risk" style="font-size:12px;font-weight:700">—</div></div>
+            <div id="ss-alert" class="abox info" style="margin-top:10px">Enter well data to calculate swab &amp; surge.</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="card-header"><div class="card-title">📈 Pressure vs Trip Speed</div></div>
+          <div class="card-body" style="padding:10px"><canvas id="ss-canvas" width="400" height="180" style="width:100%"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     5. TEMPERATURE PROFILE — BHCT / BHST
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-temp-profile">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">🌡️ Temperature Profile — BHCT / BHST</div>
+    <div class="section-subtitle">Bottom Hole Circulating &amp; Static Temperature — cement &amp; fluid planning</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="gw">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Well Temperature Inputs</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label">Surface Ambient Temperature</div><div class="field-wrap"><input type="number" id="tp-surf" value="80" oninput="calcTP()"><span class="field-unit">°F</span></div></div>
+            <div class="field"><div class="field-label">Geothermal Gradient</div><div class="field-wrap"><input type="number" id="tp-grad" value="1.6" step="0.1" oninput="calcTP()"><span class="field-unit">°F/100ft</span></div></div>
+            <div class="field"><div class="field-label">Total Depth (TD) TVD</div><div class="field-wrap"><input type="number" id="tp-td" value="14000" oninput="calcTP()"><span class="field-unit">ft</span></div></div>
+            <div class="field"><div class="field-label">Casing Shoe Depth</div><div class="field-wrap"><input type="number" id="tp-shoe" value="8500" oninput="calcTP()"><span class="field-unit">ft</span></div></div>
+            <div class="field"><div class="field-label">Circulation Rate (GPM)</div><div class="field-wrap"><input type="number" id="tp-gpm" value="280" oninput="calcTP()"><span class="field-unit">gpm</span></div></div>
+            <div class="field"><div class="field-label">Circulation Time</div><div class="field-wrap"><input type="number" id="tp-circ-hrs" value="6" step="0.5" oninput="calcTP()"><span class="field-unit">hrs</span></div></div>
+            <div class="field"><div class="field-label">Mud Specific Heat</div><div class="field-wrap"><input type="number" id="tp-Cp" value="0.4" step="0.01" oninput="calcTP()"><span class="field-unit">BTU/lb·°F</span></div></div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>BHST</strong> = Surf + Geothermal Gradient × TVD/100 (undisturbed formation temp)<br>
+          <strong>BHCT</strong> ≈ BHST × 0.65–0.85 (depends on flow rate, circ time, mud properties)<br>
+          Critical for: cement retarder selection, mud thermal stability, downhole tool ratings
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 Temperature Results</div></div>
+          <div class="card-body">
+            <div class="rbig">
+              <div class="val accent" id="tp-bhst">—</div>
+              <div class="lbl">BHST — Bottom Hole Static Temp (°F)</div>
+            </div>
+            <div class="rrow"><div class="rlabel">BHCT (Circulating Temp)</div><div class="rval hi" id="tp-bhct">—<span class="runit">°F</span></div></div>
+            <div class="rrow"><div class="rlabel">BHST (°C)</div><div class="rval" id="tp-bhst-c">—<span class="runit">°C</span></div></div>
+            <div class="rrow"><div class="rlabel">BHCT (°C)</div><div class="rval" id="tp-bhct-c">—<span class="runit">°C</span></div></div>
+            <div class="rrow"><div class="rlabel">Temp at Casing Shoe</div><div class="rval" id="tp-shoe-temp">—<span class="runit">°F</span></div></div>
+            <div class="rrow"><div class="rlabel">Temp at Mid-Depth</div><div class="rval" id="tp-mid-temp">—<span class="runit">°F</span></div></div>
+            <div class="rrow"><div class="rlabel">Flowline Temp (est.)</div><div class="rval" id="tp-fl-temp">—<span class="runit">°F</span></div></div>
+            <div class="rrow"><div class="rlabel">Cement Retarder?</div><div class="rval" id="tp-cement-flag" style="font-size:12px;font-weight:700">—</div></div>
+            <div id="tp-alert" class="abox info" style="margin-top:10px">Enter well temperature inputs.</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="card-header"><div class="card-title">📈 Temperature vs Depth Profile</div></div>
+          <div class="card-body" style="padding:10px"><canvas id="tp-canvas" width="400" height="240" style="width:100%"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     6. FANN 6-SPEED FULL RHEOLOGY
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-fann6">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">🔬 Fann 6-Speed Full Rheology</div>
+    <div class="section-subtitle">Bingham Plastic · Power Law · Herschel-Bulkley — all three models simultaneously</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Fann Viscometer Readings</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label" style="font-weight:700;color:var(--accent)">600 RPM (θ600)</div><div class="field-wrap"><input type="number" id="fn-r600" value="72" oninput="calcFann6()"></div></div>
+            <div class="field"><div class="field-label" style="font-weight:700;color:var(--accent)">300 RPM (θ300)</div><div class="field-wrap"><input type="number" id="fn-r300" value="46" oninput="calcFann6()"></div></div>
+            <div class="field"><div class="field-label">200 RPM (θ200)</div><div class="field-wrap"><input type="number" id="fn-r200" value="34" oninput="calcFann6()"></div></div>
+            <div class="field"><div class="field-label">100 RPM (θ100)</div><div class="field-wrap"><input type="number" id="fn-r100" value="22" oninput="calcFann6()"></div></div>
+            <div class="field"><div class="field-label">6 RPM (θ6)</div><div class="field-wrap"><input type="number" id="fn-r6" value="7" oninput="calcFann6()"></div></div>
+            <div class="field"><div class="field-label">3 RPM (θ3)</div><div class="field-wrap"><input type="number" id="fn-r3" value="5" oninput="calcFann6()"></div></div>
+            <div class="field"><div class="field-label">Temperature</div><div class="field-wrap"><input type="number" id="fn-temp" value="120" oninput="calcFann6()"><span class="field-unit">°F</span></div></div>
+            <div class="field"><div class="field-label">Mud Weight</div><div class="field-wrap"><input type="number" id="fn-mw" value="13" step="0.01" oninput="calcFann6()"><span class="field-unit">ppg</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 All Rheology Models</div></div>
+          <div class="card-body">
+            <!-- Bingham Plastic -->
+            <div style="font-family:var(--cond);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--glass-border)">Bingham Plastic Model</div>
+            <div class="rrow"><div class="rlabel">PV (Plastic Viscosity)</div><div class="rval hi" id="fn-bp-pv">—<span class="runit">cP</span></div></div>
+            <div class="rrow"><div class="rlabel">YP (Yield Point)</div><div class="rval hi" id="fn-bp-yp">—<span class="runit">lbf/100ft²</span></div></div>
+            <!-- Power Law -->
+            <div style="font-family:var(--cond);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);margin:12px 0 8px;padding-top:8px;border-top:1px solid var(--glass-border)">Power Law Model</div>
+            <div class="rrow"><div class="rlabel">n (flow behavior index)</div><div class="rval" id="fn-pl-n">—</div></div>
+            <div class="rrow"><div class="rlabel">K (consistency index)</div><div class="rval" id="fn-pl-k">—<span class="runit">eq.cP</span></div></div>
+            <!-- Herschel-Bulkley -->
+            <div style="font-family:var(--cond);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--warn);margin:12px 0 8px;padding-top:8px;border-top:1px solid var(--glass-border)">Herschel-Bulkley Model</div>
+            <div class="rrow"><div class="rlabel">τ₀ (Yield Stress)</div><div class="rval warn" id="fn-hb-tau">—<span class="runit">lbf/100ft²</span></div></div>
+            <div class="rrow"><div class="rlabel">n (HB flow index)</div><div class="rval" id="fn-hb-n">—</div></div>
+            <div class="rrow"><div class="rlabel">K (HB consistency)</div><div class="rval" id="fn-hb-k">—</div></div>
+            <!-- Common -->
+            <div style="font-family:var(--cond);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft);margin:12px 0 8px;padding-top:8px;border-top:1px solid var(--glass-border)">Common Parameters</div>
+            <div class="rrow"><div class="rlabel">Gel 10s</div><div class="rval" id="fn-gel10s">—<span class="runit">lbf/100ft²</span></div></div>
+            <div class="rrow"><div class="rlabel">Gel 10min (est.)</div><div class="rval" id="fn-gel10m">—<span class="runit">lbf/100ft²</span></div></div>
+            <div class="rrow"><div class="rlabel">Apparent Viscosity</div><div class="rval" id="fn-av">—<span class="runit">cP</span></div></div>
+            <div id="fn-alert" class="abox info" style="margin-top:10px">Enter all 6 Fann readings to get all models.</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="card-header"><div class="card-title">📈 Flow Curve — All 3 Models</div></div>
+          <div class="card-body" style="padding:10px"><canvas id="fn-canvas" width="400" height="200" style="width:100%"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     7. RETORT CALCULATOR
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-retort">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">⚗️ Retort Calculator</div>
+    <div class="section-subtitle">True volume fractions from raw retort readings — corrected for retort efficiency</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Retort Readings</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label">Retort Size</div><div class="field-wrap"><select id="rt-size" onchange="calcRetort()" style="background:var(--bg-input);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;outline:none"><option value="10">10 mL retort</option><option value="20">20 mL retort</option><option value="50">50 mL retort</option></select></div></div>
+            <div class="field"><div class="field-label">Oil Volume (mL read)</div><div class="field-wrap"><input type="number" id="rt-oil" value="6.5" step="0.1" oninput="calcRetort()"><span class="field-unit">mL</span></div></div>
+            <div class="field"><div class="field-label">Water Volume (mL read)</div><div class="field-wrap"><input type="number" id="rt-water" value="1.7" step="0.1" oninput="calcRetort()"><span class="field-unit">mL</span></div></div>
+            <div class="field"><div class="field-label">Retort Efficiency (correction)</div><div class="field-wrap"><input type="number" id="rt-eff" value="1.0" step="0.001" oninput="calcRetort()"><span class="field-unit">factor</span></div></div>
+            <div class="field"><div class="field-label">Mud Weight</div><div class="field-wrap"><input type="number" id="rt-mw" value="13.5" step="0.01" oninput="calcRetort()"><span class="field-unit">ppg</span></div></div>
+            <div class="field"><div class="field-label">Chloride (Cl⁻) — brine correction</div><div class="field-wrap"><input type="number" id="rt-cl" value="20000" oninput="calcRetort()"><span class="field-unit">mg/L</span></div></div>
+            <div class="field"><div class="field-label">LGS SG (drill solids)</div><div class="field-wrap"><input type="number" id="rt-lgs-sg" value="2.6" step="0.01" oninput="calcRetort()"></div></div>
+            <div class="field"><div class="field-label">HGS SG (barite)</div><div class="field-wrap"><input type="number" id="rt-hgs-sg" value="4.2" step="0.01" oninput="calcRetort()"></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 Corrected Volume Fractions</div></div>
+          <div class="card-body">
+            <div class="rbig"><div class="val accent" id="rt-sol-pct">—</div><div class="lbl">Total Solids %</div></div>
+            <div class="rrow"><div class="rlabel">Oil % (corrected)</div><div class="rval hi" id="rt-oil-pct">—<span class="runit">%</span></div></div>
+            <div class="rrow"><div class="rlabel">Water % (corrected)</div><div class="rval hi" id="rt-water-pct">—<span class="runit">%</span></div></div>
+            <div class="rrow"><div class="rlabel">Solids % (corrected)</div><div class="rval warn" id="rt-sol-pct2">—<span class="runit">%</span></div></div>
+            <div class="rrow"><div class="rlabel">Oil/Water Ratio</div><div class="rval" id="rt-ow">—</div></div>
+            <div class="rrow"><div class="rlabel">LGS %</div><div class="rval" id="rt-lgs">—<span class="runit">%</span></div></div>
+            <div class="rrow"><div class="rlabel">HGS %</div><div class="rval" id="rt-hgs">—<span class="runit">%</span></div></div>
+            <div class="rrow"><div class="rlabel">ASG (Avg Solids Gravity)</div><div class="rval" id="rt-asg">—</div></div>
+            <div class="rrow"><div class="rlabel">Brine Correction Factor</div><div class="rval" id="rt-brine-cf">—</div></div>
+            <div id="rt-alert" class="abox info" style="margin-top:10px">Enter retort readings to calculate true fractions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     8. MBT — METHYLENE BLUE TEST
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-mbt">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">🧫 MBT — Methylene Blue Test</div>
+    <div class="section-subtitle">Bentonite equivalent and reactive clay content from titration</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Titration Data</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label">mL of Methylene Blue used (Pm)</div><div class="field-wrap"><input type="number" id="mbt-ml" value="9" step="0.5" oninput="calcMBT()"><span class="field-unit">mL</span></div></div>
+            <div class="field"><div class="field-label">Sample Volume (mud)</div><div class="field-wrap"><input type="number" id="mbt-sample" value="1" step="0.1" oninput="calcMBT()"><span class="field-unit">mL</span></div></div>
+            <div class="field"><div class="field-label">Mud Type</div><div class="field-wrap"><select id="mbt-type" onchange="calcMBT()" style="background:var(--bg-input);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;outline:none"><option value="wbm">Water-Base Mud</option><option value="obm">Oil-Base Mud</option></select></div></div>
+            <div class="field"><div class="field-label">Mud Volume (system)</div><div class="field-wrap"><input type="number" id="mbt-vol" value="1400" oninput="calcMBT()"><span class="field-unit">bbls</span></div></div>
+            <div class="field"><div class="field-label">Min MBT Limit</div><div class="field-wrap"><input type="number" id="mbt-min" value="20" oninput="calcMBT()"><span class="field-unit">lb/bbl</span></div></div>
+            <div class="field"><div class="field-label">Max MBT Limit</div><div class="field-wrap"><input type="number" id="mbt-max" value="60" oninput="calcMBT()"><span class="field-unit">lb/bbl</span></div></div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>Bentonite (lb/bbl)</strong> = MBT (mL) × 5<br>
+          <strong>Bentonite (kg/m³)</strong> = MBT (mL) × 14.25<br>
+          MBT measures reactive clay (bentonite + cuttings clays). High MBT → filtration control, viscosity, and inhibition issues.
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 MBT Results</div></div>
+          <div class="card-body">
+            <div class="rbig"><div class="val accent" id="mbt-ppb">—</div><div class="lbl">Bentonite Equivalent (lb/bbl)</div></div>
+            <div class="rrow"><div class="rlabel">MBT Value (kg/m³)</div><div class="rval hi" id="mbt-kgm3">—<span class="runit">kg/m³</span></div></div>
+            <div class="rrow"><div class="rlabel">MBT vs Limits</div><div class="rval" id="mbt-status" style="font-size:12px;font-weight:700">—</div></div>
+            <div class="rrow"><div class="rlabel">Bentonite in System</div><div class="rval" id="mbt-sys-lbs">—<span class="runit">lbs</span></div></div>
+            <div class="rrow"><div class="rlabel">Bentonite Equiv Sacks (50lb)</div><div class="rval" id="mbt-sacks">—</div></div>
+            <div class="rrow"><div class="rlabel">Recommended Action</div><div class="rval" id="mbt-action" style="font-size:11px">—</div></div>
+            <div id="mbt-alert" class="abox info" style="margin-top:10px">Enter MBT titration data.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     9. pH & ALKALINITY TREATMENT
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-ph-alk">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">🧪 pH &amp; Alkalinity Treatment</div>
+    <div class="section-subtitle">Calculate chemical dosage to reach target pH — NaOH, lime, CO₂, or citric acid</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Current Mud State</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label">Current pH</div><div class="field-wrap"><input type="number" id="ph-curr" value="8.8" step="0.1" oninput="calcPH()"><span class="field-unit">pH</span></div></div>
+            <div class="field"><div class="field-label">Target pH</div><div class="field-wrap"><input type="number" id="ph-target" value="9.3" step="0.1" oninput="calcPH()"><span class="field-unit">pH</span></div></div>
+            <div class="field"><div class="field-label">Mud Volume</div><div class="field-wrap"><input type="number" id="ph-vol" value="1400" oninput="calcPH()"><span class="field-unit">bbls</span></div></div>
+            <div class="field"><div class="field-label">Mud Weight</div><div class="field-wrap"><input type="number" id="ph-mw" value="10" step="0.01" oninput="calcPH()"><span class="field-unit">ppg</span></div></div>
+            <div class="field"><div class="field-label">Current Pm (mud alkalinity)</div><div class="field-wrap"><input type="number" id="ph-pm" value="1.5" step="0.1" oninput="calcPH()"><span class="field-unit">mL</span></div></div>
+            <div class="field"><div class="field-label">Treatment Chemical</div><div class="field-wrap"><select id="ph-chem" onchange="calcPH()" style="background:var(--bg-input);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;outline:none">
+              <option value="naoh">NaOH (Caustic Soda)</option>
+              <option value="lime">Lime (Ca(OH)₂)</option>
+              <option value="bicarb">Sodium Bicarbonate (NaHCO₃)</option>
+              <option value="co2">CO₂ injection</option>
+              <option value="citric">Citric Acid (pH reduction)</option>
+            </select></div></div>
+            <div class="field"><div class="field-label">Bag / Sack Size</div><div class="field-wrap"><input type="number" id="ph-bag" value="50" oninput="calcPH()"><span class="field-unit">lbs</span></div></div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>NaOH</strong>: ~0.35 lb/bbl per pH unit (WBM). Dissolve before adding.<br>
+          <strong>Lime</strong>: ~0.5 lb/bbl per pH unit. Slower acting, good for sustained pH.<br>
+          <strong>Citric acid</strong>: reduce pH. Use carefully — can destabilize emulsion in OBM.
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 Treatment Results</div></div>
+          <div class="card-body">
+            <div class="rbig"><div class="val accent" id="ph-treat-lbs">—</div><div class="lbl" id="ph-treat-lbl">Treatment Amount (lbs)</div></div>
+            <div class="rrow"><div class="rlabel">lb/bbl dosage</div><div class="rval hi" id="ph-ppb">—<span class="runit">lb/bbl</span></div></div>
+            <div class="rrow"><div class="rlabel">Number of Sacks</div><div class="rval" id="ph-sacks">—</div></div>
+            <div class="rrow"><div class="rlabel">pH Delta</div><div class="rval" id="ph-delta">—<span class="runit">pH units</span></div></div>
+            <div class="rrow"><div class="rlabel">Direction</div><div class="rval" id="ph-dir" style="font-size:12px;font-weight:700">—</div></div>
+            <div class="rrow"><div class="rlabel">Target Pm (est.)</div><div class="rval" id="ph-target-pm">—<span class="runit">mL</span></div></div>
+            <div id="ph-alert" class="abox info" style="margin-top:10px">Enter current and target pH to calculate treatment.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     10. CHLORIDE TREATMENT
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-cl-treat">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">🧂 Chloride Treatment</div>
+    <div class="section-subtitle">Dilution or salt addition to reach target Cl⁻ concentration</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔧 Chloride Data</div></div>
+          <div class="card-body">
+            <div class="field"><div class="field-label">Current Cl⁻ Concentration</div><div class="field-wrap"><input type="number" id="cl-curr" value="35000" oninput="calcCL()"><span class="field-unit">mg/L</span></div></div>
+            <div class="field"><div class="field-label">Target Cl⁻ Concentration</div><div class="field-wrap"><input type="number" id="cl-target" value="20000" oninput="calcCL()"><span class="field-unit">mg/L</span></div></div>
+            <div class="field"><div class="field-label">Active Mud Volume</div><div class="field-wrap"><input type="number" id="cl-vol" value="1400" oninput="calcCL()"><span class="field-unit">bbls</span></div></div>
+            <div class="field"><div class="field-label">Water Fraction (retort)</div><div class="field-wrap"><input type="number" id="cl-wf" value="0.84" step="0.01" oninput="calcCL()"><span class="field-unit">0–1</span></div></div>
+            <div class="field"><div class="field-label">Salt Type (if increasing)</div><div class="field-wrap"><select id="cl-salt" onchange="calcCL()" style="background:var(--bg-input);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 9px;outline:none">
+              <option value="nacl">NaCl (Salt)</option>
+              <option value="kcl">KCl</option>
+              <option value="cacl2">CaCl₂</option>
+            </select></div></div>
+            <div class="field"><div class="field-label">Bag Size</div><div class="field-wrap"><input type="number" id="cl-bag" value="100" oninput="calcCL()"><span class="field-unit">lbs</span></div></div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>To decrease Cl⁻:</strong> dilute with fresh water. Vol = V₁ × (Cl₁ − Cl₂) / (Cl₂ − 0)<br>
+          <strong>To increase Cl⁻:</strong> add salt. Mass = (Cl₂ − Cl₁) × V₁ × wf × MW_salt / (1e6 × Cl_factor)<br>
+          WPS target: 180,000–320,000 ppm for OBM, 0–35,000 ppm for WBM
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 Treatment Results</div></div>
+          <div class="card-body">
+            <div class="rbig"><div class="val accent" id="cl-result-val">—</div><div class="lbl" id="cl-result-lbl">Volume / Amount to Add</div></div>
+            <div class="rrow"><div class="rlabel">Treatment Type</div><div class="rval" id="cl-treat-type" style="font-size:12px;font-weight:700">—</div></div>
+            <div class="rrow"><div class="rlabel">New Total Volume</div><div class="rval" id="cl-new-vol">—<span class="runit">bbls</span></div></div>
+            <div class="rrow"><div class="rlabel">Water Phase Volume</div><div class="rval" id="cl-water-vol">—<span class="runit">bbls</span></div></div>
+            <div class="rrow"><div class="rlabel">Salt (if adding) — lbs</div><div class="rval" id="cl-salt-lbs">—<span class="runit">lbs</span></div></div>
+            <div class="rrow"><div class="rlabel">Number of Bags</div><div class="rval hi" id="cl-bags">—</div></div>
+            <div id="cl-alert" class="abox info" style="margin-top:10px">Enter current and target Cl⁻ to calculate.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     11. FRAC GRADIENT & MW WINDOW
+═══════════════════════════════════════════════════════ -->
+<div class="calc-section" id="sec-frac-mw">
+  <div class="section-hdr" onclick="toggleSec(this)">
+    <div class="section-title">🪟 Frac Gradient &amp; MW Window</div>
+    <div class="section-subtitle">Safe drilling window — pore pressure to fracture gradient vs depth</div>
+    <span class="shdr-toggle">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 Depth Points (add rows)</div>
+            <button onclick="addFracRow()" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.3);color:var(--accent);border-radius:5px;padding:3px 10px;font-size:10px;cursor:pointer;font-family:var(--mono)">+ Add Depth</button>
+          </div>
+          <div class="card-body" style="padding:8px;overflow-x:auto">
+            <table class="adv-tbl">
+              <thead><tr>
+                <th>TVD (ft)</th><th>PP Grad (ppg)</th><th>FG (ppg)</th><th>Current MW</th><th></th>
+              </tr></thead>
+              <tbody id="frac-tbl-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="note" style="margin-top:0">
+          <strong>PP</strong> = Pore Pressure Gradient | <strong>FG</strong> = Fracture Gradient<br>
+          Safe MW window = between PP grad (+0.5 ppg overbalance) and FG (−0.5 ppg safety margin)<br>
+          Enter multiple depths to see the full well profile on the chart.
+        </div>
+      </div>
+      <div>
+        <div class="card result-card">
+          <div class="card-header"><div class="card-title">📊 Window Summary</div></div>
+          <div class="card-body" id="frac-summary">
+            <div class="abox info">Add depth points to see MW window analysis.</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="card-header"><div class="card-title">📈 Pressure Window vs Depth</div></div>
+          <div class="card-body" style="padding:10px"><canvas id="frac-canvas" width="400" height="300" style="width:100%"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+const fmt  = (v,d=2) => (v===null||v===undefined||isNaN(v)||!isFinite(v)) ? '—' : (+v).toFixed(d);
+const fmtN = v => isFinite(v)&&!isNaN(v) ? Math.round(v).toLocaleString() : '—';
+const vv   = id => parseFloat(document.getElementById(id)?.value) || 0;
+const sv   = id => document.getElementById(id)?.value || '';
+const set  = (id,html) => { let e=document.getElementById(id); if(e) e.innerHTML=html; };
+const cls  = (id,c)   => { let e=document.getElementById(id); if(e) e.className='abox '+c; };
+let _toast; function showToast(m){ clearTimeout(_toast); let t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; _toast=setTimeout(()=>t.style.display='none',2800); }
+
+// Animated number setter
+function setVal(id, val, decimals=2, colorClass='') {
+  const el = document.getElementById(id); if(!el) return;
+  const formatted = fmt(val, decimals);
+  if(el.dataset.last !== formatted) {
+    el.classList.remove('animating');
+    void el.offsetWidth;
+    el.classList.add('animating');
+    el.dataset.last = formatted;
+  }
+  el.innerHTML = formatted + (el.querySelector('.runit') ? el.querySelector('.runit').outerHTML : '');
+  if(colorClass) el.className = 'rval ' + colorClass;
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function goTo(id, el) {
+  document.querySelectorAll('.calc-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById('sec-'+id); if(sec) sec.classList.add('active');
+  if(el) el.classList.add('active');
+  const lbl = el?.querySelector('span')?.textContent;
+  const bc = document.getElementById('breadcrumb'); if(bc) bc.innerHTML = '▸ <span>'+lbl+'</span>';
+}
+function toggleNG(lbl) {
+  lbl.classList.toggle('closed');
+  const body = lbl.nextElementSibling;
+  if(body) body.style.display = lbl.classList.contains('closed') ? 'none' : '';
+}
+function toggleSec(hdr) {
+  if(event?.target?.tagName === 'BUTTON' || event?.target?.closest('button')) return;
+  const body = hdr.nextElementSibling;
+  if(!body) return;
+  const hidden = body.classList.toggle('hidden');
+  hdr.classList.toggle('collapsed', hidden);
+}
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  localStorage.setItem('p1_theme', document.body.classList.contains('light') ? 'light' : 'dark');
+}
+
+// ═══════════════════════════════════════════════
+// CHART HELPERS
+// ═══════════════════════════════════════════════
+function drawGrid(ctx, W, H, pad, xMax, yMax, xStep, yStep) {
+  ctx.strokeStyle = 'rgba(30,45,69,0.7)'; ctx.lineWidth = 1;
+  for(let x=0; x<=xMax; x+=xStep) { ctx.beginPath(); ctx.moveTo(pad.l+x/xMax*(W-pad.l-pad.r), pad.t); ctx.lineTo(pad.l+x/xMax*(W-pad.l-pad.r), H-pad.b); ctx.stroke(); }
+  for(let y=0; y<=yMax; y+=yStep) { ctx.beginPath(); ctx.moveTo(pad.l, pad.t+(1-y/yMax)*(H-pad.t-pad.b)); ctx.lineTo(W-pad.r, pad.t+(1-y/yMax)*(H-pad.t-pad.b)); ctx.stroke(); }
+}
+function drawLine(ctx, points, color, lw=2) {
+  if(!points.length) return;
+  ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.beginPath();
+  points.forEach((p,i) => i===0 ? ctx.moveTo(p[0],p[1]) : ctx.lineTo(p[0],p[1]));
+  ctx.stroke();
+}
+function drawFill(ctx, pts, color) {
+  if(!pts.length) return;
+  ctx.fillStyle=color; ctx.beginPath();
+  ctx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]);
+  ctx.closePath(); ctx.fill();
+}
+
+// ═══════════════════════════════════════════════
+// 1. LOT / FIT CALCULATOR
+// ═══════════════════════════════════════════════
+function calcLOT() {
+  const tvd=vv('lot-tvd'), mw=vv('lot-mw'), lop=vv('lot-lop');
+  const currMw=vv('lot-curr-mw'), ppGrad=vv('lot-pp-grad'), maxMw=vv('lot-max-mw');
+  if(!tvd||!mw){ cls('lot-alert','info'); set('lot-alert','Enter shoe TVD, mud weight and LOP.'); return; }
+
+  const hp      = 0.052 * mw * tvd;
+  const bhpLO   = hp + lop;
+  const fracGrad = bhpLO / tvd;
+  const fracPpg  = fracGrad / 0.052;
+  const pp       = ppGrad * tvd;
+  const ppMw     = ppGrad / 0.052;
+  const masp     = (fracGrad - 0.052*currMw) * tvd;
+  const mwLimit  = fracGrad / 0.052;
+  const window   = mwLimit - ppMw - 0.5;
+
+  set('lot-frac-grad', fmt(fracGrad,4));
+  set('lot-frac-ppg', `<span class="rval hi">${fmt(fracPpg,3)}<span class="runit">ppg</span></span>`);
+  set('lot-lop-out', `${fmt(lop,0)}<span class="runit">psi</span>`);
+  set('lot-bhp', `${fmtN(bhpLO)}<span class="runit">psi</span>`);
+  set('lot-masp', `${fmtN(masp)}<span class="runit">psi</span>`);
+  set('lot-mw-limit', `${fmt(mwLimit,2)}<span class="runit">ppg</span>`);
+  set('lot-pp', `${fmtN(pp)}<span class="runit">psi</span>`);
+  set('lot-window', `${fmt(window,2)}<span class="runit">ppg</span>`);
+
+  // Alert
+  const alertEl = document.getElementById('lot-alert');
+  if(window < 1) { alertEl.className='abox err'; alertEl.innerHTML=`❌ Very narrow MW window (${fmt(window,2)} ppg) — high risk of simultaneous loss/kick.`; }
+  else if(window < 2) { alertEl.className='abox warn'; alertEl.innerHTML=`⚠ Narrow MW window (${fmt(window,2)} ppg). Tight well control required.`; }
+  else { alertEl.className='abox ok'; alertEl.innerHTML=`✅ Fracture gradient: ${fmt(fracGrad,4)} psi/ft = ${fmt(fracPpg,3)} ppg EMW | Window: ${fmt(window,2)} ppg`; }
+
+  // MW window bar
+  const barMin = ppMw - 0.5, barMax = fracPpg + 0.5, barRange = barMax - barMin;
+  const safeStart = (ppMw - barMin) / barRange * 100;
+  const safeWidth = window / barRange * 100;
+  const fracStart = (mwLimit - barMin) / barRange * 100;
+  const currPos   = (currMw - barMin) / barRange * 100;
+  document.getElementById('lot-zone-collapse').style.cssText = `left:0;width:${safeStart}%`;
+  document.getElementById('lot-zone-safe').style.cssText    = `left:${safeStart}%;width:${safeWidth}%`;
+  document.getElementById('lot-zone-frac').style.cssText    = `left:${fracStart}%;width:${100-fracStart}%`;
+  document.getElementById('lot-mw-marker').style.left       = Math.max(0,Math.min(97,currPos)) + '%';
+  set('lot-bar-min', fmt(ppMw,2)+' ppg (PP)');
+  set('lot-bar-max', fmt(fracPpg,2)+' ppg (FG)');
+
+  drawLOTChart(tvd, ppGrad, fracGrad, currMw, mw, maxMw);
+}
+
+function drawLOTChart(tvd, ppGrad, fracGrad, currMw, testMw, maxMw) {
+  const canvas = document.getElementById('lot-canvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d'); const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad={l:44,r:16,t:12,b:28};
+  const depths=[0,tvd]; const maxP = fracGrad*tvd*1.1; const minP=0;
+  const px=(p)=>pad.l+(p-minP)/(maxP-minP)*(W-pad.l-pad.r);
+  const py=(d)=>pad.t+(d/tvd)*(H-pad.t-pad.b);
+  // Grid
+  ctx.strokeStyle='rgba(30,45,69,0.6)'; ctx.lineWidth=1;
+  [0,tvd/4,tvd/2,tvd*3/4,tvd].forEach(d=>{ctx.beginPath();ctx.moveTo(pad.l,py(d));ctx.lineTo(W-pad.r,py(d));ctx.stroke();});
+  // Safe zone fill
+  ctx.fillStyle='rgba(0,255,157,0.06)';
+  ctx.fillRect(px(ppGrad*0/tvd*tvd),pad.t,px(fracGrad*tvd)-px(ppGrad*tvd),H-pad.t-pad.b);
+  // PP line
+  drawLine(ctx,[[px(0),py(0)],[px(ppGrad*tvd),py(tvd)]],'rgba(0,212,255,0.8)',2);
+  // Frac line
+  drawLine(ctx,[[px(0),py(0)],[px(fracGrad*tvd),py(tvd)]],'rgba(255,71,87,0.8)',2);
+  // Current MW
+  const cmwP = currMw*0.052*tvd;
+  drawLine(ctx,[[px(0),py(0)],[px(cmwP),py(tvd)]],'rgba(255,184,0,0.9)',2);
+  // Labels
+  ctx.fillStyle='rgba(0,212,255,.8)'; ctx.font='10px monospace'; ctx.textAlign='left';
+  ctx.fillText('PP',px(ppGrad*tvd)-30,H-pad.b-4);
+  ctx.fillStyle='rgba(255,71,87,.8)'; ctx.fillText('FG',W-pad.r-20,H-pad.b-4);
+  ctx.fillStyle='rgba(255,184,0,.8)'; ctx.fillText('MW',px(cmwP)+3,py(tvd/2));
+  ctx.fillStyle='var(--text-dim)'; ctx.textAlign='right';
+  ['0','TVD/2','TVD'].forEach((l,i)=>ctx.fillText(l,pad.l-3,py(tvd*i/2)+4));
+}
+
+// ═══════════════════════════════════════════════
+// 2. KICK TOLERANCE
+// ═══════════════════════════════════════════════
+function calcKT() {
+  const mw=vv('kt-mw'), shoeTvd=vv('kt-shoe-tvd'), currTvd=vv('kt-curr-tvd');
+  const fracGrad=vv('kt-frac-grad'), pp=vv('kt-pp'), annCap=vv('kt-ann-cap');
+  const influxType=sv('kt-influx');
+  const influxDens = influxType==='gas' ? 0.1 : influxType==='oil' ? 4.0 : 8.7;
+
+  if(!mw||!shoeTvd||!currTvd){ cls('kt-alert','info'); set('kt-alert','Enter well data to calculate kick tolerance.'); return; }
+
+  const shoeFracP = fracGrad * shoeTvd;
+  const hpShoe    = 0.052 * mw * shoeTvd;
+  const maxSIDPP  = shoeFracP - hpShoe;
+  // KT = MASP_at_shoe / ((MW - influx_dens) × 0.052 × interval_height_per_bbl)
+  // interval_height = 1/annCap ft/bbl
+  const interval  = currTvd - shoeTvd;
+  const dP_per_ft = (mw - influxDens) * 0.052;
+  const kt        = annCap > 0 && dP_per_ft > 0 ? maxSIDPP / (dP_per_ft / annCap) : 0;
+  const influxHt  = kt / annCap;
+
+  set('kt-result', fmt(kt,1));
+  set('kt-max-sidpp', fmtN(maxSIDPP)+'<span class="runit">psi</span>');
+  set('kt-shoe-fp',   fmtN(shoeFracP)+'<span class="runit">psi</span>');
+  set('kt-hp-shoe',   fmtN(hpShoe)+'<span class="runit">psi</span>');
+  set('kt-influx-ht', fmt(influxHt,1)+'<span class="runit">ft</span>');
+
+  let risk, riskCls;
+  if(influxType==='gas') {
+    if(kt<10){risk='🔴 CRITICAL RISK'; riskCls='danger';}
+    else if(kt<20){risk='🟠 HIGH RISK'; riskCls='warn';}
+    else if(kt<50){risk='🟡 MODERATE'; riskCls='';}
+    else{risk='🟢 ACCEPTABLE'; riskCls='hi';}
+  } else {
+    if(kt<20){risk='🔴 HIGH RISK'; riskCls='danger';}
+    else if(kt<60){risk='🟡 MODERATE'; riskCls='warn';}
+    else{risk='🟢 ACCEPTABLE'; riskCls='hi';}
+  }
+  const riskEl = document.getElementById('kt-risk');
+  if(riskEl){ riskEl.textContent=risk; riskEl.className='rval '+riskCls; }
+
+  const alertEl = document.getElementById('kt-alert');
+  if(kt<20&&influxType==='gas'){ alertEl.className='abox err'; alertEl.innerHTML=`❌ Kick tolerance ${fmt(kt,1)} bbls for gas influx — CRITICAL. Consider increasing MW or reducing open hole interval.`; }
+  else{ alertEl.className='abox ok'; alertEl.innerHTML=`✅ Kick tolerance: ${fmt(kt,1)} bbls | Max SIDPP: ${fmtN(maxSIDPP)} psi | Influx type: ${influxType.toUpperCase()}`; }
+
+  drawKTChart(mw, shoeTvd, currTvd, fracGrad, annCap, maxSIDPP);
+}
+
+function drawKTChart(mw, shoeTvd, currTvd, fracGrad, annCap, maxSIDPP) {
+  const canvas=document.getElementById('kt-canvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d'); const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad={l:40,r:20,t:12,b:30};
+  const densities=[0.1,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.345];
+  const kts = densities.map(d => {
+    const dP = (mw-d)*0.052;
+    return dP>0 ? maxSIDPP/(dP/annCap) : 200;
+  });
+  const maxKT = Math.max(200, ...kts.filter(k=>isFinite(k)));
+  const px = d => pad.l + (d/8.345)*(W-pad.l-pad.r);
+  const py = k => pad.t + (1-Math.min(k,maxKT)/maxKT)*(H-pad.t-pad.b);
+  // Grid
+  ctx.strokeStyle='rgba(30,45,69,0.6)'; ctx.lineWidth=1;
+  [0,50,100,150,200].filter(k=>k<=maxKT).forEach(k=>{ctx.beginPath();ctx.moveTo(pad.l,py(k));ctx.lineTo(W-pad.r,py(k));ctx.stroke();ctx.fillStyle='rgba(107,131,163,.6)';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(k,pad.l-2,py(k)+3);});
+  // 20 bbl danger line
+  ctx.strokeStyle='rgba(255,71,87,.4)'; ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(pad.l,py(20));ctx.lineTo(W-pad.r,py(20));ctx.stroke();
+  ctx.setLineDash([]);
+  // KT curve
+  const pts = densities.map((d,i)=>[px(d),py(Math.min(kts[i],maxKT))]);
+  drawLine(ctx,pts,'rgba(0,212,255,0.9)',2);
+  ctx.fillStyle='rgba(0,212,255,.8)';
+  pts.forEach(p=>{ctx.beginPath();ctx.arc(p[0],p[1],3,0,Math.PI*2);ctx.fill();});
+  // Labels
+  ctx.fillStyle='rgba(107,131,163,.8)'; ctx.font='9px monospace'; ctx.textAlign='center';
+  [0,2,4,6,8.345].forEach(d=>ctx.fillText(d,px(d),H-6));
+  ctx.fillStyle='rgba(255,71,87,.7)'; ctx.textAlign='left'; ctx.font='9px monospace';
+  ctx.fillText('20 bbl danger',pad.l+4,py(20)-3);
+}
+
+// ═══════════════════════════════════════════════
+// 3. D-EXPONENT
+// ═══════════════════════════════════════════════
+let dcLogData = [];
+
+function calcDc() {
+  const rop=vv('dc-rop'), wob=vv('dc-wob'), rpm=vv('dc-rpm');
+  const bit=vv('dc-bit'), mw=vv('dc-mw'), normalMw=vv('dc-normal-grad'), normalDc=vv('dc-normal-dexp');
+  const tvd=vv('dc-tvd');
+  if(!rop||!wob||!rpm||!bit){ cls('dc-alert','info'); set('dc-alert','Enter all drilling parameters.'); return; }
+
+  // d-exponent = log(ROP/60/RPM) / log(12×WOB/(10^6 × bit_dia))
+  const ropMin = rop/60;
+  const dexp = Math.log10(ropMin/rpm) / Math.log10(12*wob/(1e6*bit));
+  // dc-exponent (corrected for mud weight)
+  const dcexp = dexp * (normalMw/mw);
+  // Estimate formation pressure from dc ratio vs normal trend
+  const dcRatio = normalDc / dcexp;
+  const fpGrad  = normalMw / dcRatio;  // ppg
+  const fp      = fpGrad * 0.052 * tvd;
+  const killMw  = fpGrad + 0.5;
+  const dev     = ((dcexp - normalDc) / normalDc * 100);
+
+  set('dc-dexp-out',  fmt(dexp,4));
+  set('dc-dcexp-out', fmt(dcexp,4));
+  set('dc-normal-out',fmt(normalDc,4));
+  set('dc-dev-out',   `${dev>=0?'+':''}${fmt(dev,1)}%`);
+  set('dc-fp-out',    fmtN(fp)+'<span class="runit">psi</span>');
+  set('dc-fp-grad',   fmt(fpGrad,3)+'<span class="runit">ppg</span>');
+  set('dc-kill-mw',   fmt(killMw,2)+'<span class="runit">ppg</span>');
+
+  const alertEl = document.getElementById('dc-alert');
+  if(dcexp < normalDc - 0.1) {
+    alertEl.className='abox err';
+    alertEl.innerHTML=`❌ dc-exp BELOW normal trend — Possible overpressure zone. Est. FP = ${fmt(fpGrad,2)} ppg. Consider increasing MW to ${fmt(killMw,2)} ppg.`;
+  } else if(dcexp < normalDc - 0.05) {
+    alertEl.className='abox warn';
+    alertEl.innerHTML=`⚠ dc-exp slightly below normal — Monitor closely. FP estimate: ${fmt(fpGrad,2)} ppg.`;
+  } else {
+    alertEl.className='abox ok';
+    alertEl.innerHTML=`✅ dc-exp = ${fmt(dcexp,4)} | Normal trend: ${fmt(normalDc,4)} | FP est: ${fmt(fpGrad,2)} ppg`;
+  }
+  drawDcChart();
+}
+
+function addDcLog() {
+  const rop=vv('dc-rop'), wob=vv('dc-wob'), rpm=vv('dc-rpm');
+  const bit=vv('dc-bit'), mw=vv('dc-mw'), normalMw=vv('dc-normal-grad');
+  const tvd=vv('dc-tvd');
+  if(!rop||!tvd) return showToast('Enter ROP and TVD first.');
+  const ropMin=rop/60;
+  const dexp=Math.log10(ropMin/rpm)/Math.log10(12*wob/(1e6*bit));
+  const dcexp=dexp*(normalMw/mw);
+  const normalDc=vv('dc-normal-dexp');
+  const fpGrad=normalMw/(normalDc/dcexp);
+  dcLogData.push({tvd,rop,dexp,dcexp,fp:fpGrad});
+  if(dcLogData.length>20) dcLogData.shift();
+  renderDcLog();
+  drawDcChart();
+  showToast('D-exp point logged at '+fmtN(tvd)+' ft');
+}
+
+function renderDcLog() {
+  const body=document.getElementById('dc-log-body'); if(!body) return;
+  body.innerHTML=dcLogData.slice().reverse().slice(0,8).map((r,i)=>`<tr>
+    <td class="mono">${fmtN(r.tvd)}</td>
+    <td class="mono">${fmt(r.rop,1)}</td>
+    <td class="mono">${fmt(r.dexp,4)}</td>
+    <td class="mono" style="color:var(--accent2)">${fmt(r.dcexp,4)}</td>
+    <td class="mono" style="color:var(--warn)">${fmt(r.fp,2)} ppg</td>
+    <td><button onclick="dcLogData.splice(${dcLogData.length-1-i},1);renderDcLog();drawDcChart();" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px">✕</button></td>
+  </tr>`).join('');
+}
+
+function drawDcChart() {
+  const canvas=document.getElementById('dc-canvas'); if(!canvas||!dcLogData.length) return;
+  const ctx=canvas.getContext('2d'); const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad={l:52,r:20,t:12,b:30};
+  const maxDepth=Math.max(...dcLogData.map(d=>d.tvd));
+  const minDepth=Math.min(...dcLogData.map(d=>d.tvd));
+  const allDc=[...dcLogData.map(d=>d.dcexp),vv('dc-normal-dexp')];
+  const maxDc=Math.max(...allDc)*1.1, minDc=Math.min(...allDc)*0.9;
+  const px=dc=>pad.l+(dc-minDc)/(maxDc-minDc)*(W-pad.l-pad.r);
+  const py=d=>pad.t+(d-minDepth)/(maxDepth-minDepth+1)*(H-pad.t-pad.b);
+  // Grid
+  ctx.strokeStyle='rgba(30,45,69,0.6)'; ctx.lineWidth=1;
+  // Normal trend line
+  const normalDc=vv('dc-normal-dexp');
+  ctx.strokeStyle='rgba(0,255,157,.5)'; ctx.setLineDash([5,5]);
+  ctx.beginPath();ctx.moveTo(px(normalDc),pad.t);ctx.lineTo(px(normalDc),H-pad.b);ctx.stroke();
+  ctx.setLineDash([]);
+  // dc-exp points
+  dcLogData.forEach((r,i) => {
+    const x=px(r.dcexp), y=py(r.tvd);
+    ctx.fillStyle=r.dcexp<normalDc-0.05?'rgba(255,71,87,.9)':'rgba(0,212,255,.9)';
+    ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();
+  });
+  // Connect points
+  if(dcLogData.length>1) {
+    ctx.strokeStyle='rgba(0,212,255,.5)'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    dcLogData.forEach((r,i) => {i===0?ctx.moveTo(px(r.dcexp),py(r.tvd)):ctx.lineTo(px(r.dcexp),py(r.tvd));});
+    ctx.stroke();
+  }
+  // Depth labels
+  ctx.fillStyle='rgba(107,131,163,.8)'; ctx.font='9px monospace'; ctx.textAlign='right';
+  dcLogData.forEach(r=>ctx.fillText(fmtN(r.tvd),pad.l-3,py(r.tvd)+3));
+  ctx.textAlign='center'; ctx.fillStyle='rgba(0,255,157,.7)';
+  ctx.fillText('Normal →',px(normalDc),pad.t+10);
+}
+
+// ═══════════════════════════════════════════════
+// 4. SWAB & SURGE
+// ═══════════════════════════════════════════════
+function calcSS() {
+  const mw=vv('ss-mw'), r600=vv('ss-r600'), r300=vv('ss-r300');
+  const speed=vv('ss-speed'), oh=vv('ss-oh'), dpOd=vv('ss-dp-od'), dpId=vv('ss-dp-id');
+  const pipeType=sv('ss-pipe-type'), tvd=vv('ss-tvd');
+  const hp=vv('ss-hp'), fracP=vv('ss-frac-p'), pp=vv('ss-pp');
+
+  const pv=r600-r300, yp=Math.max(0,r300-pv);
+  const n=3.32*Math.log10(r600/r300||1);
+  const K=510*r300/(511**n);
+
+  // Annular area
+  const oh_area = Math.PI*(oh**2-dpOd**2)/4;
+  // Closed-end: all fluid displaced moves up annulus
+  // Open-end: fluid goes partly through pipe
+  let surgeVel, swabVel;
+  if(pipeType==='closed') {
+    const dpDisp = Math.PI*dpOd**2/4;
+    const annArea = oh_area/144; // ft²
+    surgeVel = speed * dpDisp/144 / annArea;
+    swabVel  = surgeVel;
+  } else {
+    const dpCap = Math.PI*dpId**2/4/144; // ft²
+    const annArea = oh_area/144;
+    surgeVel = speed * (dpCap+Math.PI*dpOd**2/4/144-dpCap) / annArea;
+    swabVel  = speed * dpCap / annArea;
+  }
+  surgeVel = speed * (Math.PI*dpOd**2/4) / (oh_area) * 144;
+  swabVel  = surgeVel;
+
+  // Pressure loss (Power Law, simplified Dodge-Metzner for annulus)
+  const dh = oh - dpOd; // hydraulic diameter
+  const surge = yp*tvd/(200*dh) + K*(144*surgeVel)**n*tvd/(144000*dh**(1+n)*96**n);
+  const swab  = surge;
+
+  const bhpSurge = hp + surge;
+  const bhpSwab  = hp - swab;
+  const ecdSurge = bhpSurge / (0.052*tvd);
+  const ecdSwab  = bhpSwab  / (0.052*tvd);
+
+  // Max safe speed: surge cannot exceed frac, swab cannot go below pp
+  const allowSurge = fracP > 0 ? (fracP-hp)/surge*speed : speed;
+  const allowSwab  = pp    > 0 ? (hp-pp)   /swab*speed  : speed;
+  const maxSpeed   = Math.min(allowSurge, allowSwab);
+
+  set('ss-surge-out',  fmtN(surge)+'<span class="runit">psi</span>');
+  set('ss-swab-out',   fmtN(swab)+'<span class="runit">psi</span>');
+  set('ss-bhp-surge',  fmtN(bhpSurge)+'<span class="runit">psi</span>');
+  set('ss-bhp-swab',   fmtN(bhpSwab)+'<span class="runit">psi</span>');
+  set('ss-ecd-surge',  fmt(ecdSurge,3)+'<span class="runit">ppg</span>');
+  set('ss-ecd-swab',   fmt(ecdSwab,3)+'<span class="runit">ppg</span>');
+  set('ss-max-speed',  fmt(Math.max(0,maxSpeed),2)+'<span class="runit">ft/s</span>');
+
+  const swabRiskEl=document.getElementById('ss-swab-risk');
+  const surgeRiskEl=document.getElementById('ss-surge-risk');
+  if(pp>0&&bhpSwab<pp){ swabRiskEl.textContent='🔴 KICK RISK'; swabRiskEl.className='rval danger'; }
+  else if(pp>0&&bhpSwab<pp*1.05){ swabRiskEl.textContent='🟡 MARGINAL'; swabRiskEl.className='rval warn'; }
+  else{ swabRiskEl.textContent='🟢 SAFE'; swabRiskEl.className='rval hi'; }
+  if(fracP>0&&bhpSurge>fracP){ surgeRiskEl.textContent='🔴 FRAC RISK'; surgeRiskEl.className='rval danger'; }
+  else if(fracP>0&&bhpSurge>fracP*0.97){ surgeRiskEl.textContent='🟡 MARGINAL'; surgeRiskEl.className='rval warn'; }
+  else{ surgeRiskEl.textContent='🟢 SAFE'; surgeRiskEl.className='rval hi'; }
+
+  const alertEl=document.getElementById('ss-alert');
+  alertEl.className='abox ok';
+  alertEl.innerHTML=`Surge: ${fmtN(surge)} psi | Swab: ${fmtN(swab)} psi | Max safe speed: ${fmt(Math.max(0,maxSpeed),2)} ft/s`;
+
+  drawSSChart(speed, surge, swab, hp, fracP, pp, tvd);
+}
+
+function drawSSChart(maxSpeed, surgeAtMax, swabAtMax, hp, fracP, pp, tvd) {
+  const canvas=document.getElementById('ss-canvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d'); const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad={l:50,r:20,t:14,b:30};
+  const speeds=Array.from({length:20},(_,i)=>(i+1)*maxSpeed/20);
+  const surges=speeds.map(s=>surgeAtMax*s/maxSpeed);
+  const swabs=surges;
+  const maxP=Math.max(surgeAtMax,swabAtMax)*1.2;
+  const px=s=>pad.l+(s/maxSpeed)*(W-pad.l-pad.r);
+  const py=p=>pad.t+(1-p/maxP)*(H-pad.t-pad.b);
+  // Grid
+  ctx.strokeStyle='rgba(30,45,69,0.6)'; ctx.lineWidth=1;
+  [0,maxP/4,maxP/2,maxP*3/4,maxP].forEach(p=>{ctx.beginPath();ctx.moveTo(pad.l,py(p));ctx.lineTo(W-pad.r,py(p));ctx.stroke();ctx.fillStyle='rgba(107,131,163,.6)';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(Math.round(p),pad.l-2,py(p)+3);});
+  // Surge curve (orange)
+  drawLine(ctx,speeds.map((s,i)=>[px(s),py(surges[i])]),'rgba(255,184,0,.8)',2);
+  // Swab curve (cyan)
+  drawLine(ctx,speeds.map((s,i)=>[px(s),py(swabs[i])]),'rgba(0,212,255,.8)',2);
+  // Speed labels
+  ctx.fillStyle='rgba(107,131,163,.7)'; ctx.font='9px monospace'; ctx.textAlign='center';
+  [0,maxSpeed/2,maxSpeed].forEach(s=>ctx.fillText(fmt(s,1),px(s),H-6));
+  ctx.fillStyle='rgba(255,184,0,.8)'; ctx.textAlign='right'; ctx.fillText('Surge',W-pad.r-2,py(surgeAtMax*0.9));
+  ctx.fillStyle='rgba(0,212,255,.8)'; ctx.fillText('Swab',W-pad.r-2,py(swabAtMax*0.7));
+}
+
+// ═══════════════════════════════════════════════
+// 5. TEMPERATURE PROFILE
+// ═══════════════════════════════════════════════
+function calcTP() {
+  const surf=vv('tp-surf'), grad=vv('tp-grad'), td=vv('tp-td');
+  const shoe=vv('tp-shoe'), gpm=vv('tp-gpm'), circHrs=vv('tp-circ-hrs');
+  if(!td){ cls('tp-alert','info'); set('tp-alert','Enter well depth data.'); return; }
+
+  const bhst = surf + grad * td/100;
+  // BHCT correction: depends on flow rate and circ time
+  // Hasan-Kabir correlation simplified: BHCT ≈ BHST - cooling_factor
+  const coolFactor = Math.min(0.35, 0.05 + 0.002*gpm + 0.01*circHrs);
+  const bhct = bhst * (1 - coolFactor);
+  const shoeTemp = surf + grad * shoe/100;
+  const midTemp  = surf + grad * (td/2)/100;
+  const flTemp   = surf + (bhct - surf) * 0.3; // flowline ~ 30% above surface
+
+  set('tp-bhst',     fmt(bhst,1));
+  set('tp-bhct',     fmt(bhct,1)+'<span class="runit">°F</span>');
+  set('tp-bhst-c',   fmt((bhst-32)*5/9,1)+'<span class="runit">°C</span>');
+  set('tp-bhct-c',   fmt((bhct-32)*5/9,1)+'<span class="runit">°C</span>');
+  set('tp-shoe-temp',fmt(shoeTemp,1)+'<span class="runit">°F</span>');
+  set('tp-mid-temp', fmt(midTemp,1)+'<span class="runit">°F</span>');
+  set('tp-fl-temp',  fmt(flTemp,1)+'<span class="runit">°F</span>');
+
+  const cementEl=document.getElementById('tp-cement-flag');
+  if(bhct>200){ cementEl.textContent='⚠ Retarder REQUIRED (BHCT>200°F)'; cementEl.className='rval danger'; }
+  else if(bhct>150){ cementEl.textContent='⚠ Consider retarder (BHCT>150°F)'; cementEl.className='rval warn'; }
+  else{ cementEl.textContent='✅ Standard cement adequate'; cementEl.className='rval hi'; }
+
+  const alertEl=document.getElementById('tp-alert');
+  alertEl.className='abox ok';
+  alertEl.innerHTML=`✅ BHST=${fmt(bhst,1)}°F | BHCT=${fmt(bhct,1)}°F | Cooling factor=${fmt(coolFactor*100,1)}%`;
+
+  drawTPChart(surf, grad, td, shoe, bhst, bhct);
+}
+
+function drawTPChart(surf, grad, td, shoe, bhst, bhct) {
+  const canvas=document.getElementById('tp-canvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d'); const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad={l:54,r:16,t:14,b:30};
+  const maxT=bhst*1.05, points=20;
+  const px=t=>pad.l+(t-surf)/(maxT-surf)*(W-pad.l-pad.r);
+  const py=d=>pad.t+(d/td)*(H-pad.t-pad.b);
+  // Grid
+  ctx.strokeStyle='rgba(30,45,69,0.6)'; ctx.lineWidth=1;
+  [0,td/4,td/2,td*3/4,td].forEach(d=>{ctx.beginPath();ctx.moveTo(pad.l,py(d));ctx.lineTo(W-pad.r,py(d));ctx.stroke();ctx.fillStyle='rgba(107,131,163,.6)';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(Math.round(d/100)*100,pad.l-2,py(d)+3);});
+  // BHST profile (geothermal gradient)
+  const bhstPts=Array.from({length:points},(_,i)=>{ const d=i/(points-1)*td; return [px(surf+grad*d/100),py(d)]; });
+  // BHCT profile
+  const bhctPts=Array.from({length:points},(_,i)=>{ const d=i/(points-1)*td; const t=surf+grad*d/100; const cool=Math.min(0.35,0.05+0.002*vv('tp-gpm')+0.01*vv('tp-circ-hrs')); return [px(t*(1-cool*d/td)),py(d)]; });
+  // Fill area between
+  ctx.fillStyle='rgba(255,184,0,0.05)';
+  ctx.beginPath(); bhstPts.forEach((p,i)=>i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]));
+  bhctPts.slice().reverse().forEach(p=>ctx.lineTo(p[0],p[1])); ctx.closePath(); ctx.fill();
+  drawLine(ctx,bhstPts,'rgba(255,71,87,.8)',2);
+  drawLine(ctx,bhctPts,'rgba(0,212,255,.8)',2);
+  // Shoe marker
+  ctx.strokeStyle='rgba(0,255,157,.5)'; ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(pad.l,py(shoe));ctx.lineTo(W-pad.r,py(shoe));ctx.stroke();
+  ctx.setLineDash([]);
+  // Temp labels on x-axis
+  ctx.fillStyle='rgba(107,131,163,.7)'; ctx.font='9px monospace'; ctx.textAlign='center';
+  [surf, surf+(bhst-surf)/2, bhst].forEach(t=>ctx.fillText(Math.round(t)+'°F',px(t),H-6));
+  ctx.fillStyle='rgba(255,71,87,.7)'; ctx.textAlign='right'; ctx.fillText('BHST',W-pad.r-2,py(td*0.8)+12);
+  ctx.fillStyle='rgba(0,212,255,.7)'; ctx.fillText('BHCT',W-pad.r-2,py(td*0.8)-4);
+}
+
+// ═══════════════════════════════════════════════
+// 6. FANN 6-SPEED RHEOLOGY
+// ═══════════════════════════════════════════════
+function calcFann6() {
+  const r600=vv('fn-r600'), r300=vv('fn-r300'), r200=vv('fn-r200');
+  const r100=vv('fn-r100'), r6=vv('fn-r6'), r3=vv('fn-r3');
+  if(!r600||!r300){ cls('fn-alert','info'); set('fn-alert','Enter at least θ600 and θ300.'); return; }
+
+  // Bingham Plastic
+  const pv = r600 - r300;
+  const yp = r300 - pv;
+  const av = r600 / 2;
+
+  // Power Law (from 600/300 pair)
+  const n_pl = 3.32 * Math.log10(r600/r300);
+  const K_pl = 510 * r300 / (511**n_pl);
+
+  // Herschel-Bulkley (3-parameter model — fit using 3, 100, 600 RPM)
+  // τ = τ0 + K × (shear_rate)^n
+  // At 3 RPM:  τ3   = τ0 + K × (5.11 × 3)^n
+  // At 100 RPM: τ100 = τ0 + K × (5.11 × 100)^n
+  // At 600 RPM: τ600 = τ0 + K × (5.11 × 600)^n
+  // Use Newton's method or direct ratio
+  // Simplified: τ0 ≈ (r3 × r600 - r6² ) / (r600 + r3 - 2×r6) if consistent
+  let tau0 = 0, n_hb = 1, K_hb = 0;
+  if(r3 > 0) {
+    tau0 = Math.max(0, (2*r3 - r6));
+    const sr100 = 5.11 * 100, sr600 = 5.11 * 600;
+    const t100 = r100 - tau0, t600 = r600 - tau0;
+    if(t100>0 && t600>0) {
+      n_hb = Math.log(t600/t100) / Math.log(sr600/sr100);
+      K_hb = t600 / (sr600**n_hb);
+    }
+  }
+
+  // Gel strengths
+  const gel10s = r3;  // 3 rpm ≈ 10-sec gel
+  const gel10m = r6 * 1.8; // estimate
+
+  set('fn-bp-pv', `<span class="rval hi">${fmt(pv,1)}</span><span class="runit">cP</span>`);
+  set('fn-bp-yp', `<span class="rval hi">${fmt(yp,1)}</span><span class="runit">lbf/100ft²</span>`);
+  set('fn-pl-n',  fmt(n_pl,4));
+  set('fn-pl-k',  fmt(K_pl,4)+'<span class="runit">eq.cP</span>');
+  set('fn-hb-tau',fmt(tau0,2)+'<span class="runit">lbf/100ft²</span>');
+  set('fn-hb-n',  fmt(n_hb,4));
+  set('fn-hb-k',  fmt(K_hb,6));
+  set('fn-gel10s',fmt(gel10s,1)+'<span class="runit">lbf/100ft²</span>');
+  set('fn-gel10m',fmt(gel10m,1)+'<span class="runit">lbf/100ft²</span>');
+  set('fn-av',    fmt(av,1)+'<span class="runit">cP</span>');
+
+  const alertEl=document.getElementById('fn-alert');
+  alertEl.className='abox ok';
+  alertEl.innerHTML=`✅ PV=${fmt(pv,1)} cP | YP=${fmt(yp,1)} lbf/100ft² | n=${fmt(n_pl,4)} | τ₀=${fmt(tau0,2)} (HB)`;
+
+  drawFannChart(r600,r300,r200,r100,r6,r3,pv,yp,n_pl,K_pl,tau0,n_hb,K_hb);
+}
+
+function drawFannChart(r600,r300,r200,r100,r6,r3,pv,yp,n,K,tau0,nhb,Khb) {
+  const canvas=document.getElementById('fn-canvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d'); const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad={l:44,r:20,t:14,b:30};
+  const rpms=[3,6,100,200,300,600];
+  const readings=[r3,r6,r100,r200,r300,r600];
+  const maxSR=5.11*600, maxTau=Math.max(r600,r300)*1.15;
+  const px=sr=>pad.l+(sr/maxSR)*(W-pad.l-pad.r);
+  const py=tau=>pad.t+(1-tau/maxTau)*(H-pad.t-pad.b);
+  // Grid
+  ctx.strokeStyle='rgba(30,45,69,0.6)'; ctx.lineWidth=1;
+  [0,maxTau/4,maxTau/2,maxTau*3/4,maxTau].forEach(t=>{ctx.beginPath();ctx.moveTo(pad.l,py(t));ctx.lineTo(W-pad.r,py(t));ctx.stroke();ctx.fillStyle='rgba(107,131,163,.5)';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(Math.round(t),pad.l-2,py(t)+3);});
+  // Bingham Plastic
+  const bpPts=[[px(0),py(yp)],[px(maxSR),py(yp+pv*maxSR/511)]];
+  drawLine(ctx,bpPts,'rgba(255,71,87,.7)',1.5);
+  // Power Law
+  const plPts=Array.from({length:30},(_,i)=>{const sr=(i+1)*maxSR/30;return[px(sr),py(K*(sr**n)/511)];});
+  drawLine(ctx,plPts,'rgba(0,255,157,.7)',1.5);
+  // HB
+  if(Khb>0){
+    const hbPts=Array.from({length:30},(_,i)=>{const sr=(i+1)*maxSR/30;return[px(sr),py(tau0+Khb*(sr**nhb))];});
+    drawLine(ctx,hbPts,'rgba(255,184,0,.7)',1.5);
+  }
+  // Actual data points
+  rpms.forEach((rpm,i)=>{
+    const sr=5.11*rpm, tau=readings[i];
+    ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.beginPath();ctx.arc(px(sr),py(tau),5,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(0,212,255,.6)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(px(sr),py(tau),5,0,Math.PI*2);ctx.stroke();
+  });
+  // Legend
+  ctx.font='9px monospace'; ctx.textAlign='left';
+  [['rgba(255,71,87,.8)','BP'],['rgba(0,255,157,.8)','PL'],['rgba(255,184,0,.8)','HB']].forEach(([c,l],i)=>{
+    ctx.fillStyle=c; ctx.fillRect(pad.l+i*40,H-22,12,8); ctx.fillStyle='rgba(107,131,163,.8)'; ctx.fillText(l,pad.l+i*40+14,H-15);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// 7. RETORT CALCULATOR
+// ═══════════════════════════════════════════════
+function calcRetort() {
+  const size=parseFloat(sv('rt-size'))||10;
+  const oilRd=vv('rt-oil'), waterRd=vv('rt-water'), eff=vv('rt-eff')||1;
+  const mw=vv('rt-mw'), cl=vv('rt-cl'), lgsSg=vv('rt-lgs-sg')||2.6, hgsSg=vv('rt-hgs-sg')||4.2;
+  if(!oilRd){ cls('rt-alert','info'); set('rt-alert','Enter retort oil and water volumes.'); return; }
+
+  // Correct for brine (salts increase apparent water)
+  const saltCF = 1 + cl/1000000 * 0.67; // salt correction factor
+  const oilCor = (oilRd / size * 100) * eff;
+  const waterRaw = waterRd / size * 100 * eff;
+  const waterCor = waterRaw / saltCF;
+  const solCor  = 100 - oilCor - waterCor;
+
+  const sgMud = mw / 8.345;
+  const oilF=oilCor/100, waterF=waterCor/100, solF=solCor/100;
+
+  // ASG
+  const asg = solF > 0 ? (sgMud - oilF*0.84 - waterF) / solF : 0;
+  // LGS/HGS split
+  let lgs=0, hgs=0;
+  if(solF>0) {
+    lgs = (sgMud - oilF*0.84 - waterF - solF*hgsSg) / (lgsSg - hgsSg);
+    hgs = solF - lgs;
+    lgs = Math.max(0, lgs); hgs = Math.max(0, hgs);
+  }
+  const ow = waterCor>0 ? oilCor/waterCor : 0;
+
+  set('rt-sol-pct',  fmt(solCor,2));
+  set('rt-oil-pct',  fmt(oilCor,2)+'<span class="runit">%</span>');
+  set('rt-water-pct',fmt(waterCor,2)+'<span class="runit">%</span>');
+  set('rt-sol-pct2', fmt(solCor,2)+'<span class="runit">%</span>');
+  set('rt-ow',       fmt(oilCor,1)+'/'+fmt(waterCor,1)+' ('+fmt(ow*100,1)+'% oil)');
+  set('rt-lgs',      fmt(lgs*100,3)+'<span class="runit">%</span>');
+  set('rt-hgs',      fmt(hgs*100,3)+'<span class="runit">%</span>');
+  set('rt-asg',      fmt(asg,3));
+  set('rt-brine-cf', fmt(saltCF,4));
+
+  const alertEl=document.getElementById('rt-alert');
+  if(solCor>25){ alertEl.className='abox err'; alertEl.innerHTML=`❌ High total solids ${fmt(solCor,1)}% — efficiency at risk. Consider dilution.`; }
+  else if(lgs*100>6){ alertEl.className='abox warn'; alertEl.innerHTML=`⚠ LGS = ${fmt(lgs*100,2)}% — above 6% limit. Increase dilution/SCE.`; }
+  else{ alertEl.className='abox ok'; alertEl.innerHTML=`✅ Oil=${fmt(oilCor,1)}% | Water=${fmt(waterCor,1)}% | Sol=${fmt(solCor,1)}% | LGS=${fmt(lgs*100,2)}% | ASG=${fmt(asg,3)}`; }
+}
+
+// ═══════════════════════════════════════════════
+// 8. MBT
+// ═══════════════════════════════════════════════
+function calcMBT() {
+  const ml=vv('mbt-ml'), sample=vv('mbt-sample')||1;
+  const vol=vv('mbt-vol'), minLim=vv('mbt-min'), maxLim=vv('mbt-max');
+  if(!ml){ cls('mbt-alert','info'); set('mbt-alert','Enter MBT mL used.'); return; }
+
+  const ppb   = (ml / sample) * 5;      // lb/bbl
+  const kgm3  = ppb * 2.853;            // kg/m³
+  const sysLbs= ppb * vol;
+  const sacks = Math.ceil(sysLbs / 50);
+
+  set('mbt-ppb',     fmt(ppb,2));
+  set('mbt-kgm3',    fmt(kgm3,2)+'<span class="runit">kg/m³</span>');
+  set('mbt-sys-lbs', fmt(sysLbs,0)+'<span class="runit">lbs</span>');
+  set('mbt-sacks',   sacks);
+
+  const statusEl=document.getElementById('mbt-status'), actionEl=document.getElementById('mbt-action');
+  const alertEl=document.getElementById('mbt-alert');
+  if(ppb < minLim) {
+    if(statusEl){statusEl.textContent=`LOW — ${fmt(ppb,1)} < ${minLim} lb/bbl`;statusEl.className='rval warn';}
+    if(actionEl){actionEl.textContent='Add bentonite or pre-hydrated gel to build MBT.';}
+    alertEl.className='abox warn'; alertEl.innerHTML=`⚠ MBT below minimum. May need additional viscosity/filtration control.`;
+  } else if(ppb > maxLim) {
+    if(statusEl){statusEl.textContent=`HIGH — ${fmt(ppb,1)} > ${maxLim} lb/bbl`;statusEl.className='rval danger';}
+    if(actionEl){actionEl.textContent='Dilute with water or use flocculant to reduce bentonite.';}
+    alertEl.className='abox err'; alertEl.innerHTML=`❌ MBT exceeds maximum. Expect high filtration, viscosity issues.`;
+  } else {
+    if(statusEl){statusEl.textContent=`OK — ${fmt(ppb,1)} lb/bbl`;statusEl.className='rval hi';}
+    if(actionEl){actionEl.textContent='MBT within program limits.';}
+    alertEl.className='abox ok'; alertEl.innerHTML=`✅ MBT = ${fmt(ppb,1)} lb/bbl (${fmt(kgm3,1)} kg/m³) — within limits.`;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 9. pH & ALKALINITY
+// ═══════════════════════════════════════════════
+function calcPH() {
+  const curr=vv('ph-curr'), target=vv('ph-target'), vol=vv('ph-vol');
+  const mw=vv('ph-mw'), pm=vv('ph-pm'), chem=sv('ph-chem'), bag=vv('ph-bag');
+  if(!curr||!target||!vol){ cls('ph-alert','info'); set('ph-alert','Enter pH values and mud volume.'); return; }
+
+  const delta=target-curr;
+  const dir=delta>0?'INCREASE':'DECREASE';
+  let ppb=0, chemName='';
+  // Dose factors (lb/bbl per pH unit) — empirical
+  if(chem==='naoh')   { ppb=Math.abs(delta)*0.35; chemName='NaOH'; }
+  else if(chem==='lime'){ ppb=Math.abs(delta)*0.5; chemName='Lime Ca(OH)₂'; }
+  else if(chem==='bicarb'){ ppb=Math.abs(delta)*0.7; chemName='Sodium Bicarbonate'; }
+  else if(chem==='co2'){ ppb=Math.abs(delta)*0.4; chemName='CO₂ (Carbonic Acid)'; }
+  else if(chem==='citric'){ ppb=Math.abs(delta)*0.6; chemName='Citric Acid'; }
+
+  const totalLbs=ppb*vol;
+  const sacks=Math.ceil(totalLbs/bag);
+  const targetPm=pm + delta*0.8; // estimate
+
+  set('ph-treat-lbs',   fmt(totalLbs,1));
+  set('ph-treat-lbl',   `${chemName} Required (lbs)`);
+  set('ph-ppb',         fmt(ppb,3)+'<span class="runit">lb/bbl</span>');
+  set('ph-sacks',       sacks);
+  set('ph-delta',       (delta>=0?'+':'')+fmt(delta,2)+'<span class="runit">pH units</span>');
+  set('ph-target-pm',   fmt(Math.max(0,targetPm),2)+'<span class="runit">mL</span>');
+
+  const dirEl=document.getElementById('ph-dir');
+  if(dirEl){ dirEl.textContent=(delta>0?'⬆ INCREASE pH':'⬇ DECREASE pH'); dirEl.className='rval '+(delta>0?'hi':'warn'); }
+
+  const alertEl=document.getElementById('ph-alert');
+  alertEl.className='abox ok';
+  alertEl.innerHTML=`✅ Add ${fmt(totalLbs,1)} lbs (${sacks} bags) of ${chemName} to ${dir} pH from ${fmt(curr,1)} → ${fmt(target,1)}`;
+}
+
+// ═══════════════════════════════════════════════
+// 10. CHLORIDE TREATMENT
+// ═══════════════════════════════════════════════
+function calcCL() {
+  const curr=vv('cl-curr'), target=vv('cl-target'), vol=vv('cl-vol');
+  const wf=vv('cl-wf'), salt=sv('cl-salt'), bag=vv('cl-bag');
+  if(!curr||!target||!vol){ cls('cl-alert','info'); set('cl-alert','Enter chloride values and mud volume.'); return; }
+
+  const waterVol=vol*wf;
+  const alertEl=document.getElementById('cl-alert');
+
+  if(target < curr) {
+    // Dilute with water
+    // Mass balance: Cl_curr × waterVol = Cl_target × (waterVol + Vw)
+    const Vw = waterVol*(curr-target)/target;
+    const newVol=vol+Vw;
+    set('cl-result-val',   fmt(Vw,1));
+    set('cl-result-lbl',   'Water to Add (bbls)');
+    set('cl-treat-type',   '💧 DILUTE WITH FRESH WATER');
+    set('cl-new-vol',      fmt(newVol,1)+'<span class="runit">bbls</span>');
+    set('cl-water-vol',    fmt(waterVol,2)+'<span class="runit">bbls</span>');
+    set('cl-salt-lbs',     '—');
+    set('cl-bags',         '—');
+    alertEl.className='abox ok';
+    alertEl.innerHTML=`✅ Add ${fmt(Vw,1)} bbls fresh water to reduce Cl⁻ from ${curr.toLocaleString()} → ${target.toLocaleString()} mg/L`;
+  } else {
+    // Add salt
+    const deltaCl=target-curr;
+    // Salt mass (grams) = deltaCl (mg/L) × waterVol × 158.987 L/bbl / 1000 (g/kg) × MW_factor
+    const saltFactors={'nacl':1.65,'kcl':2.10,'cacl2':1.57}; // lb NaCl per mg/L Cl per bbl water
+    const factor=saltFactors[salt]||1.65;
+    const saltLbs=deltaCl * waterVol * factor / 1e6 * 1e6 / 1000 * 350.49 / 1e3;
+    const bags=Math.ceil(saltLbs/bag);
+    const newVol=vol+saltLbs/(8.345*42);
+    set('cl-result-val',   fmt(saltLbs,0));
+    set('cl-result-lbl',   'Salt to Add (lbs)');
+    set('cl-treat-type',   '🧂 ADD SALT');
+    set('cl-new-vol',      fmt(newVol,1)+'<span class="runit">bbls</span>');
+    set('cl-water-vol',    fmt(waterVol,2)+'<span class="runit">bbls</span>');
+    set('cl-salt-lbs',     fmt(saltLbs,0)+'<span class="runit">lbs</span>');
+    set('cl-bags',         bags);
+    alertEl.className='abox ok';
+    alertEl.innerHTML=`✅ Add ${fmt(saltLbs,0)} lbs (${bags} bags) of ${salt.toUpperCase()} to increase Cl⁻ from ${curr.toLocaleString()} → ${target.toLocaleString()} mg/L`;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 11. FRAC GRADIENT & MW WINDOW
+// ═══════════════════════════════════════════════
+let fracData = [
+  {tvd:0,   pp:8.5, fg:14.5, mw:9.0},
+  {tvd:5000, pp:8.8, fg:13.8, mw:9.5},
+  {tvd:8500, pp:9.0, fg:12.8, mw:10.0},
+  {tvd:12000,pp:11.5,fg:12.5, mw:11.0},
+  {tvd:14000,pp:13.0,fg:13.5, mw:13.2},
+];
+
+function addFracRow() {
+  fracData.push({tvd:fracData[fracData.length-1].tvd+1000, pp:9.5, fg:12.5, mw:10.0});
+  renderFracTable();
+}
+
+function renderFracTable() {
+  const body=document.getElementById('frac-tbl-body'); if(!body) return;
+  const inp=s=>`background:var(--bg-input);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--mono);font-size:11px;padding:3px 6px;width:70px;text-align:right;outline:none`;
+  body.innerHTML=fracData.map((r,i)=>`<tr>
+    <td><input type="number" value="${r.tvd}" style="${inp()}" oninput="fracData[${i}].tvd=+this.value;calcFrac()"></td>
+    <td><input type="number" value="${r.pp}" step="0.01" style="${inp()}" oninput="fracData[${i}].pp=+this.value;calcFrac()"></td>
+    <td><input type="number" value="${r.fg}" step="0.01" style="${inp()}" oninput="fracData[${i}].fg=+this.value;calcFrac()"></td>
+    <td><input type="number" value="${r.mw}" step="0.01" style="${inp()}" oninput="fracData[${i}].mw=+this.value;calcFrac()"></td>
+    <td><button onclick="fracData.splice(${i},1);renderFracTable();calcFrac();" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px">✕</button></td>
+  </tr>`).join('');
+  calcFrac();
+}
+
+function calcFrac() {
+  if(!fracData.length) return;
+  const sorted=fracData.slice().sort((a,b)=>a.tvd-b.tvd);
+  // Check each point
+  const summary=sorted.map(r=>{
+    const window=r.fg-r.pp;
+    const safe=r.mw>r.pp+0.3&&r.mw<r.fg-0.3;
+    return{...r,window,safe};
+  });
+  const minWindow=Math.min(...summary.map(r=>r.window));
+  const critDepth=summary.find(r=>r.window===minWindow);
+  const outOfWindow=summary.filter(r=>!r.safe);
+
+  const sumEl=document.getElementById('frac-summary'); if(!sumEl) return;
+  sumEl.innerHTML=`
+    <div class="rbig"><div class="val ${minWindow<1.5?'danger':minWindow<2.5?'warning':'accent'}">${fmt(minWindow,2)}</div><div class="lbl">Narrowest MW Window (ppg)</div></div>
+    <div class="rrow"><div class="rlabel">Critical Depth</div><div class="rval hi">${fmtN(critDepth?.tvd)} ft</div></div>
+    <div class="rrow"><div class="rlabel">Points Outside Window</div><div class="rval ${outOfWindow.length>0?'danger':'hi'}">${outOfWindow.length}</div></div>
+    ${outOfWindow.length?`<div class="abox err">❌ MW out of window at: ${outOfWindow.map(r=>fmtN(r.tvd)+' ft').join(', ')}</div>`:'<div class="abox ok">✅ MW within safe window at all depths</div>'}
+  `;
+  drawFracChart(sorted);
+}
+
+function drawFracChart(data) {
+  const canvas=document.getElementById('frac-canvas'); if(!canvas||!data.length) return;
+  const ctx=canvas.getContext('2d'); const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad={l:44,r:16,t:14,b:30};
+  const maxDepth=Math.max(...data.map(d=>d.tvd))||14000;
+  const allMw=[...data.map(d=>d.pp),...data.map(d=>d.fg),...data.map(d=>d.mw)];
+  const minMw=Math.min(...allMw)*0.95, maxMw=Math.max(...allMw)*1.05;
+  const px=mw=>pad.l+(mw-minMw)/(maxMw-minMw)*(W-pad.l-pad.r);
+  const py=d=>pad.t+(d/maxDepth)*(H-pad.t-pad.b);
+  // Grid lines
+  ctx.strokeStyle='rgba(30,45,69,0.6)'; ctx.lineWidth=1;
+  [0,maxDepth/4,maxDepth/2,maxDepth*3/4,maxDepth].forEach(d=>{ctx.beginPath();ctx.moveTo(pad.l,py(d));ctx.lineTo(W-pad.r,py(d));ctx.stroke();ctx.fillStyle='rgba(107,131,163,.5)';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(Math.round(d/1000)+'k',pad.l-2,py(d)+3);});
+  // Safe zone fill
+  ctx.fillStyle='rgba(0,255,157,0.06)';
+  ctx.beginPath();
+  data.forEach((r,i)=>i===0?ctx.moveTo(px(r.pp+0.3),py(r.tvd)):ctx.lineTo(px(r.pp+0.3),py(r.tvd)));
+  data.slice().reverse().forEach(r=>ctx.lineTo(px(r.fg-0.3),py(r.tvd)));
+  ctx.closePath(); ctx.fill();
+  // PP line (cyan)
+  drawLine(ctx,data.map(r=>[px(r.pp),py(r.tvd)]),'rgba(0,212,255,.8)',2);
+  // FG line (red)
+  drawLine(ctx,data.map(r=>[px(r.fg),py(r.tvd)]),'rgba(255,71,87,.8)',2);
+  // Current MW (yellow)
+  drawLine(ctx,data.map(r=>[px(r.mw),py(r.tvd)]),'rgba(255,184,0,.9)',2);
+  // Data points
+  data.forEach(r=>{
+    const safe=r.mw>r.pp+0.3&&r.mw<r.fg-0.3;
+    ctx.fillStyle=safe?'rgba(0,255,157,.8)':'rgba(255,71,87,.8)';
+    ctx.beginPath();ctx.arc(px(r.mw),py(r.tvd),4,0,Math.PI*2);ctx.fill();
+  });
+  // MW axis labels
+  ctx.fillStyle='rgba(107,131,163,.7)'; ctx.font='9px monospace'; ctx.textAlign='center';
+  [Math.ceil(minMw),Math.round((minMw+maxMw)/2),Math.floor(maxMw)].forEach(m=>ctx.fillText(m+' ppg',px(m),H-6));
+  // Legend
+  ctx.font='9px monospace'; ctx.textAlign='left';
+  [['rgba(0,212,255,.8)','PP'],['rgba(255,71,87,.8)','FG'],['rgba(255,184,0,.8)','MW']].forEach(([c,l],i)=>{
+    ctx.fillStyle=c; ctx.fillRect(pad.l+i*40,H-22,12,8); ctx.fillStyle='rgba(107,131,163,.8)'; ctx.fillText(l,pad.l+i*40+14,H-15);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.onload = function() {
+  if(localStorage.getItem('p1_theme')==='light') document.body.classList.add('light');
+  calcLOT(); calcKT(); calcDc();
+  calcSS(); calcTP(); calcFann6();
+  calcRetort(); calcMBT(); calcPH();
+  calcCL(); renderFracTable();
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,2900 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ahmed's Rig Chemicals Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root, [data-theme="dark"] {
+      --bg: #0f172a; --bg-alt: #111827; --bg-card: #1f2937;
+      --border-subtle: rgba(148, 163, 184, 0.2);
+      --accent: #38bdf8; --text: #e5e7eb; --text-soft: #9ca3af;
+      
+      --color-white: rgba(255, 255, 255, 0.15); --color-green: rgba(34, 197, 94, 0.2);
+      --color-orange: rgba(249, 115, 22, 0.2); --color-red: rgba(107, 114, 128, 0.25);
+      --color-grey: rgba(239, 68, 68, 0.28); --color-black: rgba(0, 0, 0, 0.5);
+
+      --color-white-solid: #e2e8f0; --color-green-solid: #22c55e;
+      --color-orange-solid: #f97316; --color-red-solid: #9ca3af;
+      --color-grey-solid: #ef4444; --color-black-solid: #333333;
+
+      --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc; --bg-alt: #e2e8f0; --bg-card: #ffffff;
+      --border-subtle: #cbd5e1; --accent: #0284c7; --text: #0f172a; --text-soft: #475569;
+      
+      --color-white: rgba(255, 255, 255, 1); --color-green: rgba(34, 197, 94, 0.15);
+      --color-orange: rgba(249, 115, 22, 0.15); --color-red: rgba(107, 114, 128, 0.18);
+      --color-grey: rgba(239, 68, 68, 0.18); --color-black: rgba(239, 68, 68, 0.22);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px; transition: 0.3s; }
+
+    .sticky-top-area{
+      position: sticky;
+      top: 85px;
+      z-index: 900;
+      background: var(--bg);
+      padding-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    /* Centered Header & Repositioned Actions */
+    .app-header { 
+      position: sticky; top: 0; z-index: 1000; height: 85px; 
+      display: flex; align-items: center; justify-content: space-between; 
+      padding: 0 24px; background: #020617; border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 20px; margin: -20px -20px 20px -20px;
+    }
+    .header-left { flex: 1; }
+    .header-center { flex: 2; display: flex; justify-content: center; text-align: center; }
+    .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 15px; }
+    
+    .app-title {
+      font-size: 32px; font-family: 'Impact', 'Arial Black', sans-serif; letter-spacing: 1px;
+      background: -webkit-linear-gradient(45deg, #38bdf8, #a855f7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin: 0; text-transform: uppercase;
+    }
+
+    /* Modern Theme Toggle */
+    .ios-switch { position: relative; display: inline-block; width: 64px; height: 32px; }
+    .ios-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: linear-gradient(135deg, #1e293b, #334155);
+      transition: all .35s ease;
+      border-radius: 50px;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.35), 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .slider:before {
+      position: absolute; content: "🌙";
+      height: 24px; width: 24px;
+      left: 4px; bottom: 3px;
+      background: white;
+      transition: all .35s ease;
+      border-radius: 50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    }
+    input:checked + .slider {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+    }
+    input:checked + .slider:before {
+      transform: translateX(31px);
+      content: "☀️";
+    }
+    .theme-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-soft);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.04);
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Tabs */
+    .nav-tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border-subtle); }
+    .tab-btn { background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); padding: 10px 18px; color: var(--text-soft); cursor: pointer; font-size: 14px; font-weight: 600; border-radius: 12px 12px 0 0; display:flex; align-items:center; gap:8px; }
+    .tab-btn.active { color: #fff; border-bottom: 3px solid var(--accent); background: linear-gradient(135deg,#1e293b,#0f172a); }
+    .tab-count{background:rgba(255,255,255,0.12);padding:2px 8px;border-radius:999px;font-size:11px;}
+    .tab-content { display: none; }
+    .tab-content.active-tab { display: block; }
+
+    /* Buttons */
+    .btn { padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-primary { background-color: var(--accent); color: #0f172a; }
+    .btn-secondary { background-color: var(--bg-card); color: var(--text); border-color: var(--border-subtle); }
+    .btn-danger { background-color: var(--danger); color: #fff; border-color: #ef4444;}
+    .btn-icon { width: 28px; height: 28px; padding: 0; justify-content: center; border-radius: 50%; }
+
+    /* Dashboard Cards */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .metric-card { 
+      padding: 18px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); text-align: left; 
+      cursor: pointer; transition: 0.2s; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .metric-card:hover { transform: translateY(-3px); opacity: 0.9; }
+    .metric-card.active-filter { outline: 3px solid var(--accent); box-shadow: 0 0 15px var(--accent); transform: scale(1.05); }
+    
+    .card-white { background-color: var(--color-white-solid); color: #0f172a; text-shadow: none; }
+    .card-green { background-color: var(--color-green-solid); }
+    .card-orange { background-color: var(--color-orange-solid); }
+    .card-red { background-color: var(--color-red-solid); }
+    .card-grey { background-color: var(--color-grey-solid); }
+    .card-black { background-color: var(--color-black-solid); }
+
+    .metric-card h3 { font-size: 11px; text-transform: uppercase; margin-bottom: 5px; opacity: 0.9; }
+    .metric-card .value { font-size: 24px; font-weight: bold; }
+
+    /* Tables */
+    .table-container { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 6px; overflow: auto; max-height: 600px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+    thead th { background-color: var(--bg-alt); padding: 10px; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid var(--border-subtle); cursor: pointer; }
+    tbody td { padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); }
+    tbody tr:hover td { filter: brightness(1.2); }
+    
+    .editable-cell { cursor: text; position: relative; }
+    .editable-cell:hover::after { content: '✎'; position: absolute; right: 5px; opacity: 0.5; color: var(--accent); }
+
+    .row-white td { background-color: var(--color-white); }
+    .row-green td { background-color: var(--color-green); }
+    .row-orange td { background-color: var(--color-orange); }
+    .row-red td { background-color: var(--color-red); }
+    .row-grey td { background-color: var(--color-grey); }
+    .row-black td { background-color: var(--color-black); color: #9ca3af; }
+    .highlight-row td { outline: 2px solid var(--accent); }
+
+    input, select { background: var(--bg-alt); border: 1px solid var(--border-subtle); color: var(--text); padding: 6px 10px; border-radius: 4px; font-size: 12px; outline: none; width: 100%; }
+    input:focus, select:focus { border-color: var(--accent); }
+    input[readonly] { opacity: 0.7; cursor: not-allowed; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 15px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 11px; font-weight: 600; color: var(--text-soft); }
+
+    .autocomplete-wrapper { position: relative; }
+    .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card); border: 1px solid var(--border-subtle); max-height: 150px; overflow-y: auto; z-index: 1000; border-radius: 4px; }
+    .autocomplete-item { padding: 8px; cursor: pointer; border-bottom: 1px solid var(--border-subtle); font-size: 11px; display: flex; justify-content: space-between; }
+    .autocomplete-item:hover { background: var(--bg-alt); color: var(--accent); }
+
+    /* Modals */
+    .modal-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+    .modal-box { background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border-subtle); width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle); }
+    .modal-header h3 { color: var(--accent); font-size: 16px; }
+    .close-btn { background: none; border: none; font-size: 18px; color: var(--text-soft); cursor: pointer; }
+
+    details { background: var(--bg-alt); border: 1px solid var(--border-subtle); border-radius: 4px; margin-bottom: 10px; }
+    summary { padding: 10px; font-weight: bold; cursor: pointer; list-style: none; outline: none; display: flex; justify-content: space-between; align-items: center; color:var(--accent); }
+    summary::-webkit-details-marker { display: none; }
+    .alert-item { padding: 10px; border-top: 1px solid var(--border-subtle); font-size: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .alert-item:hover { background: var(--bg-card); }
+
+    .analytics-area { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .chart-box { 
+      background: var(--bg-card); border: 1px solid var(--border-subtle); padding: 15px; border-radius: 8px; 
+      resize: both; overflow: auto; min-width: 400px; min-height: 300px; width: 600px; height: 400px;
+      position: relative; display: flex; flex-direction: column;
+    }
+    .chart-canvas-wrapper { flex: 1; position: relative; min-height: 0; }
+
+    /* Sticky Chemical Name column */
+    .sticky-col { position: sticky; left: 0; z-index: 3; }
+    thead .sticky-col { background: var(--bg-alt) !important; z-index: 11; }
+    tbody .sticky-col { background: var(--bg-card); }
+    tr.row-white .sticky-col { background-color: var(--color-white); }
+    tr.row-green .sticky-col { background-color: var(--color-green); }
+    tr.row-orange .sticky-col { background-color: var(--color-orange); }
+    tr.row-red .sticky-col { background-color: var(--color-red); }
+    tr.row-grey .sticky-col { background-color: var(--color-grey); }
+    tr.row-black .sticky-col { background-color: var(--color-black); }
+
+    /* Search highlight */
+    mark { background: rgba(251,191,36,0.35); color: inherit; border-radius: 2px; padding: 0 2px; }
+
+    /* Toast notification */
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(120px); background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 20px; display: flex; align-items: center; gap: 14px; z-index: 10000; box-shadow: 0 8px 32px rgba(0,0,0,0.5); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); font-size: 13px; min-width: 300px; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast-msg { flex: 1; }
+    .toast-undo { background: var(--accent); color: #0f172a; border: none; padding: 5px 14px; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 12px; white-space: nowrap; }
+    .toast-close { background: none; border: none; color: var(--text-soft); cursor: pointer; font-size: 16px; padding: 0; line-height: 1; }
+
+    /* Column visibility toggle */
+    .col-toggle-wrap { position: relative; }
+    .col-toggle-panel { position: absolute; top: calc(100% + 6px); right: 0; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; z-index: 600; min-width: 230px; max-height: 340px; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.4); display: none; }
+    .col-toggle-panel.open { display: block; }
+    .col-toggle-item { display: flex; align-items: center; gap: 8px; padding: 5px 6px; font-size: 12px; cursor: pointer; border-radius: 4px; user-select: none; }
+    .col-toggle-item:hover { background: var(--bg-alt); }
+    .col-toggle-item input[type="checkbox"] { width: auto; cursor: pointer; }
+
+    /* Import modal strategy buttons */
+    .strategy-toggle { display: flex; gap: 8px; }
+    .strat-btn { flex: 1; padding: 8px 12px; text-align: center; border: 1px solid var(--border-subtle); border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; background: var(--bg-alt); color: var(--text-soft); transition: 0.2s; }
+    .strat-btn.strat-active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+
+    /* Backup reminder banner */
+    .backup-banner { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.35); border-radius: 6px; padding: 8px 16px; margin-bottom: 12px; font-size: 12px; display: none; justify-content: space-between; align-items: center; color: var(--warning); }
+    .backup-banner.visible { display: flex; }
+
+    /* Storage indicator */
+    .storage-bar-wrap { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+    .storage-bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.1); overflow: hidden; width: 70px; }
+    .storage-bar-fill { height: 100%; border-radius: 2px; background: var(--success); transition: width 0.5s; }
+    .storage-label { font-size: 10px; color: var(--text-soft); white-space: nowrap; }
+
+    /* Expiry timeline */
+    .timeline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; max-height: 62vh; overflow-y: auto; padding-right: 4px; }
+    .timeline-month { background: var(--bg-alt); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; }
+    .timeline-month-title { font-size: 12px; font-weight: bold; color: var(--accent); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-subtle); }
+    .timeline-item { font-size: 11px; padding: 3px 0; display: flex; justify-content: space-between; gap: 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .timeline-item:last-child { border-bottom: none; }
+
+    /* Snapshot history */
+    .snapshot-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); font-size: 12px; flex-wrap: wrap; gap: 8px; }
+    .snapshot-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+    .snap-badge { padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; }
+
+    /* Keyboard shortcuts */
+    .shortcut-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 4px; border-bottom: 1px solid var(--border-subtle); font-size: 13px; }
+    .shortcut-key { background: var(--bg-alt); border: 1px solid var(--border-subtle); padding: 2px 10px; border-radius: 4px; font-family: monospace; font-size: 11px; color: var(--accent); }
+
+    /* Notes dot indicator */
+    .note-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #a855f7; margin-left: 5px; vertical-align: middle; }
+
+    /* ── BULK SELECT ── */
+    .bulk-bar { display:none; align-items:center; gap:10px; padding:8px 14px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); border-radius:8px; margin-bottom:10px; flex-wrap:wrap; }
+    .bulk-bar.visible { display:flex; }
+    .bulk-count { font-size:13px; font-weight:700; color:var(--accent); }
+    td.sel-col, th.sel-col { width:32px; text-align:center; padding:4px !important; }
+    input.row-check { width:auto !important; cursor:pointer; accent-color:var(--accent); }
+
+    /* ── LAST SAVED INDICATOR ── */
+    .last-saved-lbl { font-size:10px; color:var(--text-soft); white-space:nowrap; }
+
+    /* ── CONSUMPTION LOG ── */
+    .clog-row { display:flex; align-items:center; gap:10px; padding:7px 12px; border-bottom:1px solid var(--border-subtle); font-size:12px; flex-wrap:wrap; }
+    .clog-badge { padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; }
+    .clog-badge.pos { background:rgba(239,68,68,0.2); color:#ef4444; }
+    .clog-badge.neg { background:rgba(34,197,94,0.2); color:#22c55e; }
+
+    /* ── MANIFEST HISTORY ── */
+    .mhist-row { padding:10px 14px; border-bottom:1px solid var(--border-subtle); font-size:12px; cursor:pointer; }
+    .mhist-row:hover { background:var(--bg-alt); }
+
+    /* ── EXPIRY CALENDAR ── */
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .cal-day-hdr { font-size:10px; font-weight:700; color:var(--text-soft); text-align:center; padding:4px 0; }
+    .cal-day { min-height:60px; border-radius:6px; background:var(--bg-alt); border:1px solid var(--border-subtle); padding:4px; font-size:10px; }
+    .cal-day.today { border-color:var(--accent); }
+    .cal-day.empty { background:transparent; border-color:transparent; }
+    .cal-day-num { font-weight:700; font-size:11px; color:var(--text-soft); margin-bottom:2px; }
+    .cal-chip { border-radius:3px; padding:1px 4px; margin-bottom:2px; font-size:9px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+    .cal-nav { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .cal-nav h4 { flex:1; text-align:center; font-size:15px; color:var(--accent); }
+
+    /* ── INSIGHTS PANEL ── */
+    .insights-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+    .insight-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:10px; padding:14px; }
+    .insight-card h4 { font-size:12px; color:var(--text-soft); text-transform:uppercase; margin-bottom:10px; }
+    .insight-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid var(--border-subtle); font-size:12px; }
+    .insight-row:last-child { border:none; }
+    .stockout-badge { font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; }
+    .stockout-ok    { background:rgba(34,197,94,0.2); color:#22c55e; }
+    .stockout-warn  { background:rgba(249,115,22,0.2); color:#f97316; }
+    .stockout-crit  { background:rgba(239,68,68,0.2); color:#ef4444; }
+
+    /* ── PRIORITY LIST ── */
+    .priority-row { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-bottom:1px solid var(--border-subtle); font-size:12px; }
+    .priority-row:hover { background:var(--bg-alt); cursor:pointer; }
+    .priority-rank { font-size:18px; font-weight:700; color:var(--accent); width:32px; text-align:center; }
+
+    /* ── SDS MODAL ── */
+    #sdsFrameWrap { width:100%; height:60vh; border:none; border-radius:6px; background:#fff; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <link rel="manifest" id="pwaManifest">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-left"></div>
+    <div class="header-center">
+      <h1 class="app-title">Ahmed's Rig Chemicals Tracker</h1>
+    </div>
+    <div class="header-right">
+      <div class="storage-bar-wrap" title="LocalStorage usage">
+        <div class="storage-label" id="storageLbl">0 KB / ~5 MB</div>
+        <div class="storage-bar"><div class="storage-bar-fill" id="storageBar" style="width:0%"></div></div>
+        <div class="last-saved-lbl" id="lastSavedLbl">—</div>
+      </div>
+      <div class="theme-label" title="Toggle Light/Dark Mode">
+        Mode
+        <label class="ios-switch">
+          <input type="checkbox" id="themeToggleCheckbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <button class="btn btn-secondary" title="Keyboard Shortcuts" onclick="openModal('shortcutsModal')" style="padding:6px 10px; font-size:14px;">⌨️</button>
+      <button class="btn btn-primary" title="Export Master Tracker to Excel" onclick="exportToExcel('main')">📤 Export Main</button>
+      <button class="btn btn-primary" title="Export Database Catalog to Excel" onclick="exportToExcel('db')">📤 Export DB</button>
+      <button class="btn btn-danger" title="View Lifecycle & Stock Alerts" onclick="openModal('alertsModal')">🚨 Alerts (<span id="alertBadge">0</span>)</button>
+    </div>
+  </header>
+
+  <div class="backup-banner" id="backupBanner">
+    ⚠️ <strong>No recent backup detected.</strong> &nbsp;It's been a while — consider downloading a JSON backup from the Vault tab to prevent data loss.
+    <button class="btn btn-secondary" style="padding:4px 10px; font-size:11px;" onclick="document.getElementById('backupBanner').classList.remove('visible')">Dismiss</button>
+  </div>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" title="View main chemical inventory" onclick="switchTab('tab-tracker')">📋 Master Tracker <span class='tab-count' id='tabMainCount'>0</span></button>
+    <button class="tab-btn" title="View standard chemical database" onclick="switchTab('tab-database')">🗄️ Chemical Database <span class='tab-count' id='tabDbCount'>0</span></button>
+    <button class="tab-btn" title="View graphs and metrics" onclick="switchTab('tab-analytics')">📊 Analytics</button>
+    <button class="tab-btn" title="Consumption activity log" onclick="switchTab('tab-clog')">📒 Consumption Log <span class='tab-count' id='tabClogCount'>0</span></button>
+    <button class="tab-btn" title="Backup or restore system data" onclick="switchTab('tab-vault')">💾 Backup / Trash</button>
+  </nav>
+
+  <main>
+    <div id="tab-tracker" class="tab-content active-tab">
+      
+      <div class="sticky-top-area"><div class="dashboard-grid">
+        <div class="metric-card card-white" id="cardFilter-all" data-filter="all" title="Show all items" onclick="setCardFilter('all')">
+          <h3>Total Items</h3><div class="value" id="mTotal">0</div>
+        </div>
+        <div class="metric-card card-white" id="cardFilter-white" data-filter="white" title="Show safe items (>6 Months)" onclick="setCardFilter('white')">
+          <h3>Safe (&gt;6 Months)</h3><div class="value" id="mWhite">0</div>
+        </div>
+        <div class="metric-card card-green" id="cardFilter-green" data-filter="green" title="Show good items (5-6 Months)" onclick="setCardFilter('green')">
+          <h3>Good (5-6 Months)</h3><div class="value" id="mGreen">0</div>
+        </div>
+        <div class="metric-card card-orange" id="cardFilter-orange" data-filter="orange" title="Show warning items (4-5 Months)" onclick="setCardFilter('orange')">
+          <h3>Warning (4-5 Months)</h3><div class="value" id="mOrange">0</div>
+        </div>
+        <div class="metric-card card-red" id="cardFilter-red" data-filter="red" title="Show danger items (105d - 4m)" onclick="setCardFilter('red')">
+          <h3>Danger (105d - 4m)</h3><div class="value" id="mRed">0</div>
+        </div>
+        <div class="metric-card card-grey" id="cardFilter-grey" data-filter="grey" title="Show critical items (10-105 Days)" onclick="setCardFilter('grey')">
+          <h3>Critical (10-105 Days)</h3><div class="value" id="mGrey">0</div>
+        </div>
+        <div class="metric-card card-black" id="cardFilter-black" data-filter="black" title="Show expired items" onclick="setCardFilter('black')">
+          <h3>Expired (≤0 Days)</h3><div class="value" id="mBlack">0</div>
+        </div>
+              <div class="metric-card card-black" id="cardFilter-unknown" data-filter="unknown" title="Show unknown expiry items" onclick="setCardFilter('unknown')">
+          <h3>Unknown Expiry</h3><div class="value" id="mUnknown">0</div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; margin-bottom: 15px; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" title="Manually add a new chemical entry" onclick="openModal('entryModal'); clearEntryForm();">➕ Add New Entry</button>
+          <button class="btn btn-secondary" title="View items needed from supply boat" onclick="openManifestModal()">🚢 Supply Boat Manifest</button>
+          <button class="btn btn-secondary" title="Consumption rates &amp; stockout predictions" onclick="openInsightsModal()">📈 Insights</button>
+          <button class="btn btn-secondary" title="View chemicals sorted by use-by priority" onclick="openPriorityModal()">⚡ Use-Before-Expire</button>
+          <button class="btn btn-secondary" title="Generate PDF Summary Report" onclick="generatePdfReport()">📄 PDF Report</button>
+          <button class="btn btn-danger" title="Delete all rows in Master Tracker (moved to trash)" onclick="deleteAllMain()">🗑️ Delete All</button>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="text" id="trackerSearch" title="Search any text in the table" placeholder="🔍 Search table..." oninput="renderMainTable()" style="width: 250px;" />
+          <button class="btn btn-secondary" title="Toggle between essential and full columns" onclick="toggleViewMode()" id="viewBtn">Switch View</button>
+          <div class="col-toggle-wrap">
+            <button class="btn btn-secondary" title="Show/hide columns" onclick="toggleColPanel()">Columns ▾</button>
+            <div class="col-toggle-panel" id="colTogglePanel"></div>
+          </div>
+          <button class="btn btn-secondary" title="Export only currently visible/filtered rows" onclick="exportToExcel('main', true)">📤 Export Filtered</button>
+          <button class="btn btn-secondary" title="View expiry calendar timeline" onclick="openTimelineModal()">📅 Timeline</button>
+          <button class="btn btn-secondary" title="View calendar grid of expiry dates" onclick="openCalendarModal()">🗓️ Calendar</button>
+          <button class="btn btn-secondary" title="Import from Excel file" onclick="openImportModal('main')">📥 Import Excel</button>
+        </div>
+      </div></div>
+
+      <div class="table-container">
+        <!-- Bulk action bar -->
+        <div class="bulk-bar" id="bulkBar">
+          <span class="bulk-count" id="bulkCount">0 selected</span>
+          <button class="btn btn-secondary" onclick="bulkSelectAll()">Select All</button>
+          <button class="btn btn-secondary" onclick="bulkClearSelect()">Clear</button>
+          <button class="btn btn-secondary" onclick="bulkExport()">📤 Export Selected</button>
+          <button class="btn btn-secondary" onclick="bulkEditStorage()">📍 Change Storage</button>
+          <button class="btn btn-danger" onclick="bulkDelete()">🗑️ Delete Selected</button>
+        </div>
+        <table id="mainTable">
+          <thead id="mainHead"></thead>
+          <tbody id="mainBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-database" class="tab-content">
+      <div style="display:flex; justify-content:space-between; margin-bottom: 15px; flex-wrap:wrap; gap:8px;">
+        <input type="text" id="dbSearch" title="Search Database Catalog" placeholder="🔍 Search Catalog..." style="width: 300px;" oninput="renderDbTable()" />
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary" title="Add new chemical to the catalog" onclick="openDbAddModal()">➕ Add to Catalog</button>
+          <button class="btn btn-secondary" title="Import Database from Excel" onclick="openImportModal('db')">📥 Import Catalog</button>
+          <button class="btn btn-danger" title="Delete all items in Chemical Database (moved to trash)" onclick="deleteAllDb()">🗑️ Delete All</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortDb('itemNo')" title="Click to sort">Item No. ↕</th>
+              <th onclick="sortDb('sap')" title="Click to sort">SAP No. ↕</th>
+              <th onclick="sortDb('name')" title="Click to sort">Chemical Name ↕</th>
+              <th onclick="sortDb('unit')" title="Click to sort">Unit Size ↕</th>
+              <th onclick="sortDb('pallet')" title="Click to sort">Units Per Pallet ↕</th>
+              <th title="Calculated based on double-click input">Rows * (Units/Row)</th>
+              <th onclick="sortDb('func')" title="Click to sort">Function ↕</th>
+              <th onclick="sortDb('man')" title="Click to sort">Manufacturer ↕</th>
+              <th>SDS</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dbBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-analytics" class="tab-content">
+      <div style="background:var(--bg-card); padding:15px; border-radius:6px; border:1px solid var(--border-subtle); margin-bottom:15px; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+        <div class="form-group"><label>Chart Type</label>
+          <select id="cType" title="Select visualization type">
+            <option value="bar">Bar</option>
+            <option value="horizontalBar">Horizontal Bar</option>
+            <option value="line">Line</option>
+            <option value="pie">Pie</option>
+            <option value="doughnut">Doughnut</option>
+            <option value="polarArea">Polar Area</option>
+            <option value="radar">Radar</option>
+            <option value="scatter">Scatter</option>
+            <option value="bubble">Bubble</option>
+          </select>
+        </div>
+        <div class="form-group"><label>X-Axis (Group By)</label><select id="cX" title="Select grouping variable"></select></div>
+        <div class="form-group"><label>Y-Axis (Measure)</label><select id="cY" title="Select measurement variable"></select></div>
+        <div class="form-group"><label>Aggregation</label>
+          <select id="cAgg" title="How to aggregate values">
+            <option value="sum">Sum</option>
+            <option value="count">Count (rows)</option>
+            <option value="avg">Average</option>
+            <option value="max">Maximum</option>
+            <option value="min">Minimum</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" title="Generate selected chart" onclick="buildCustomChart()">Add Graph</button>
+        <button class="btn btn-secondary" title="Quick chart: how many products expire each month" onclick="buildMonthlyExpiryChart()">📅 Expiry by Month</button>
+        <button class="btn btn-secondary" title="Remove all charts" onclick="document.getElementById('analyticsContainer').innerHTML=''">Clear All</button>
+      </div>
+      
+      <div class="analytics-area" id="analyticsContainer">
+        </div>
+    </div>
+
+    <div id="tab-vault" class="tab-content">
+      <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap:wrap;">
+        <button class="btn btn-primary" title="Export all settings and data to JSON" onclick="exportBackupJSON()">Download System JSON Backup</button>
+        <button class="btn btn-secondary" title="Restore system from JSON file" onclick="document.getElementById('importJsonFile').click()">Restore JSON Backup</button>
+        <input type="file" id="importJsonFile" accept=".json" style="display:none;" onchange="importBackupJSON(event)">
+        <button class="btn btn-danger" title="Delete all browser data for this app" onclick="wipeSystem()">Wipe Local Storage</button>
+      </div>
+
+      <!-- Manifest History -->
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; margin-bottom:14px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; cursor:pointer; user-select:none;" onclick="toggleBin('binManHist')">
+          <div style="font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:8px;">
+            🚢 Manifest History
+            <span id="binManHistBadge" style="background:rgba(255,255,255,0.12); padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600;">0</span>
+          </div>
+          <span id="binManHistArrow" style="color:var(--text-soft); font-size:14px; transition:transform 0.2s;">▶</span>
+        </div>
+        <div id="binManHist" style="display:none; padding:0 12px 12px;">
+          <p style="font-size:11px; color:var(--text-soft); padding:8px 0;">Saved supply boat manifests. Click a row to view its items.</p>
+          <div id="manifestHistContainer" style="border:1px solid var(--border-subtle); border-radius:6px; overflow:hidden;"></div>
+        </div>
+      </div>
+
+      <!-- Trash Bin: Master Tracker -->
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; margin-bottom:14px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; cursor:pointer; user-select:none;" onclick="toggleBin('binMain')">
+          <div style="font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:8px;">
+            🗑️ Master Tracker Trash Bin
+            <span id="binMainBadge" style="background:rgba(255,255,255,0.12); padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600;">0</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" title="Permanently delete all trash" onclick="emptyTrash('main'); event.stopPropagation();">Empty Bin</button>
+            <span id="binMainArrow" style="color:var(--text-soft); font-size:14px; transition:transform 0.2s;">▶</span>
+          </div>
+        </div>
+        <div id="binMain" style="display:none; padding:0 12px 12px;">
+          <div class="table-container" style="max-height:260px;">
+            <table>
+              <thead><tr><th>Chemical Name</th><th>SAP No</th><th>Quantity</th><th>Action</th></tr></thead>
+              <tbody id="trashMainBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trash Bin: Chemical Database -->
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; margin-bottom:14px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; cursor:pointer; user-select:none;" onclick="toggleBin('binDb')">
+          <div style="font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:8px;">
+            🗑️ Chemical Database Trash Bin
+            <span id="binDbBadge" style="background:rgba(255,255,255,0.12); padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600;">0</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" title="Permanently delete all trash" onclick="emptyTrash('db'); event.stopPropagation();">Empty Bin</button>
+            <span id="binDbArrow" style="color:var(--text-soft); font-size:14px; transition:transform 0.2s;">▶</span>
+          </div>
+        </div>
+        <div id="binDb" style="display:none; padding:0 12px 12px;">
+          <div class="table-container" style="max-height:260px;">
+            <table>
+              <thead><tr><th>Item No.</th><th>Chemical Name</th><th>SAP No</th><th>Action</th></tr></thead>
+              <tbody id="trashDbBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Snapshots -->
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; cursor:pointer; user-select:none;" onclick="toggleBin('binSnap')">
+          <div style="font-weight:bold; color:var(--accent); display:flex; align-items:center; gap:8px;">
+            📸 Inventory Snapshots
+            <span id="binSnapBadge" style="background:rgba(255,255,255,0.12); padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600;">0</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn btn-secondary" style="padding:4px 10px; font-size:11px;" title="Save a snapshot of current inventory health" onclick="saveSnapshot(true); event.stopPropagation();">📸 Save Snapshot Now</button>
+            <span id="binSnapArrow" style="color:var(--text-soft); font-size:14px; transition:transform 0.2s;">▶</span>
+          </div>
+        </div>
+        <div id="binSnap" style="display:none; padding:0 12px 12px;">
+          <p style="font-size:11px; color:var(--text-soft); margin-bottom:10px; padding-top:4px;">A snapshot records the current count of every status bucket. Use <strong>Save Snapshot Now</strong> at any time, or one is auto-saved when the app loads. Last 20 kept.</p>
+          <div id="snapshotsContainer" style="border:1px solid var(--border-subtle); border-radius:6px; overflow:hidden;">
+            <div style="padding:12px; font-size:12px; color:var(--text-soft); text-align:center;">No snapshots saved yet.</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- end tab-vault -->
+
+    <!-- ── CONSUMPTION LOG TAB ── -->
+    <div id="tab-clog" class="tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <div style="font-size:13px; color:var(--text-soft);">Every time a chemical's <strong>USED</strong> value changes, the delta is recorded here for auditing and rate analysis.</div>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="clogSearch" placeholder="🔍 Filter by name..." style="width:220px;" oninput="renderConsumptionLog()">
+          <button class="btn btn-secondary" onclick="exportConsumptionLog()">📤 Export Log</button>
+          <button class="btn btn-danger" onclick="clearConsumptionLog()">🗑️ Clear Log</button>
+        </div>
+      </div>
+      <div class="table-container" style="max-height:600px;">
+        <table>
+          <thead><tr>
+            <th>Timestamp</th>
+            <th>Chemical Name</th>
+            <th>SAP No.</th>
+            <th>Prev. USED</th>
+            <th>New USED</th>
+            <th>Delta (Δ)</th>
+          </tr></thead>
+          <tbody id="clogBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-backdrop" id="entryModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="entryTitle">➕ Add New Entry</h3>
+        <button class="close-btn" title="Close Popup" onclick="closeModal('entryModal')">✕</button>
+      </div>
+      <div class="form-grid">
+        <input type="hidden" id="fUuid">
+        <div class="form-group"><label>Item No.</label><input type="number" id="fItemNo" readonly title="Auto-generated"></div>
+        <div class="form-group autocomplete-wrapper">
+          <label>Chemical Name *</label>
+          <input type="text" id="fChemicalName" autocomplete="off" title="Start typing to search database">
+          <div class="autocomplete-list" id="autoList" style="display:none;"></div>
+        </div>
+        <div class="form-group"><label>Storage Location(s)</label><input type="text" id="fStorage" title="Where is it stored?"></div>
+        <div class="form-group"><label>CHB No.</label><input type="text" id="fChb"></div>
+        <div class="form-group"><label>Starting *</label><input type="number" step="any" id="fStart" title="Numbers only" oninput="liveCalcQty()"></div>
+        
+        <div class="form-group">
+          <label>CHB in Arabic (Y/N) *</label>
+          <select id="fArabic" title="Select Yes or No">
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        
+        <div class="form-group"><label>SAP No. *</label><input type="number" id="fSap" title="Numbers only"></div>
+        <div class="form-group"><label>REC *</label><input type="number" step="any" id="fRec" title="Numbers only" oninput="liveCalcQty()"></div>
+        <div class="form-group"><label>USED *</label><input type="number" step="any" id="fUsed" title="Numbers only" oninput="liveCalcQty()"></div>
+        <div class="form-group"><label>B.L *</label><input type="number" step="any" id="fBl" title="Numbers only" oninput="liveCalcQty()"></div>
+        
+        <div class="form-group">
+          <label>Special Handling Procedure *</label>
+          <select id="fHand" title="Select Action Class A, B, or C">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
+        </div>
+        
+        <div class="form-group"><label>Quantity</label><input type="number" step="any" id="fQty" title="Auto-calculated (Start + REC - USED - BL)"></div>
+        <div class="form-group"><label>Unit Size</label><input type="text" id="fUnit" title="e.g. 55 Gal"></div>
+        <div class="form-group"><label>Quantity Safe Margin *</label><input type="number" step="any" id="fSafeMargin" value="10" title="Alert trigger limit"></div>
+        <div class="form-group"><label>Expiry Date</label><input type="date" id="fExp" title="Select Date"></div>
+        <div class="form-group"><label>Batch / Lot No.</label><input type="text" id="fBatch" title="Optional batch or lot number for traceability"></div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+        <button class="btn btn-primary" title="Save entry to Master Tracker" onclick="saveEntry()">Save Entry</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="dbEditModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>✏️ Edit Database Catalog Item</h3>
+        <button class="close-btn" title="Close Popup" onclick="closeModal('dbEditModal')">✕</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Item No.</label><input type="number" id="eDbItemNo" readonly title="Auto-generated"></div>
+        <div class="form-group"><label>Chemical Name</label><input type="text" id="eDbName"></div>
+        <div class="form-group"><label>SAP No.</label><input type="number" id="eDbSap" title="Numbers only"></div>
+        <div class="form-group"><label>Unit Size</label><input type="text" id="eDbUnit"></div>
+        <div class="form-group"><label>Units Per Pallet</label><input type="number" id="eDbPallet"></div>
+        <div class="form-group"><label>Function</label><input type="text" id="eDbFunc"></div>
+        <div class="form-group"><label>Manufacturer</label><input type="text" id="eDbMan"></div>
+        <div class="form-group"><label>SDS / Safety Data Sheet URL</label><input type="url" id="eDbSds" placeholder="https://..."></div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+        <button class="btn btn-primary" title="Update Database" onclick="saveDbEdit()">Update Item</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="alertsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🚨 System Lifecycle & Margin Alerts</h3>
+        <button class="close-btn" title="Close Popup" onclick="closeModal('alertsModal')">✕</button>
+      </div>
+      <div id="alertsContainer" style="display:flex; flex-direction:column; gap:10px;">
+        </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="manifestModal">
+    <div class="modal-box" style="max-width:860px;">
+      <div class="modal-header">
+        <h3>🚢 Supply Boat Manifest</h3>
+        <button class="close-btn" title="Close Popup" onclick="closeModal('manifestModal')">✕</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px; flex-wrap:wrap;">
+        <p style="font-size:12px; color:var(--text-soft); flex:1;">Items below Quantity Safe Margin. Edit <em>Order Qty</em> before saving.</p>
+        <div style="display:flex; align-items:center; gap:8px; font-size:12px;">
+          <label style="font-size:11px; color:var(--text-soft);">Supply Boat Frequency (days):</label>
+          <input type="number" id="boatFreqDays" value="14" min="1" max="365" style="width:70px;" title="Used for reorder quantity suggestion">
+        </div>
+        <button class="btn btn-primary" onclick="saveManifestToHistory()">💾 Save Manifest</button>
+        <button class="btn btn-secondary" onclick="exportManifestExcel()">📤 Export Excel</button>
+      </div>
+      <div class="table-container" style="max-height:460px;">
+        <table>
+          <thead><tr>
+            <th>SAP No</th>
+            <th>Name</th>
+            <th>Live Qty</th>
+            <th>Safe Margin</th>
+            <th>Deficit</th>
+            <th>Days to Stockout</th>
+            <th>Order Qty</th>
+          </tr></thead>
+          <tbody id="manifestBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="importModal">
+    <div class="modal-box" style="max-width: 750px;">
+      <div class="modal-header">
+        <h3 id="importTitle">📥 Import Wizard</h3>
+        <button class="close-btn" title="Close Popup" onclick="closeModal('importModal')">✕</button>
+      </div>
+      <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="form-group"><label>Header Row No.</label><input type="number" id="impHead" value="1" min="1" onchange="parseExcel()"></div>
+        <div class="form-group"><label>Data Start Row No.</label><input type="number" id="impData" value="2" min="1" onchange="parseExcel()"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:15px;"><label>Select File</label><input type="file" id="impFile" accept=".xlsx,.xls,.csv" onchange="parseExcel()"></div>
+      
+      <div style="background:var(--bg-alt); padding:10px; border-radius:6px; margin-bottom:15px;">
+        <label style="font-size:12px; font-weight:bold;">Column Mapping:</label>
+        <div id="mappingContainer" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;"></div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px; font-weight:bold; color:var(--text-soft);">Preview (First 5 Rows):</label>
+        <div style="overflow:auto; max-height:200px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--bg-alt);">
+          <table style="width:100%; border-collapse:collapse; font-size:11px;">
+            <thead id="importPreviewHead" style="position:sticky; top:0; background:var(--bg-card); z-index:5;"></thead>
+            <tbody id="importPreviewBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="margin-bottom:15px;">
+        <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:8px;">Strategy:</label>
+        <div class="strategy-toggle">
+          <div class="strat-btn strat-active" id="stratReplace" onclick="selectStrategy('replace')">🔄 Replace Existing Data</div>
+          <div class="strat-btn" id="stratAppend" onclick="selectStrategy('append')">➕ Append to Existing</div>
+        </div>
+        <input type="hidden" id="impStratHidden" value="replace">
+      </div>
+      
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" title="Run Import" onclick="executeImport()">Execute Import</button>
+    </div>
+  </div>
+
+  <!-- Notes Modal -->
+  <div class="modal-backdrop" id="notesModal">
+    <div class="modal-box" style="max-width:480px;">
+      <div class="modal-header">
+        <h3>📝 Row Notes</h3>
+        <button class="close-btn" onclick="closeModal('notesModal')">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-soft); margin-bottom:10px;" id="notesChemName"></p>
+      <textarea id="notesTextarea" style="width:100%; height:130px; background:var(--bg-alt); border:1px solid var(--border-subtle); color:var(--text); padding:8px; border-radius:4px; font-size:13px; resize:vertical;" placeholder="Add your notes here..."></textarea>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+        <button class="btn btn-primary" onclick="saveNotes()">Save Note</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline Modal -->
+  <div class="modal-backdrop" id="timelineModal">
+    <div class="modal-box" style="max-width:900px;">
+      <div class="modal-header">
+        <h3>📅 Expiry Timeline</h3>
+        <button class="close-btn" onclick="closeModal('timelineModal')">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-soft); margin-bottom:14px;">Chemicals grouped by expiry month. Scroll to see all months.</p>
+      <div class="timeline-grid" id="timelineContent"></div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div class="modal-backdrop" id="shortcutsModal">
+    <div class="modal-box" style="max-width:460px;">
+      <div class="modal-header">
+        <h3>⌨️ Keyboard Shortcuts</h3>
+        <button class="close-btn" onclick="closeModal('shortcutsModal')">✕</button>
+      </div>
+      <div class="shortcut-row"><span>Add New Entry</span><span class="shortcut-key">Ctrl + N</span></div>
+      <div class="shortcut-row"><span>Focus Search</span><span class="shortcut-key">Ctrl + F</span></div>
+      <div class="shortcut-row"><span>Export Main to Excel</span><span class="shortcut-key">Ctrl + E</span></div>
+      <div class="shortcut-row"><span>Close Modal / Clear Filter</span><span class="shortcut-key">Escape</span></div>
+      <div class="shortcut-row" style="border:none;"><span>Show Shortcuts</span><span class="shortcut-key">?</span></div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toastEl">
+    <span class="toast-msg" id="toastMsg"></span>
+    <button class="toast-undo" id="toastUndoBtn" onclick="triggerUndo()" style="display:none;">Undo</button>
+    <button class="toast-close" onclick="hideToast()">✕</button>
+  </div>
+
+  <!-- Expiry Date Review Modal -->
+  <div class="modal-backdrop" id="expiryReviewModal">
+    <div class="modal-box" style="max-width:680px;">
+      <div class="modal-header">
+        <h3>📅 Missing Expiry Dates</h3>
+        <button class="close-btn" onclick="closeModal('expiryReviewModal')">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-soft); margin-bottom:12px;">The following rows have no expiry date. Enter a date manually or check <strong>Skip</strong> to exclude the row from import.</p>
+      <div style="max-height:50vh; overflow-y:auto;">
+        <table style="width:100%;">
+          <thead><tr>
+            <th style="padding:6px 8px; font-size:11px; color:var(--text-soft);">Chemical Name</th>
+            <th style="padding:6px 8px; font-size:11px; color:var(--text-soft);">SAP No.</th>
+            <th style="padding:6px 8px; font-size:11px; color:var(--text-soft);">Expiry Date (DD-MM-YYYY)</th>
+            <th style="padding:6px 8px; font-size:11px; color:var(--text-soft);">Action</th>
+          </tr></thead>
+          <tbody id="expiryReviewBody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+        <button class="btn btn-secondary" onclick="closeModal('expiryReviewModal')">Cancel Import</button>
+        <button class="btn btn-primary" onclick="confirmExpiryReview()">Continue →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zero Quantity Review Modal -->
+  <div class="modal-backdrop" id="zeroQtyReviewModal">
+    <div class="modal-box" style="max-width:620px;">
+      <div class="modal-header">
+        <h3>⚠️ Zero Quantity Products</h3>
+        <button class="close-btn" onclick="closeModal('zeroQtyReviewModal')">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-soft); margin-bottom:12px;">The following rows have <strong style="color:var(--danger);">0 quantity</strong>. Uncheck any you do not want to import.</p>
+      <div style="display:flex; gap:8px; margin-bottom:10px;">
+        <button class="btn btn-secondary" style="font-size:11px;" onclick="document.querySelectorAll('[id^=zeroInclude_]').forEach(el=>el.checked=true)">Select All</button>
+        <button class="btn btn-secondary" style="font-size:11px;" onclick="document.querySelectorAll('[id^=zeroInclude_]').forEach(el=>el.checked=false)">Deselect All</button>
+      </div>
+      <div style="max-height:50vh; overflow-y:auto;">
+        <table style="width:100%;">
+          <thead><tr>
+            <th style="padding:6px 8px; font-size:11px; color:var(--text-soft);">Chemical Name</th>
+            <th style="padding:6px 8px; font-size:11px; color:var(--text-soft);">SAP No.</th>
+            <th style="padding:6px 8px; font-size:11px; color:var(--text-soft); text-align:center;">Quantity</th>
+            <th style="padding:6px 8px; font-size:11px; color:var(--text-soft); text-align:center;">Import?</th>
+          </tr></thead>
+          <tbody id="zeroQtyBody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+        <button class="btn btn-secondary" onclick="closeModal('zeroQtyReviewModal')">Cancel Import</button>
+        <button class="btn btn-primary" onclick="confirmZeroQtyReview()">Finalize Import ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add to Catalog Modal -->
+  <div class="modal-backdrop" id="dbAddModal">
+    <div class="modal-box" style="max-width:700px;">
+      <div class="modal-header">
+        <h3>➕ Add New Chemical to Catalog</h3>
+        <button class="close-btn" onclick="closeModal('dbAddModal')">✕</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Item No.</label><input type="number" id="dItemNo" readonly title="Auto-generated"></div>
+        <div class="form-group"><label>Chemical Name *</label><input type="text" title="Enter Chemical Name" id="dName"></div>
+        <div class="form-group"><label>SAP No. *</label><input type="number" title="Numbers only" id="dSap"></div>
+        <div class="form-group"><label>Unit Size</label><input type="text" title="e.g., 55 Gal" id="dUnit"></div>
+        <div class="form-group"><label>Units Per Pallet</label><input type="number" title="Total units on one pallet" id="dPallet"></div>
+        <div class="form-group"><label>Function</label><input type="text" title="Chemical function/purpose" id="dFunc"></div>
+        <div class="form-group"><label>Manufacturer</label><input type="text" title="Manufacturer name" id="dMan"></div>
+        <div class="form-group"><label>SDS / Safety Data Sheet URL</label><input type="url" title="Link to Safety Data Sheet" id="dSds" placeholder="https://..."></div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+        <button class="btn btn-secondary" onclick="closeModal('dbAddModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveDbRow()">Save to Catalog</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data Setup
+    let mainData = JSON.parse(localStorage.getItem('mTracker')) || [];
+    let dbData = JSON.parse(localStorage.getItem('mDb')) || [];
+    let trashMain = JSON.parse(localStorage.getItem('mTrashMain')) || [];
+    let trashDb = JSON.parse(localStorage.getItem('mTrashDb')) || [];
+    let dismissedAlerts = JSON.parse(localStorage.getItem('mDismissedAlerts')) || [];
+    let hiddenCols = JSON.parse(localStorage.getItem('mHiddenCols')) || [];
+    let snapshots = JSON.parse(localStorage.getItem('mSnapshots')) || [];
+    let consumptionLog = JSON.parse(localStorage.getItem('mConsLog')) || [];
+    let manifestHistory = JSON.parse(localStorage.getItem('mManifestHistory')) || [];
+    let pendingUndo = null;
+    let toastTimer = null;
+    let activeNotesUuid = null;
+    let lastVisibleRows = [];
+    let selectedRows = new Set();
+    let calendarYear = new Date().getFullYear();
+    let calendarMonth = new Date().getMonth();
+    let _dupParsed = [];
+    let _dupDecisions = {};
+
+    const colsFull = ["Item No.", "Chemical Name", "Storage Location(s)", "CHB No.", "Startinng", "CHB in Arabic (Y/N)", "SAP No.", "REC", "USED", "B.L (Back Load)", "Special Handling Procedure* (A,B or C)", "Quantity", "Unit Size", "Expiry Date", "Days to Expire", "Quantity Safe Margin", "Action"];
+    const colsEssential = ["Item No.", "Chemical Name", "Storage Location(s)", "CHB No.", "SAP No.", "REC", "USED", "B.L (Back Load)", "Quantity", "Unit Size", "Expiry Date", "Days to Expire", "Quantity Safe Margin", "Action"];
+    const dbCols = ["itemNo", "name", "sap", "unit", "pallet", "func", "man"];
+
+    const fieldMap = {
+      "Item No.": "itemNo", "Chemical Name": "chemicalName", "Storage Location(s)": "storageLocation",
+      "CHB No.": "chbNo", "Startinng": "starting", "CHB in Arabic (Y/N)": "chbArabic",
+      "SAP No.": "sapNo", "REC": "rec", "USED": "used", "B.L (Back Load)": "bl",
+      "Special Handling Procedure* (A,B or C)": "handling", "Quantity": "quantity",
+      "Unit Size": "unitSize", "Expiry Date": "expiryDate", "Days to Expire": "days",
+      "Quantity Safe Margin": "minAlertQty"
+    };
+
+    let isFullView = true;
+    let activeCard = 'all';
+    let importTarget = '';
+    let rawExcelRows = [];
+    let excelHeaders = [];
+    let editDbIndex = null;
+    let chartCounter = 0; 
+
+    window.onload = () => {
+      const themeSwitch = document.getElementById('themeToggleCheckbox');
+      if(localStorage.getItem('theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeSwitch.checked = true;
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeSwitch.checked = false;
+      }
+
+      themeSwitch.addEventListener('change', () => {
+        if(themeSwitch.checked) {
+          document.documentElement.setAttribute('data-theme', 'light');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+        }
+        if(window.Chart && Chart.instances) {
+          Object.values(Chart.instances).forEach(chart => { chart.update(); });
+        }
+      });
+
+      populateAnalyticsAxes();
+      updateAll();
+      
+      document.getElementById('dItemNo').value = getNextItemNo(dbData, 'itemNo');
+
+      fitTableHeight();
+      window.addEventListener('resize', () => {
+        const activeTab = document.querySelector('.tab-content.active-tab');
+        if (activeTab && activeTab.id === 'tab-database') fitDbTableHeight();
+        else fitTableHeight();
+      });
+
+      initColTogglePanel();
+      initKeyboardShortcuts();
+      initPWA();
+      checkBackupReminder();
+      updateStorageIndicator();
+
+      // Auto-save every 3 minutes
+      setInterval(() => { saveLocal(); }, 3 * 60 * 1000);
+
+      // Close col toggle panel on outside click
+      document.addEventListener('click', (e) => {
+        const wrap = document.querySelector('.col-toggle-wrap');
+        if(wrap && !wrap.contains(e.target)) document.getElementById('colTogglePanel').classList.remove('open');
+      });
+    };
+
+    function fitTableHeight() {
+      const stickyArea = document.querySelector('.sticky-top-area');
+      const topOffset = stickyArea ? (85 + stickyArea.offsetHeight + 10) : 240;
+      const tc = document.querySelector('#tab-tracker .table-container');
+      if (tc) {
+        tc.style.height = (window.innerHeight - topOffset - 20) + 'px';
+        tc.style.maxHeight = 'none';
+      }
+    }
+
+    function fitDbTableHeight() {
+      const tc = document.querySelector('#tab-database .table-container');
+      if (!tc) return;
+      const rect = tc.getBoundingClientRect();
+      const available = window.innerHeight - rect.top - 20;
+      tc.style.height = Math.max(200, available) + 'px';
+      tc.style.maxHeight = 'none';
+    }
+
+    function updateAll() {
+      saveLocal();
+      renderMainTable();
+      renderDbTable();
+      renderTrash();
+      updateAlerts();
+      updateStorageIndicator();
+      renderSnapshots();
+      renderConsumptionLog();
+      renderManifestHistory();
+      let el = document.getElementById('tabClogCount');
+      if(el) el.textContent = consumptionLog.length;
+    }
+
+    function saveLocal() {
+      localStorage.setItem('mTracker', JSON.stringify(mainData));
+      localStorage.setItem('mDb', JSON.stringify(dbData));
+      localStorage.setItem('mTrashMain', JSON.stringify(trashMain));
+      localStorage.setItem('mTrashDb', JSON.stringify(trashDb));
+      localStorage.setItem('mDismissedAlerts', JSON.stringify(dismissedAlerts));
+      localStorage.setItem('mHiddenCols', JSON.stringify(hiddenCols));
+      localStorage.setItem('mSnapshots', JSON.stringify(snapshots));
+      localStorage.setItem('mConsLog', JSON.stringify(consumptionLog));
+      localStorage.setItem('mManifestHistory', JSON.stringify(manifestHistory));
+      // Update last-saved label
+      let el = document.getElementById('lastSavedLbl');
+      if(el) el.textContent = 'Saved ' + new Date().toLocaleTimeString();
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function _switchTabOriginal(id) {
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-tab'));
+      event.target.classList.add('active');
+      document.getElementById(id).classList.add('active-tab');
+      if(id === 'tab-database') { document.getElementById('dItemNo').value = getNextItemNo(dbData, 'itemNo'); setTimeout(fitDbTableHeight, 0); }
+      if(id === 'tab-tracker') fitTableHeight();
+    }
+
+    // MATH LOGIC: Compute Quantity automatically
+    function computeQuantity(start, rec, used, bl) {
+      let vStart = parseFloat(start) || 0;
+      let vRec = parseFloat(rec) || 0;
+      let vUsed = parseFloat(used) || 0;
+      let vBl = parseFloat(bl) || 0;
+      return vStart + vRec - vUsed - vBl;
+    }
+
+    window.liveCalcQty = function() {
+      let qty = computeQuantity(
+        document.getElementById('fStart').value,
+        document.getElementById('fRec').value,
+        document.getElementById('fUsed').value,
+        document.getElementById('fBl').value
+      );
+      document.getElementById('fQty').value = qty;
+    };
+
+    function getNextItemNo(arr, field) {
+        let max = 0;
+        arr.forEach(row => {
+            let val = parseInt(row[field]);
+            if (!isNaN(val) && val > max) max = val;
+        });
+        return max + 1;
+    }
+
+    // STRICT DATE LOGIC
+    
+// FLEXIBLE DATE LOGIC
+    function formatDate(val) {
+      if(val === null || val === undefined || val === "") return "";
+
+      let d = null;
+
+      if(typeof val === 'number' && !isNaN(val)) {
+        d = new Date(Math.round((val - 25569) * 86400 * 1000));
+      } else {
+        let s = String(val).trim();
+
+        if(!s) return "";
+
+        if(s.includes('T')) s = s.split('T')[0];
+
+        s = s.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+
+        let directDate = new Date(s);
+
+        if(!isNaN(directDate.getTime())) {
+          d = directDate;
+        } else {
+
+            let p = s.split(/[-/.\\s]/).filter(Boolean);
+
+            if(p.length === 3) {
+
+              if(p[0].length === 4) {
+                d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+              }
+
+              else if(p[2].length === 4) {
+
+                let first = Number(p[0]);
+                let second = Number(p[1]);
+                let year = Number(p[2]);
+
+                if(first > 12) {
+                  d = new Date(year, second - 1, first);
+                } else if(second > 12) {
+                  d = new Date(year, first - 1, second);
+                } else {
+                  d = new Date(year, first - 1, second);
+                }
+              }
+            }
+        }
+      }
+
+      if(!d || isNaN(d.getTime())) return "";
+
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function displayDate(dateStr) {
+      if(!dateStr) return "";
+      let p = String(dateStr).split('-');
+      if(p.length !== 3) return dateStr;
+      return `${p[2]}-${p[1]}-${p[0]}`;
+    }
+
+    function displayDate(val){
+      let f = formatDate(val);
+      if(!f) return '';
+      let p = f.split('-');
+      return `${p[2]}-${p[1]}-${p[0]}`;
+    }
+
+function calcDays(dateStr) {
+      if(!dateStr) return '';
+      let p = dateStr.split('-');
+      if(p.length !== 3) return '';
+      let d = new Date(p[0], p[1]-1, p[2]); 
+      let now = new Date(); now.setHours(0,0,0,0); d.setHours(0,0,0,0);
+      return Math.ceil((d - now) / 86400000);
+    }
+
+    function getExpBucket(days) {
+      if(days === '') return 'unknown';
+      if(days <= 0) return 'black';
+      if(days >= 10 && days <= 105) return 'grey';
+      if(days > 105 && days < 120) return 'red';
+      if(days >= 120 && days < 150) return 'orange';
+      if(days >= 150 && days <= 180) return 'green';
+      if(days > 180) return 'white';
+      return 'unknown';
+    }
+
+    window.editMargin = function(uuid) {
+      let r = mainData.find(x => x.uuid === uuid);
+      if(r) {
+        let v = prompt(`Set Quantity Safe Margin for ${r.chemicalName}:`, r.minAlertQty || 0);
+        if(v !== null && !isNaN(v)) { r.minAlertQty = Number(v); updateAll(); }
+      }
+    };
+    
+    // DB ROW MATH INPUT BUG FIXED
+    window.editDbRowsUnits = function(idx) {
+      let r = dbData[idx];
+      let rowInput = prompt(`Set Number of Rows for ${r.name}:`, r.rCount !== undefined ? r.rCount : 1);
+      if(rowInput === null || isNaN(rowInput) || rowInput.trim() === "") return;
+      let unitInput = prompt(`Set Units Per Row for ${r.name}:`, r.upr !== undefined ? r.upr : 1);
+      if(unitInput === null || isNaN(unitInput) || unitInput.trim() === "") return;
+      
+      let rCount = Number(rowInput);
+      let upr = Number(unitInput);
+      let totalExpected = rCount * upr;
+      let palletTotal = Number(r.pallet || 0);
+
+      dbData[idx].rCount = rCount; 
+      dbData[idx].upr = upr;
+      
+      if(palletTotal > 0 && totalExpected !== palletTotal) {
+        alert(`⚠️ WARNING! Math mismatch.\nRows (${rCount}) * Units/Row (${upr}) = ${totalExpected}\nPallet Total column says: ${palletTotal}`);
+      }
+      updateAll(); // Force data persistence and structural table visual redraw
+    };
+
+    function toggleViewMode() { isFullView = !isFullView; renderMainTable(); }
+
+    function setCardFilter(status) {
+      activeCard = activeCard === status ? 'all' : status;
+      document.querySelectorAll('.metric-card').forEach(c => c.classList.remove('active-filter'));
+      if(activeCard !== 'all') document.getElementById(`cardFilter-${status}`).classList.add('active-filter');
+      renderMainTable();
+    }
+
+    const autoInp = document.getElementById('fChemicalName');
+    const autoBox = document.getElementById('autoList');
+    autoInp.addEventListener('input', (e) => {
+      let q = e.target.value.toLowerCase();
+      autoBox.innerHTML = '';
+      if(!q) { autoBox.style.display = 'none'; return; }
+      let matches = dbData.filter(d => (d.name||'').toLowerCase().includes(q));
+      if(!matches.length) { autoBox.style.display = 'none'; return; }
+      
+      matches.forEach(m => {
+        let d = document.createElement('div');
+        d.className = 'autocomplete-item';
+        d.innerHTML = `<strong>${m.name}</strong> <span>SAP: ${m.sap}</span>`;
+        d.onclick = () => {
+          autoInp.value = m.name;
+          document.getElementById('fSap').value = m.sap || '';
+          document.getElementById('fUnit').value = m.unit || '';
+          autoBox.style.display = 'none';
+        };
+        autoBox.appendChild(d);
+      });
+      autoBox.style.display = 'block';
+    });
+
+    document.addEventListener("click", (e) => {
+      if(e.target !== autoInp && e.target !== autoBox) autoBox.style.display = 'none';
+    });
+
+    let currentEditIndex = null;
+    function clearEntryForm() {
+      currentEditIndex = null;
+      document.getElementById('entryTitle').textContent = "➕ Add New Entry";
+      ['fUuid','fChemicalName','fStorage','fChb','fStart','fSap','fRec','fUsed','fBl','fQty','fUnit','fExp','fBatch'].forEach(id => document.getElementById(id).value='');
+      
+      document.getElementById('fArabic').value = 'No';
+      document.getElementById('fHand').value = 'A';
+      document.getElementById('fItemNo').value = getNextItemNo(mainData, 'itemNo');
+      document.getElementById('fSafeMargin').value = '10';
+    }
+
+    function saveEntry() {
+      let name = document.getElementById('fChemicalName').value;
+      let sap = document.getElementById('fSap').value;
+      if(!name || !sap) return alert("Chemical Name and SAP No required.");
+      
+      let start = document.getElementById('fStart').value;
+      let rec = document.getElementById('fRec').value;
+      let used = document.getElementById('fUsed').value;
+      let bl = document.getElementById('fBl').value;
+      let userQty = parseFloat(document.getElementById('fQty').value) || 0;
+      let calcQty = computeQuantity(start, rec, used, bl);
+      
+      let finalQty = (userQty !== calcQty) ? calcQty : userQty;
+      let rawExp = document.getElementById('fExp').value;
+      let fmtExp = formatDate(rawExp); 
+
+      // Log USED changes
+      let newUsed = parseFloat(used) || 0;
+      let prevUsed = 0;
+      if(currentEditIndex !== null && mainData[currentEditIndex]) {
+        prevUsed = parseFloat(mainData[currentEditIndex].used) || 0;
+        if(newUsed !== prevUsed) {
+          consumptionLog.unshift({
+            id: Date.now().toString(),
+            uuid: mainData[currentEditIndex].uuid,
+            chemicalName: name,
+            sapNo: sap,
+            oldUsed: prevUsed,
+            newUsed: newUsed,
+            delta: newUsed - prevUsed,
+            ts: new Date().toISOString()
+          });
+          if(consumptionLog.length > 500) consumptionLog = consumptionLog.slice(0, 500);
+        }
+      }
+
+      let obj = {
+        uuid: document.getElementById('fUuid').value || Date.now().toString(),
+        itemNo: document.getElementById('fItemNo').value,
+        chemicalName: name, storageLocation: document.getElementById('fStorage').value,
+        chbNo: document.getElementById('fChb').value, starting: start,
+        chbArabic: document.getElementById('fArabic').value, sapNo: sap,
+        rec: rec, used: used, bl: bl, handling: document.getElementById('fHand').value,
+        quantity: finalQty, unitSize: document.getElementById('fUnit').value,
+        minAlertQty: document.getElementById('fSafeMargin').value || "10",
+        expiryDate: fmtExp,
+        batchNo: document.getElementById('fBatch').value || '',
+        lastModified: new Date().toISOString(),
+        notes: (currentEditIndex !== null && mainData[currentEditIndex]) ? (mainData[currentEditIndex].notes || '') : ''
+      };
+
+      if(currentEditIndex === null) mainData.push(obj);
+      else mainData[currentEditIndex] = obj;
+
+      closeModal('entryModal');
+      updateAll();
+    }
+
+    window.editMainRow = function(idx) {
+      currentEditIndex = idx;
+      let r = mainData[idx];
+      document.getElementById('entryTitle').textContent = "✏️ Edit Entry";
+      document.getElementById('fUuid').value = r.uuid;
+      document.getElementById('fItemNo').value = r.itemNo||''; document.getElementById('fChemicalName').value = r.chemicalName||'';
+      document.getElementById('fStorage').value = r.storageLocation||''; document.getElementById('fChb').value = r.chbNo||'';
+      document.getElementById('fStart').value = r.starting||''; 
+      
+      // Handle setting default validation options nicely if blank
+      document.getElementById('fArabic').value = r.chbArabic === 'Yes' ? 'Yes' : 'No';
+      document.getElementById('fSap').value = r.sapNo||''; document.getElementById('fRec').value = r.rec||'';
+      document.getElementById('fUsed').value = r.used||''; document.getElementById('fBl').value = r.bl||'';
+      document.getElementById('fHand').value = ['A','B','C'].includes(r.handling) ? r.handling : 'A';
+      
+      document.getElementById('fQty').value = r.quantity||'';
+      document.getElementById('fUnit').value = r.unitSize||''; document.getElementById('fSafeMargin').value = r.minAlertQty||'10';
+      document.getElementById('fExp').value = formatDate(r.expiryDate);
+      document.getElementById('fBatch').value = r.batchNo || '';
+      openModal('entryModal');
+    };
+
+    window.delMainRow = function(idx) {
+      let deleted = mainData.splice(idx,1)[0];
+      trashMain.push({ origIdx: idx, data: deleted });
+      updateAll();
+      showToast(`Deleted: ${deleted.chemicalName}`, () => {
+        trashMain.pop();
+        mainData.splice(idx, 0, deleted);
+        updateAll();
+      });
+    };
+
+    function deleteAllMain() {
+      if (!mainData.length) return alert("Master Tracker is already empty.");
+      if (!confirm(`Delete all ${mainData.length} rows from Master Tracker? They will be moved to Trash.`)) return;
+      let count = mainData.length;
+      mainData.forEach((d, i) => trashMain.push({ origIdx: i, data: d }));
+      mainData = [];
+      updateAll();
+      showToast(`Deleted all ${count} rows from Master Tracker.`);
+    }
+
+    function deleteAllDb() {
+      if (!dbData.length) return alert("Chemical Database is already empty.");
+      if (!confirm(`Delete all ${dbData.length} items from Chemical Database? They will be moved to Trash.`)) return;
+      let count = dbData.length;
+      dbData.forEach((d, i) => trashDb.push({ origIdx: i, data: d }));
+      dbData = [];
+      updateAll();
+      showToast(`Deleted all ${count} items from Chemical Database.`);
+    }
+
+    let mSortField = ''; let mSortAsc = true;
+    window.sortMain = function(field) {
+      mSortAsc = mSortField === field ? !mSortAsc : true;
+      mSortField = field;
+      mainData.sort((a,b) => {
+        let va = a[field] || ''; let vb = b[field] || '';
+        if(typeof va === 'string') return mSortAsc ? va.localeCompare(vb, undefined, {numeric:true}) : vb.localeCompare(va, undefined, {numeric:true});
+        return mSortAsc ? va - vb : vb - va;
+      });
+      renderMainTable();
+    };
+
+    function renderMainTable() {
+      let head = document.getElementById('mainHead');
+      let body = document.getElementById('mainBody');
+      let cols = (isFullView ? colsFull : colsEssential).filter(c => !hiddenCols.includes(c));
+
+      // Sort indicators
+      head.innerHTML = '<tr><th class="sel-col"><input type="checkbox" id="selectAllChk" onchange="bulkToggleAll(this.checked)" style="width:auto; cursor:pointer;" title="Select/deselect all"></th>' + cols.map(c => {
+        if(c === "Action") return `<th>Action</th>`;
+        let fk = fieldMap[c];
+        let arrow = (mSortField === fk) ? (mSortAsc ? ' ↑' : ' ↓') : ' ↕';
+        let stickyAttr = (c === "Chemical Name") ? ' class="sticky-col"' : '';
+        return `<th${stickyAttr} title="Sort by ${c}" onclick="sortMain('${fk}')">${c}${arrow}</th>`;
+      }).join('') + '</tr>';
+      
+      let searchQuery = document.getElementById('trackerSearch').value.toLowerCase();
+      body.innerHTML = '';
+      let counts = { white:0, green:0, orange:0, red:0, grey:0, black:0, unknown:0, total:0 };
+      lastVisibleRows = [];
+
+      mainData.forEach((row, idx) => {
+        row.expiryDate = formatDate(row.expiryDate);
+        row.days = calcDays(row.expiryDate);
+        let bucket = getExpBucket(row.days);
+        
+        counts.total++;
+        if(counts[bucket] !== undefined) counts[bucket]++;
+
+        if(activeCard !== 'all' && activeCard !== bucket) return;
+
+        let rData = cols.map(c => c === "Action" ? "" : (row[fieldMap[c]] || ""));
+        let matchedCols = {};
+        if (searchQuery) {
+          let matchFound = false;
+          cols.forEach((c, i) => {
+            let val = String(rData[i]).toLowerCase();
+            if(val.includes(searchQuery)) { matchFound = true; matchedCols[i] = true; }
+          });
+          if (!matchFound) return;
+        }
+
+        lastVisibleRows.push(row);
+        let tr = document.createElement('tr');
+        tr.className = `row-${bucket}`;
+        tr.id = `row-${row.uuid}`;
+        let lastMod = row.lastModified ? new Date(row.lastModified).toLocaleString() : 'N/A';
+        tr.title = `Last modified: ${lastMod}`;
+
+        // Checkbox cell
+        let chkTd = document.createElement('td');
+        chkTd.className = 'sel-col';
+        chkTd.innerHTML = `<input type="checkbox" class="row-check" data-uuid="${row.uuid}" ${selectedRows.has(row.uuid)?'checked':''} onchange="bulkRowToggle(this)">`;
+        tr.appendChild(chkTd);
+
+        cols.forEach((c, i) => {
+          let td = document.createElement('td');
+          if(c === "Chemical Name") td.className = 'sticky-col';
+
+          if(c === "Action") {
+            let noteDot = row.notes ? '<span class="note-dot" title="Has notes"></span>' : '';
+            let batchBadge = row.batchNo ? `<span title="Batch: ${row.batchNo}" style="font-size:10px; background:rgba(168,85,247,0.2); color:#a855f7; padding:1px 5px; border-radius:3px; margin-left:2px;">${row.batchNo}</span>` : '';
+            td.innerHTML = `<button class="btn btn-secondary" title="Edit this row" style="padding:4px 8px;" onclick="editMainRow(${idx})">✏️</button> <button class="btn btn-secondary" title="Duplicate this row" style="padding:4px 8px;" onclick="duplicateMainRow(${idx})">📋</button> <button class="btn btn-secondary" title="View/edit notes" style="padding:4px 8px;" onclick="openNotesModal('${row.uuid}')">${row.notes ? '📝' : '🗒️'}${noteDot}</button>${batchBadge} <button class="btn btn-danger" title="Delete this row" style="padding:4px 8px;" onclick="delMainRow(${idx})">🗑️</button>`;
+          } else if(c === "Quantity Safe Margin") {
+            td.textContent = rData[i] || '0'; td.className += ' editable-cell';
+            td.title = "Double click to edit margin"; td.ondblclick = () => editMargin(row.uuid);
+          } else if(c === "Days to Expire") {
+            td.innerHTML = `<strong>${rData[i]}</strong>`;
+          } else {
+            let displayVal = c === 'Expiry Date' ? displayDate(rData[i]) : rData[i];
+            if(searchQuery && matchedCols[i] && displayVal) {
+              let re = new RegExp('(' + searchQuery.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+              td.innerHTML = String(displayVal).replace(re, '<mark>$1</mark>');
+            } else {
+              td.textContent = displayVal;
+            }
+          }
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+
+      document.getElementById('mTotal').innerText = counts.total;
+      ['white','green','orange','red','grey','black','unknown'].forEach(c => {
+        let el = document.getElementById('m'+c.charAt(0).toUpperCase()+c.slice(1));
+        if(el) el.innerText = counts[c];
+      });
+      document.getElementById('tabMainCount').innerText = counts.total;
+      document.getElementById('tabDbCount').innerText = dbData.length;
+      updateBulkBar();
+    }
+
+    function openDbAddModal() {
+      ['dName','dSap','dUnit','dPallet','dFunc','dMan','dSds'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('dItemNo').value = getNextItemNo(dbData, 'itemNo');
+      openModal('dbAddModal');
+    }
+
+    function saveDbRow() {
+      let r = {
+        itemNo: document.getElementById('dItemNo').value,
+        name: document.getElementById('dName').value, sap: document.getElementById('dSap').value,
+        unit: document.getElementById('dUnit').value, pallet: document.getElementById('dPallet').value,
+        rCount: 1, upr: 1, 
+        func: document.getElementById('dFunc').value, man: document.getElementById('dMan').value,
+        sdsUrl: document.getElementById('dSds').value
+      };
+      if(!r.name || !r.sap) return alert("Name & SAP Required");
+      dbData.push(r);
+      closeModal('dbAddModal');
+      document.getElementById('dItemNo').value = getNextItemNo(dbData, 'itemNo');
+      updateAll();
+      showToast(`Added: ${r.name}`);
+    }
+
+    window.editDbRow = function(idx) {
+      editDbIndex = idx; let r = dbData[idx];
+      document.getElementById('eDbItemNo').value = r.itemNo||''; document.getElementById('eDbName').value = r.name||''; 
+      document.getElementById('eDbSap').value = r.sap||''; document.getElementById('eDbUnit').value = r.unit||''; 
+      document.getElementById('eDbPallet').value = r.pallet||''; document.getElementById('eDbFunc').value = r.func||''; 
+      document.getElementById('eDbMan').value = r.man||'';
+      document.getElementById('eDbSds').value = r.sdsUrl||'';
+      openModal('dbEditModal');
+    };
+
+    function saveDbEdit() {
+      if(editDbIndex === null) return;
+      dbData[editDbIndex].name = document.getElementById('eDbName').value;
+      dbData[editDbIndex].sap = document.getElementById('eDbSap').value;
+      dbData[editDbIndex].unit = document.getElementById('eDbUnit').value;
+      dbData[editDbIndex].pallet = document.getElementById('eDbPallet').value;
+      dbData[editDbIndex].func = document.getElementById('eDbFunc').value;
+      dbData[editDbIndex].man = document.getElementById('eDbMan').value;
+      dbData[editDbIndex].sdsUrl = document.getElementById('eDbSds').value;
+      editDbIndex = null;
+      closeModal('dbEditModal'); updateAll();
+    }
+
+    window.delDbRow = function(idx) {
+      let deleted = dbData.splice(idx,1)[0];
+      trashDb.push({ origIdx: idx, data: deleted });
+      updateAll();
+      showToast(`Deleted: ${deleted.name}`, () => {
+        trashDb.pop();
+        dbData.splice(idx, 0, deleted);
+        updateAll();
+      });
+    };
+
+    let dSortField = ''; let dSortAsc = true;
+    window.sortDb = function(field) {
+      dSortAsc = dSortField === field ? !dSortAsc : true; dSortField = field;
+      dbData.sort((a,b) => {
+        let va = a[field] || ''; let vb = b[field] || '';
+        return dSortAsc ? va.localeCompare(vb, undefined, {numeric:true}) : vb.localeCompare(va, undefined, {numeric:true});
+      });
+      renderDbTable();
+    };
+
+    function renderDbTable() {
+      let b = document.getElementById('dbBody'); let q = document.getElementById('dbSearch').value.toLowerCase();
+      b.innerHTML = '';
+      dbData.forEach((r, i) => {
+        if(q && !r.name.toLowerCase().includes(q) && !String(r.sap).toLowerCase().includes(q) && !(r.itemNo||'').includes(q)) return;
+        let rc = r.rCount !== undefined ? r.rCount : 1; 
+        let ur = r.upr !== undefined ? r.upr : 1;
+        let sdsCell = r.sdsUrl 
+          ? `<button class="btn btn-secondary" style="padding:3px 7px; font-size:12px;" title="View SDS in modal" onclick="openSdsView('${r.sdsUrl.replace(/'/g,"\\'")}','${r.name.replace(/'/g,"\\'")}')">📋</button>`
+          : `<span style="color:var(--text-soft); font-size:11px;">—</span>`;
+        b.innerHTML += `<tr>
+          <td>${r.itemNo||''}</td>
+          <td>${r.sap}</td><td class="sticky-col"><strong>${r.name}</strong></td><td>${r.unit||''}</td><td>${r.pallet||''}</td>
+          <td class="editable-cell" style="background: rgba(56, 189, 248, 0.05);" title="Double click to edit Rows and Units" ondblclick="editDbRowsUnits(${i})">${rc} Rows * (${ur} u/r) = <strong>${rc*ur}</strong></td>
+          <td>${r.func||''}</td><td>${r.man||''}</td>
+          <td style="text-align:center;">${sdsCell}</td>
+          <td>
+            <button class="btn btn-primary" title="Add to Master Tracker (pre-fill form)" style="padding:4px 8px; font-size:11px;" onclick="quickAddFromDb(${i})">➕</button>
+            <button class="btn btn-secondary" title="Edit Catalog Item" style="padding:4px 8px;" onclick="editDbRow(${i})">✏️</button>
+            <button class="btn btn-danger" title="Delete Catalog Item" style="padding:4px 8px;" onclick="delDbRow(${i})">🗑️</button>
+          </td>
+        </tr>`;
+      });
+    }
+
+    function renderTrash() {
+      let tb = document.getElementById('trashMainBody'); tb.innerHTML = '';
+      trashMain.forEach((r, i) => {
+        tb.innerHTML += `<tr><td>${r.data.chemicalName}</td><td>${r.data.sapNo}</td><td>${r.data.quantity}</td>
+        <td><button class="btn btn-primary" title="Restore to table" onclick="restoreTrash('main', ${i})">Restore</button></td></tr>`;
+      });
+      let dbb = document.getElementById('trashDbBody'); dbb.innerHTML = '';
+      trashDb.forEach((r, i) => {
+        dbb.innerHTML += `<tr><td>${r.data.itemNo||''}</td><td>${r.data.name}</td><td>${r.data.sap}</td>
+        <td><button class="btn btn-primary" title="Restore to catalog" onclick="restoreTrash('db', ${i})">Restore</button></td></tr>`;
+      });
+      // Update badges
+      let bm = document.getElementById('binMainBadge'); if(bm) bm.textContent = trashMain.length;
+      let bd = document.getElementById('binDbBadge'); if(bd) bd.textContent = trashDb.length;
+      let bs = document.getElementById('binSnapBadge'); if(bs) bs.textContent = snapshots.length;
+    }
+
+    window.restoreTrash = function(type, idx) {
+      if(type==='main') { let r = trashMain.splice(idx,1)[0]; mainData.splice(r.origIdx, 0, r.data); } 
+      else { let r = trashDb.splice(idx,1)[0]; dbData.splice(r.origIdx, 0, r.data); }
+      updateAll();
+    };
+
+    function _wipeSystemOriginal() {
+      if(confirm("Wipe all local browser data?")) {
+        mainData=[]; dbData=[]; trashMain=[]; trashDb=[]; dismissedAlerts=[]; updateAll();
+      }
+    }
+
+    function _exportBackupJSONOriginal() {
+      let blob = new Blob([JSON.stringify({mainData, dbData, trashMain, trashDb, dismissedAlerts})], {type: "application/json"});
+      let a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Rig_Backup_${Date.now()}.json`; a.click();
+      localStorage.setItem('lastBackupTime', Date.now().toString());
+      document.getElementById('backupBanner').classList.remove('visible');
+    }
+
+    function _importBackupJSONOriginal(e) {
+      let f = e.target.files[0]; if(!f) return; let r = new FileReader();
+      r.onload = ev => {
+        try {
+          let j = JSON.parse(ev.target.result);
+          mainData = j.mainData||[]; dbData = j.dbData||[]; trashMain = j.trashMain||[]; trashDb = j.trashDb||[]; dismissedAlerts = j.dismissedAlerts||[];
+          updateAll(); alert("Backup Restored!");
+        } catch(e) { alert("Invalid JSON"); }
+      }; r.readAsText(f);
+    }
+
+    window.dismissAlert = function(id, e) {
+      e.stopPropagation(); dismissedAlerts.push(id); updateAll();
+    };
+
+    window.goToRow = function(uuid) {
+      closeModal('alertsModal'); switchTab('tab-tracker');
+      document.querySelectorAll('.highlight-row').forEach(el => el.classList.remove('highlight-row'));
+      let row = document.getElementById(`row-${uuid}`);
+      if(row) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' }); row.classList.add('highlight-row');
+        setTimeout(() => row.classList.remove('highlight-row'), 3000); 
+      }
+    };
+
+    function updateAlerts() {
+      let stockAlerts = []; let expAlerts = []; let manHtml = ''; let badgeCnt = 0;
+      mainData.forEach(r => {
+        let days = calcDays(r.expiryDate);
+        let q = parseFloat(r.quantity)||0; let m = parseFloat(r.minAlertQty)||0;
+
+        let alertIdStock = `stock_${r.uuid}_${q}`;
+        if(q <= m) {
+          manHtml += `<tr><td>${r.sapNo}</td><td>${r.chemicalName}</td><td>${q}</td><td>${m}</td><td style="color:var(--danger);font-weight:bold;">${m-q}</td></tr>`;
+          if(!dismissedAlerts.includes(alertIdStock)) {
+            badgeCnt++;
+            stockAlerts.push(`
+              <div class="alert-item" title="Click to view in table" onclick="goToRow('${r.uuid}')">
+                <div>
+                  <strong style="color:var(--warning)">⚠️ Low Stock: ${r.chemicalName}</strong><br>
+                  <span style="font-size:11px; color:var(--text-soft);">Current: ${q} | Margin: ${m}</span>
+                </div>
+                <button class="btn btn-secondary" style="padding:4px;" onclick="dismissAlert('${alertIdStock}', event)">✕</button>
+              </div>`);
+          }
+        }
+
+        let bucket = getExpBucket(days); let alertIdExp = `exp_${r.uuid}_${days}`;
+        if(bucket === 'black' || bucket === 'grey' || bucket === 'red') {
+          if(!dismissedAlerts.includes(alertIdExp)) {
+            badgeCnt++;
+            let color = bucket==='black' ? 'var(--danger)' : 'var(--warning)';
+            expAlerts.push(`
+              <div class="alert-item" title="Click to view in table" onclick="goToRow('${r.uuid}')">
+                <div>
+                  <strong style="color:${color}">⏳ Expiry: ${r.chemicalName}</strong><br>
+                  <span style="font-size:11px; color:var(--text-soft);">Status: ${days<=0 ? 'Expired' : days+' Days Left'} (${r.expiryDate})</span>
+                </div>
+                <button class="btn btn-secondary" style="padding:4px;" onclick="dismissAlert('${alertIdExp}', event)">✕</button>
+              </div>`);
+          }
+        }
+      });
+
+      let alertsHtml = '';
+      if(stockAlerts.length > 0) alertsHtml += `<details open><summary>📦 Low Stock Alerts (${stockAlerts.length})</summary>${stockAlerts.join('')}</details>`;
+      if(expAlerts.length > 0) alertsHtml += `<details open><summary>⏰ Expiry Alerts (${expAlerts.length})</summary>${expAlerts.join('')}</details>`;
+      document.getElementById('alertsContainer').innerHTML = alertsHtml || '<div style="color:var(--success)">✅ All systems clear. No new alerts.</div>';
+      document.getElementById('alertBadge').innerText = badgeCnt;
+    }
+
+    function openManifestModal() {
+      buildManifestBody();
+      openModal('manifestModal');
+    }
+
+    function buildManifestBody() {
+      let manHtml = '';
+      mainData.forEach(r => {
+        let q = parseFloat(r.quantity)||0; let m = parseFloat(r.minAlertQty)||0;
+        if(q <= m) {
+          let daysToStockout = calcDaysToStockout(r.uuid, q);
+          let dtsCell = daysToStockout !== null
+            ? `<span class="stockout-badge ${daysToStockout<=7?'stockout-crit':daysToStockout<=30?'stockout-warn':'stockout-ok'}">${daysToStockout}d</span>`
+            : '<span style="color:var(--text-soft);">N/A</span>';
+          let suggestedOrder = calcSuggestedOrder(r.uuid, m);
+          manHtml += `<tr>
+            <td>${r.sapNo}</td>
+            <td>${r.chemicalName}</td>
+            <td>${q}</td>
+            <td>${m}</td>
+            <td style="color:var(--danger); font-weight:bold;">${m-q}</td>
+            <td>${dtsCell}</td>
+            <td><input type="number" class="manifest-order-qty" data-uuid="${r.uuid}" value="${suggestedOrder}" min="0" style="width:80px; padding:3px 6px; font-size:12px; background:var(--bg-alt); border:1px solid var(--border-subtle); color:var(--text); border-radius:4px;"></td>
+          </tr>`;
+        }
+      });
+      let body = document.getElementById('manifestBody');
+      if(body) body.innerHTML = manHtml || '<tr><td colspan="7" style="text-align:center; color:var(--text-soft); padding:12px;">✅ No deficit items.</td></tr>';
+    }
+
+    function populateAnalyticsAxes() {
+      let selX = document.getElementById('cX'); let selY = document.getElementById('cY');
+
+      const xOptions = [
+        { label: "Chemical Name",          value: "chemicalName" },
+        { label: "Expiry Status",          value: "__expStatus" },
+        { label: "Storage Location",       value: "storageLocation" },
+        { label: "Handling Type (A/B/C)",  value: "handling" },
+        { label: "CHB in Arabic",          value: "chbArabic" },
+        { label: "Month of Expiry",        value: "__expiryMonth" },
+        { label: "Quarter of Expiry",      value: "__expiryQuarter" },
+        { label: "Quantity Range",         value: "__qtyRange" },
+        { label: "Days-to-Expire Range",   value: "__daysRange" },
+        { label: "Unit Size",              value: "unitSize" },
+        { label: "SAP No.",                value: "sapNo" },
+      ];
+
+      const yOptions = [
+        { label: "Quantity",               value: "quantity" },
+        { label: "Days to Expire",         value: "days" },
+        { label: "Safe Margin",            value: "minAlertQty" },
+        { label: "Starting Stock",         value: "starting" },
+        { label: "Received (REC)",         value: "rec" },
+        { label: "Used (USED)",            value: "used" },
+        { label: "Bill of Lading (BL)",    value: "bl" },
+        { label: "Qty vs Margin Gap",      value: "__qtyGap" },
+        { label: "Stock Utilization %",    value: "__utilPct" },
+      ];
+
+      selX.innerHTML = xOptions.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+      selY.innerHTML = yOptions.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+      selX.value = "chemicalName"; selY.value = "quantity";
+    }
+
+    function buildCustomChart() {
+      let type = document.getElementById('cType').value;
+      let xKey = document.getElementById('cX').value;
+      let yKey = document.getElementById('cY').value;
+      let agg  = document.getElementById('cAgg').value;
+
+      // Computed value resolver per row
+      function rowY(r) {
+        let qty = parseFloat(r.quantity)||0, margin = parseFloat(r.minAlertQty)||0;
+        let start = parseFloat(r.starting)||0;
+        if(yKey === '__qtyGap')    return qty - margin;
+        if(yKey === '__utilPct')   return start > 0 ? Math.round(((start - qty) / start) * 100) : 0;
+        if(yKey === 'days')        return r.days !== '' ? Number(r.days) : null;
+        return parseFloat(r[yKey]) || 0;
+      }
+
+      // Group key resolver per row
+      function rowX(r) {
+        let status = { white:'Safe>6M', green:'Good 5-6M', orange:'Warning 4-5M', red:'Danger 105d-4M', grey:'Critical 10-105d', black:'Expired', unknown:'Unknown' };
+        if(xKey === '__expStatus')      return status[getExpBucket(r.days)] || 'Unknown';
+        if(xKey === '__expiryMonth') {
+          let d = r.expiryDate ? r.expiryDate.slice(0,7) : null;
+          return d ? new Date(d+'-01').toLocaleDateString('en-US',{month:'short',year:'numeric'}) : 'Unknown';
+        }
+        if(xKey === '__expiryQuarter') {
+          if(!r.expiryDate) return 'Unknown';
+          let [y,m] = r.expiryDate.split('-'); let q = Math.ceil(parseInt(m)/3);
+          return `Q${q} ${y}`;
+        }
+        if(xKey === '__qtyRange') {
+          let q = parseFloat(r.quantity)||0;
+          if(q === 0) return '0'; if(q <= 5) return '1-5'; if(q <= 20) return '6-20'; if(q <= 50) return '21-50'; return '51+';
+        }
+        if(xKey === '__daysRange') {
+          let d = r.days;
+          if(d === '') return 'Unknown'; if(d <= 0) return 'Expired'; if(d <= 30) return '≤30d'; if(d <= 90) return '31-90d'; if(d <= 180) return '91-180d'; return '>180d';
+        }
+        return r[xKey] || 'Unknown';
+      }
+
+      // Build grouped dict
+      let dict = {};  // label → [values]
+      mainData.forEach(r => {
+        r.expiryDate = formatDate(r.expiryDate);
+        r.days = calcDays(r.expiryDate);
+        let label = rowX(r);
+        let val = rowY(r);
+        if(val === null) return;
+        if(!dict[label]) dict[label] = [];
+        dict[label].push(val);
+      });
+
+      // Sort x labels sensibly
+      let labels = Object.keys(dict);
+      if(xKey === '__expiryMonth' || xKey === '__expiryQuarter') {
+        labels.sort((a,b) => new Date(a) - new Date(b));
+      }
+
+      // Aggregate
+      function aggregate(vals) {
+        if(!vals.length) return 0;
+        if(agg === 'count')  return vals.length;
+        if(agg === 'sum')    return vals.reduce((s,v)=>s+v, 0);
+        if(agg === 'avg')    return Math.round((vals.reduce((s,v)=>s+v,0)/vals.length)*10)/10;
+        if(agg === 'max')    return Math.max(...vals);
+        if(agg === 'min')    return Math.min(...vals);
+        return vals.reduce((s,v)=>s+v,0);
+      }
+      let values = labels.map(l => aggregate(dict[l]));
+
+      let isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      let textColor  = isLight ? '#0f172a' : '#e5e7eb';
+      let gridColor  = isLight ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.08)';
+      let palette    = ['#38bdf8','#22c55e','#f97316','#a855f7','#f59e0b','#10b981','#ef4444','#6366f1','#ec4899','#14b8a6'];
+
+      // Set global Chart defaults for this render
+      Chart.defaults.color = textColor;
+      Chart.defaults.borderColor = gridColor;
+
+      const container = document.getElementById('analyticsContainer');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chart-box';
+      wrapper.style.position = 'relative';
+      wrapper.innerHTML = `<div style="font-size:11px; color:var(--text-soft); margin-bottom:6px; padding-right:24px;">${document.getElementById('cX').options[document.getElementById('cX').selectedIndex].text} → ${document.getElementById('cY').options[document.getElementById('cY').selectedIndex].text} (${agg})</div><button style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-soft);cursor:pointer;font-size:16px;" onclick="this.parentElement.remove()">✕</button>`;
+
+      const canvasWrapper = document.createElement('div'); canvasWrapper.className = 'chart-canvas-wrapper';
+      const canvas = document.createElement('canvas'); canvas.id = `chart_${chartCounter++}`;
+      canvasWrapper.appendChild(canvas); wrapper.appendChild(canvasWrapper); container.appendChild(wrapper);
+
+      let axisConfig = {
+        x: { ticks: { color: textColor, maxRotation: 45 }, grid: { color: gridColor } },
+        y: { ticks: { color: textColor }, grid: { color: gridColor }, beginAtZero: true }
+      };
+
+      let chartType = type === 'horizontalBar' ? 'bar' : type;
+      let indexAxis = type === 'horizontalBar' ? 'y' : 'x';
+
+      let chartData, chartOptions;
+
+      if(type === 'scatter' || type === 'bubble') {
+        let pts = labels.map((l,i) => ({ x: i, y: values[i], r: type==='bubble' ? Math.max(4, Math.abs(values[i])/5) : 5, label: l }));
+        chartData = { datasets: [{ label: 'Data', data: pts, backgroundColor: '#38bdf8', borderColor: '#38bdf8' }] };
+        chartOptions = {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: textColor } }, tooltip: { callbacks: { label: ctx => `${labels[ctx.dataIndex]}: ${ctx.parsed.y}` } } },
+          scales: { x: { ...axisConfig.x, ticks: { ...axisConfig.x.ticks, callback: (v,i) => labels[i] ? labels[i].slice(0,12) : v } }, y: axisConfig.y }
+        };
+      } else if(type === 'pie' || type === 'doughnut' || type === 'polarArea') {
+        chartData = { labels, datasets: [{ data: values, backgroundColor: palette.slice(0, labels.length), borderColor: isLight ? '#fff' : '#1e293b', borderWidth: 2 }] };
+        chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: textColor, boxWidth: 12 } } } };
+      } else if(type === 'radar') {
+        chartData = { labels, datasets: [{ label: document.getElementById('cY').options[document.getElementById('cY').selectedIndex].text, data: values, backgroundColor: 'rgba(56,189,248,0.2)', borderColor: '#38bdf8', pointBackgroundColor: '#38bdf8', pointBorderColor: textColor }] };
+        chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } }, scales: { r: { ticks: { color: textColor, backdropColor: 'transparent' }, grid: { color: gridColor }, angleLines: { color: gridColor }, pointLabels: { color: textColor } } } };
+      } else {
+        // bar / line / horizontalBar
+        let isLine = type === 'line';
+        let bgColors = isLine ? 'rgba(56,189,248,0.15)' : labels.map((_,i) => palette[i % palette.length]);
+        let borderColors = isLine ? '#38bdf8' : (isLight ? '#fff' : '#1e293b');
+        chartData = { labels, datasets: [{ label: document.getElementById('cY').options[document.getElementById('cY').selectedIndex].text, data: values, backgroundColor: bgColors, borderColor: borderColors, borderWidth: isLine ? 2.5 : 1, fill: isLine, tension: 0.35, pointBackgroundColor: '#38bdf8', pointRadius: isLine ? 4 : 0, pointHoverRadius: isLine ? 6 : 0 }] };
+        chartOptions = {
+          indexAxis, responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: textColor } } },
+          scales: indexAxis === 'y'
+            ? { x: axisConfig.y, y: { ...axisConfig.x, ticks: { ...axisConfig.x.ticks, maxRotation: 0 } } }
+            : axisConfig
+        };
+      }
+
+      new Chart(canvas, { type: chartType, data: chartData, options: chartOptions });
+    }
+
+    
+    function generatePdfReport() {
+      if(mainData.length === 0) { alert("No data available."); return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('landscape');
+
+      doc.setFontSize(18);
+      doc.setTextColor(56, 189, 248);
+      doc.text("Master Tracker Summary Report", 14, 15);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Generated: ${new Date().toLocaleString()} | Total Items: ${mainData.length}`, 14, 22);
+
+      const bucketColors = {
+        white: [220,220,220], green: [34,197,94], orange: [249,115,22],
+        red: [156,163,175], grey: [239,68,68], black: [60,60,60], unknown: [100,100,100]
+      };
+
+      const rows = mainData.map(r => {
+        r.expiryDate = formatDate(r.expiryDate);
+        r.days = calcDays(r.expiryDate);
+        let bucket = getExpBucket(r.days);
+        let color = bucketColors[bucket] || [200,200,200];
+        return {
+          data: [r.chemicalName||'', r.sapNo||'', r.quantity||'', displayDate(r.expiryDate), r.days!==''?r.days:'N/A', r.storageLocation||''],
+          bucket, color
+        };
+      });
+
+      doc.autoTable({
+        startY: 28,
+        head: [['Chemical Name', 'SAP No.', 'Qty', 'Expiry Date', 'Days Left', 'Storage Location']],
+        body: rows.map(r => r.data),
+        headStyles: { fillColor: [15, 23, 42], textColor: [56, 189, 248], fontSize: 9, fontStyle: 'bold' },
+        bodyStyles: { fontSize: 8, textColor: [30, 30, 30] },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        didParseCell: (data) => {
+          if(data.section === 'body') {
+            let row = rows[data.row.index];
+            if(row) {
+              let c = row.color;
+              data.cell.styles.fillColor = [c[0], c[1], c[2]];
+              data.cell.styles.textColor = row.bucket === 'black' ? [200,200,200] : [30,30,30];
+            }
+          }
+        },
+        margin: { left: 14, right: 14 }
+      });
+
+      doc.save("Master_Tracker_Report.pdf");
+    }
+
+
+    function openImportModal(type) {
+      importTarget = type; document.getElementById('importTitle').innerText = type === 'main' ? "📥 Import Master Tracker" : "📥 Import Catalog";
+      document.getElementById('impFile').value = ''; document.getElementById('mappingContainer').innerHTML = '';
+      document.getElementById('importPreviewHead').innerHTML = ''; document.getElementById('importPreviewBody').innerHTML = '';
+      openModal('importModal');
+    }
+
+    function parseExcel() {
+      let f = document.getElementById('impFile').files[0]; if(!f) return;
+      let hRow = parseInt(document.getElementById('impHead').value) - 1; if (hRow < 0 || isNaN(hRow)) hRow = 0;
+      let reader = new FileReader();
+      reader.onload = e => {
+        let wb = XLSX.read(e.target.result, {type:'array'});
+        rawExcelRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:""});
+        excelHeaders = rawExcelRows[hRow] || [];
+        
+        let mCont = document.getElementById('mappingContainer'); mCont.innerHTML = '';
+        let tCols   = importTarget === 'main' ? Object.values(fieldMap) : dbCols;
+        let tLabels = importTarget === 'main' ? Object.keys(fieldMap) : ["Item No","Chemical Name","SAP No.","Unit Size","Units Per Pallet","Function","Manufacturer"];
+
+        // Exact/near-exact matching: use full label, not just first word
+        function bestMatch(label) {
+          let labelL = label.toLowerCase().replace(/[^a-z0-9]/g,'');
+          let best = -1, bestScore = 0;
+          excelHeaders.forEach((eh, ei) => {
+            let ehL = String(eh).toLowerCase().replace(/[^a-z0-9]/g,'');
+            let score = 0;
+            if(ehL === labelL) score = 100;
+            else if(ehL.includes(labelL) || labelL.includes(ehL)) score = 50;
+            if(score > bestScore) { bestScore = score; best = ei; }
+          });
+          return bestScore > 0 ? best : -1;
+        }
+
+        tCols.forEach((k, i) => {
+          // Skip purely calculated / user-set columns
+          if(k === 'days') return;
+          if(importTarget === 'main' && k === 'quantity') return;
+          if(importTarget === 'main' && k === 'minAlertQty') return;
+
+          let match = bestMatch(tLabels[i]);
+          let sel = `<select id="map_${k}" style="width:100%; padding:4px; font-size:11px;">`;
+          sel += `<option value="">-- Skip --</option>`;
+          excelHeaders.forEach((eh, ei) => {
+            let s = (ei === match) ? 'selected' : '';
+            sel += `<option value="${ei}" ${s}>Col ${ei+1}: ${eh}</option>`;
+          });
+          sel += `</select>`;
+          mCont.innerHTML += `<div><label style="font-size:11px; color:var(--text-soft);">${tLabels[i]}</label><br>${sel}</div>`;
+        });
+
+        let pHead = document.getElementById('importPreviewHead'); let pBody = document.getElementById('importPreviewBody');
+        pHead.innerHTML = '<tr>' + excelHeaders.map(h => `<th style="padding:6px; border-bottom:1px solid var(--border-subtle);">${h}</th>`).join('') + '</tr>';
+        pBody.innerHTML = '';
+        let dRow = parseInt(document.getElementById('impData').value) - 1; if (dRow < 0 || isNaN(dRow)) dRow = 1;
+        let previewRows = rawExcelRows.slice(dRow, dRow + 5);
+        previewRows.forEach(r => {
+          pBody.innerHTML += '<tr>' + excelHeaders.map((_, i) => `<td style="padding:4px 6px; border-bottom:1px solid var(--border-subtle);">${r[i] !== undefined ? r[i] : ''}</td>`).join('') + '</tr>';
+        });
+      }; reader.readAsArrayBuffer(f);
+    }
+
+    let _importParsed = []; // staging area between parse → expiry review → qty review → finalize
+
+    function executeImport() {
+      if(!rawExcelRows.length) return alert("Parse file first.");
+      let dRow = parseInt(document.getElementById('impData').value) - 1; if (dRow < 0 || isNaN(dRow)) dRow = 1;
+
+      let parsed = [];
+      if(importTarget === 'main') {
+        let maxItemNo = getNextItemNo(mainData, 'itemNo');
+        for(let i=dRow; i<rawExcelRows.length; i++) {
+          let row = rawExcelRows[i]; if(!row || !row.length) continue;
+          let obj = { uuid: Date.now()+i.toString() }; let hasData = false;
+          Object.values(fieldMap).forEach(k => {
+            if(k === 'days' || k === 'quantity' || k === 'minAlertQty') return; // skip calculated/user-set
+            let el = document.getElementById(`map_${k}`);
+            if(el && el.value !== "") {
+              let val = row[el.value];
+              if(k === 'expiryDate') obj[k] = formatDate(val);
+              else obj[k] = val !== undefined ? String(val) : "";
+              if(obj[k] !== "") hasData = true;
+            } else { obj[k] = ""; }
+          });
+          if(hasData) {
+            // Always compute quantity from components
+            obj.quantity = String(computeQuantity(obj.starting, obj.rec, obj.used, obj.bl));
+            if(!obj.itemNo) { obj.itemNo = maxItemNo; maxItemNo++; }
+            if(obj.chbArabic !== 'Yes' && obj.chbArabic !== 'No') obj.chbArabic = 'No';
+            if(!['A','B','C'].includes(obj.handling)) obj.handling = 'A';
+            obj.lastModified = new Date().toISOString();
+            parsed.push(obj);
+          }
+        }
+      } else {
+        let maxItemNo = getNextItemNo(dbData, 'itemNo');
+        for(let i=dRow; i<rawExcelRows.length; i++) {
+          let row = rawExcelRows[i]; if(!row || !row.length) continue;
+          let obj = {}; let hasData = false;
+          dbCols.forEach(k => {
+            let el = document.getElementById(`map_${k}`);
+            if(el && el.value !== "") {
+              obj[k] = row[el.value] !== undefined ? String(row[el.value]) : "";
+              if(obj[k] !== "") hasData = true;
+            } else { obj[k] = ""; }
+          });
+          if(hasData) {
+            if(!obj.itemNo) { obj.itemNo = maxItemNo; maxItemNo++; }
+            parsed.push(obj);
+          }
+        }
+        // DB has no expiry/qty review — finalize directly
+        let strat = document.getElementById('impStratHidden').value;
+        if(strat==='replace') dbData = parsed; else dbData = dbData.concat(parsed);
+        closeModal('importModal'); updateAll();
+        showToast(`Imported ${parsed.length} items into Chemical Database.`);
+        return;
+      }
+
+      _importParsed = parsed;
+      closeModal('importModal');
+
+      // Step 1: check for empty expiry dates
+      let missingExpiry = _importParsed.filter(r => !r.expiryDate);
+      if(missingExpiry.length > 0) {
+        openExpiryReviewModal(missingExpiry);
+      } else {
+        openZeroQtyReviewModal();
+      }
+    }
+
+    // ── EXPIRY REVIEW MODAL ────────────────────────────────────────────
+    function openExpiryReviewModal(missing) {
+      let body = document.getElementById('expiryReviewBody');
+      body.innerHTML = '';
+      missing.forEach(r => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="padding:6px 8px;">${r.chemicalName || r.uuid}</td>
+          <td style="padding:6px 8px;">${r.sapNo || '—'}</td>
+          <td style="padding:6px 8px;"><input type="text" id="expFix_${r.uuid}" placeholder="DD-MM-YYYY" style="width:130px; padding:4px 6px; font-size:12px; background:var(--bg-alt); border:1px solid var(--border-subtle); color:var(--text); border-radius:4px;"></td>
+          <td style="padding:6px 8px; text-align:center;"><input type="checkbox" id="expSkip_${r.uuid}" title="Skip this row entirely" style="width:auto;"><label style="font-size:11px; color:var(--text-soft);"> Skip</label></td>`;
+        body.appendChild(tr);
+      });
+      openModal('expiryReviewModal');
+    }
+
+    function confirmExpiryReview() {
+      let missing = _importParsed.filter(r => !r.expiryDate);
+      let toSkip = [];
+      missing.forEach(r => {
+        let skipEl = document.getElementById(`expSkip_${r.uuid}`);
+        let dateEl = document.getElementById(`expFix_${r.uuid}`);
+        if(skipEl && skipEl.checked) { toSkip.push(r.uuid); return; }
+        if(dateEl && dateEl.value.trim()) r.expiryDate = formatDate(dateEl.value.trim());
+      });
+      _importParsed = _importParsed.filter(r => !toSkip.includes(r.uuid));
+      closeModal('expiryReviewModal');
+      openZeroQtyReviewModal();
+    }
+
+    // ── ZERO QTY REVIEW MODAL ──────────────────────────────────────────
+    function openZeroQtyReviewModal() {
+      let zeroRows = _importParsed.filter(r => parseFloat(r.quantity) === 0 || r.quantity === '' || r.quantity === '0');
+      if(!zeroRows.length) { finalizeMainImport(); return; }
+      let body = document.getElementById('zeroQtyBody');
+      body.innerHTML = '';
+      zeroRows.forEach(r => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="padding:6px 8px;">${r.chemicalName || '—'}</td>
+          <td style="padding:6px 8px;">${r.sapNo || '—'}</td>
+          <td style="padding:6px 8px; text-align:center; color:var(--danger); font-weight:bold;">0</td>
+          <td style="padding:6px 8px; text-align:center;">
+            <label style="font-size:12px; display:flex; align-items:center; gap:5px; justify-content:center;">
+              <input type="checkbox" id="zeroInclude_${r.uuid}" checked style="width:auto;"> Include
+            </label>
+          </td>`;
+        body.appendChild(tr);
+      });
+      openModal('zeroQtyReviewModal');
+    }
+
+    function confirmZeroQtyReview() {
+      let zeroRows = _importParsed.filter(r => parseFloat(r.quantity) === 0 || r.quantity === '' || r.quantity === '0');
+      let toSkip = zeroRows.filter(r => {
+        let el = document.getElementById(`zeroInclude_${r.uuid}`);
+        return el && !el.checked;
+      }).map(r => r.uuid);
+      _importParsed = _importParsed.filter(r => !toSkip.includes(r.uuid));
+      closeModal('zeroQtyReviewModal');
+      finalizeMainImport();
+    }
+
+    function _finalizeMainImportBase() {
+      let strat = document.getElementById('impStratHidden').value;
+      if(strat==='replace') mainData = _importParsed; else mainData = mainData.concat(_importParsed);
+      updateAll();
+      showToast(`Imported ${_importParsed.length} rows into Master Tracker.`);
+      _importParsed = [];
+    }
+    
+    function exportToExcel(type, filteredOnly = false) {
+      let ws;
+      if(type === 'main') {
+        let source = filteredOnly ? lastVisibleRows : mainData;
+        let d = source.map(x => ({
+          "Item No.": x.itemNo, "Chemical Name": x.chemicalName, "Storage Location(s)": x.storageLocation, "CHB No.": x.chbNo,
+          "Startinng": x.starting, "CHB in Arabic (Y/N)": x.chbArabic, "SAP No.": x.sapNo, "REC": x.rec, "USED": x.used, "B.L": x.bl,
+          "Special Handling Procedure* (A,B or C)": x.handling, "Quantity": x.quantity, "Unit Size": x.unitSize,
+          "Days To Expire": x.days, "Quantity Safe Margin": x.minAlertQty, "Expiry Date": x.expiryDate,
+          "Notes": x.notes || "", "Last Modified": x.lastModified ? new Date(x.lastModified).toLocaleString() : ""
+        }));
+        ws = XLSX.utils.json_to_sheet(d);
+      } else {
+        let d = dbData.map(x => ({
+          "Item No.": x.itemNo, "Chemical Name": x.name, "SAP No.": x.sap, "Unit Size": x.unit,
+          "Units Per Pallet": x.pallet, "Function": x.func, "Manufacturer": x.man, "SDS URL": x.sdsUrl || ""
+        }));
+        ws = XLSX.utils.json_to_sheet(d);
+      }
+      let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+      let fname = filteredOnly ? `Export_${type}_filtered.xlsx` : `Export_${type}.xlsx`;
+      XLSX.writeFile(wb, fname);
+    }
+    // ── TOAST ──────────────────────────────────────────────────────────
+    function showToast(msg, undoFn = null) {
+      clearTimeout(toastTimer);
+      pendingUndo = undoFn;
+      document.getElementById('toastMsg').textContent = msg;
+      let undoBtn = document.getElementById('toastUndoBtn');
+      undoBtn.style.display = undoFn ? 'inline-block' : 'none';
+      let el = document.getElementById('toastEl');
+      el.classList.add('show');
+      toastTimer = setTimeout(hideToast, 5000);
+    }
+    function hideToast() {
+      document.getElementById('toastEl').classList.remove('show');
+      pendingUndo = null;
+    }
+    function triggerUndo() {
+      if(pendingUndo) { pendingUndo(); pendingUndo = null; }
+      hideToast();
+    }
+
+    // ── DUPLICATE ROW ──────────────────────────────────────────────────
+    window.duplicateMainRow = function(idx) {
+      let orig = mainData[idx];
+      let copy = JSON.parse(JSON.stringify(orig));
+      copy.uuid = Date.now().toString();
+      copy.itemNo = getNextItemNo(mainData, 'itemNo');
+      copy.lastModified = new Date().toISOString();
+      mainData.splice(idx + 1, 0, copy);
+      updateAll();
+      showToast(`Duplicated: ${orig.chemicalName}`);
+    };
+
+    // ── NOTES ──────────────────────────────────────────────────────────
+    window.openNotesModal = function(uuid) {
+      activeNotesUuid = uuid;
+      let row = mainData.find(r => r.uuid === uuid);
+      if(!row) return;
+      document.getElementById('notesChemName').textContent = row.chemicalName + (row.sapNo ? ` — SAP: ${row.sapNo}` : '');
+      document.getElementById('notesTextarea').value = row.notes || '';
+      openModal('notesModal');
+    };
+    function saveNotes() {
+      let row = mainData.find(r => r.uuid === activeNotesUuid);
+      if(!row) return;
+      row.notes = document.getElementById('notesTextarea').value.trim();
+      row.lastModified = new Date().toISOString();
+      closeModal('notesModal');
+      updateAll();
+      showToast('Note saved.');
+    }
+
+    // ── COLUMN VISIBILITY TOGGLE ───────────────────────────────────────
+    function initColTogglePanel() {
+      renderColTogglePanel();
+    }
+    function renderColTogglePanel() {
+      let panel = document.getElementById('colTogglePanel');
+      panel.innerHTML = '<div style="font-size:11px; font-weight:bold; color:var(--text-soft); margin-bottom:6px; padding:0 4px;">Show / Hide Columns</div>';
+      let allCols = colsFull.filter(c => c !== 'Action');
+      allCols.forEach(c => {
+        let checked = !hiddenCols.includes(c) ? 'checked' : '';
+        let item = document.createElement('label');
+        item.className = 'col-toggle-item';
+        item.innerHTML = `<input type="checkbox" ${checked} onchange="toggleColVisibility('${c}')"> ${c}`;
+        panel.appendChild(item);
+      });
+    }
+    function toggleColPanel() {
+      document.getElementById('colTogglePanel').classList.toggle('open');
+      renderColTogglePanel();
+    }
+    window.toggleColVisibility = function(col) {
+      let idx = hiddenCols.indexOf(col);
+      if(idx === -1) hiddenCols.push(col);
+      else hiddenCols.splice(idx, 1);
+      saveLocal();
+      renderMainTable();
+    };
+
+    // ── EXPIRY TIMELINE ────────────────────────────────────────────────
+    function openTimelineModal() {
+      let container = document.getElementById('timelineContent');
+      container.innerHTML = '';
+      let months = {};
+      mainData.forEach(r => {
+        r.expiryDate = formatDate(r.expiryDate);
+        r.days = calcDays(r.expiryDate);
+        if(!r.expiryDate) { 
+          (months['Unknown'] = months['Unknown']||[]).push(r);
+          return; 
+        }
+        let key = r.expiryDate.slice(0,7); // YYYY-MM
+        (months[key] = months[key]||[]).push(r);
+      });
+      let sortedKeys = Object.keys(months).filter(k=>k!=='Unknown').sort().concat(months['Unknown']?['Unknown']:[]);
+      if(!sortedKeys.length) { container.innerHTML = '<p style="color:var(--text-soft);">No data available.</p>'; }
+      sortedKeys.forEach(key => {
+        let div = document.createElement('div');
+        div.className = 'timeline-month';
+        let title = key === 'Unknown' ? 'Unknown Expiry' : new Date(key+'-01').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+        let itemsHtml = months[key].map(r => {
+          let bucket = getExpBucket(r.days);
+          let color = {white:'#94a3b8',green:'#22c55e',orange:'#f97316',red:'#9ca3af',grey:'#ef4444',black:'#ef4444',unknown:'#6b7280'}[bucket] || '#ccc';
+          return `<div class="timeline-item"><span>${r.chemicalName}</span><span style="color:${color}; font-weight:600;">${r.days!==''?(r.days<=0?'Exp':r.days+'d'):'—'}</span></div>`;
+        }).join('');
+        div.innerHTML = `<div class="timeline-month-title">${title} <span style="font-size:10px; color:var(--text-soft);">(${months[key].length})</span></div>${itemsHtml}`;
+        container.appendChild(div);
+      });
+      openModal('timelineModal');
+    }
+
+    // ── SNAPSHOTS ──────────────────────────────────────────────────────
+    function saveSnapshot(manual = false) {
+      let counts = { white:0, green:0, orange:0, red:0, grey:0, black:0, unknown:0 };
+      mainData.forEach(r => {
+        r.expiryDate = formatDate(r.expiryDate);
+        r.days = calcDays(r.expiryDate);
+        let b = getExpBucket(r.days);
+        if(counts[b]!==undefined) counts[b]++;
+      });
+      let snap = { ts: new Date().toISOString(), total: mainData.length, counts, manual };
+      snapshots.unshift(snap);
+      if(snapshots.length > 20) snapshots = snapshots.slice(0, 20);
+      saveLocal();
+      renderSnapshots();
+      if(manual) showToast('Snapshot saved.');
+    }
+    function renderSnapshots() {
+      let c = document.getElementById('snapshotsContainer');
+      if(!c) return;
+      if(!snapshots.length) { c.innerHTML = '<div style="padding:12px; font-size:12px; color:var(--text-soft); text-align:center;">No snapshots saved yet.</div>'; return; }
+      let colors = {white:'#e2e8f0',green:'#22c55e',orange:'#f97316',red:'#9ca3af',grey:'#ef4444',black:'#333',unknown:'#6b7280'};
+      c.innerHTML = snapshots.map((s,i) => {
+        let dt = new Date(s.ts).toLocaleString();
+        let badges = Object.entries(s.counts).filter(([,v])=>v>0).map(([k,v])=>`<span class="snap-badge" style="background:${colors[k]}; color:${k==='white'?'#0f172a':'#fff'};">${k[0].toUpperCase()}: ${v}</span>`).join('');
+        return `<div class="snapshot-row"><div><span style="font-size:11px; color:var(--text-soft);">${dt}${s.manual?' · <em>manual</em>':''}</span><br><strong style="font-size:13px;">Total: ${s.total}</strong></div><div class="snapshot-badges">${badges}</div><button class="btn btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="snapshots.splice(${i},1); saveLocal(); renderSnapshots();">✕</button></div>`;
+      }).join('');
+    }
+
+    // ── STORAGE INDICATOR ──────────────────────────────────────────────
+    function updateStorageIndicator() {
+      try {
+        let total = 0;
+        for(let k in localStorage) { if(localStorage.hasOwnProperty(k)) total += (localStorage[k].length + k.length) * 2; }
+        let kb = (total / 1024).toFixed(1);
+        let pct = Math.min((total / (5 * 1024 * 1024)) * 100, 100);
+        document.getElementById('storageLbl').textContent = `${kb} KB / ~5 MB`;
+        let bar = document.getElementById('storageBar');
+        bar.style.width = pct + '%';
+        bar.style.background = pct > 80 ? 'var(--danger)' : pct > 60 ? 'var(--warning)' : 'var(--success)';
+      } catch(e) {}
+    }
+
+    // ── AUTO-BACKUP REMINDER ───────────────────────────────────────────
+    function checkBackupReminder() {
+      let last = parseInt(localStorage.getItem('lastBackupTime') || '0');
+      let daysSince = (Date.now() - last) / (1000 * 60 * 60 * 24);
+      if(daysSince > 7 || last === 0) {
+        document.getElementById('backupBanner').classList.add('visible');
+      }
+    }
+
+    // ── STRATEGY TOGGLE ────────────────────────────────────────────────
+    function selectStrategy(val) {
+      document.getElementById('impStratHidden').value = val;
+      document.getElementById('stratReplace').classList.toggle('strat-active', val === 'replace');
+      document.getElementById('stratAppend').classList.toggle('strat-active', val === 'append');
+    }
+
+    // ── KEYBOARD SHORTCUTS ─────────────────────────────────────────────
+    function initKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        let tag = document.activeElement.tagName;
+        let inInput = ['INPUT','TEXTAREA','SELECT'].includes(tag);
+        if(e.key === 'Escape') {
+          document.querySelectorAll('.modal-backdrop').forEach(m => m.style.display = 'none');
+          setCardFilter('all');
+        }
+        if(!inInput) {
+          if(e.key === '?') { e.preventDefault(); openModal('shortcutsModal'); }
+        }
+        if(e.ctrlKey || e.metaKey) {
+          if(e.key === 'n') { e.preventDefault(); openModal('entryModal'); clearEntryForm(); }
+          if(e.key === 'f') { e.preventDefault(); let s = document.getElementById('trackerSearch'); if(s) s.focus(); }
+          if(e.key === 'e') { e.preventDefault(); exportToExcel('main'); }
+        }
+      });
+    }
+
+    // ── PWA SETUP ──────────────────────────────────────────────────────
+    function initPWA() {
+      try {
+        const manifest = { name: "Rig Chemicals Tracker", short_name: "Chem Tracker", start_url: "./", display: "standalone", background_color: "#0f172a", theme_color: "#38bdf8", icons: [{ src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧪%3C/text%3E%3C/svg%3E", sizes: "any", type: "image/svg+xml" }] };
+        const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+        document.getElementById('pwaManifest').href = URL.createObjectURL(blob);
+        if('serviceWorker' in navigator) {
+          const swCode = `self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(() => new Response('Offline', {status:503}))); });`;
+          const swBlob = new Blob([swCode], {type:'text/javascript'});
+          navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+        }
+      } catch(e) {}
+    }
+
+    // ── BIN COLLAPSE/EXPAND ────────────────────────────────────────────
+    function toggleBin(id) {
+      let panel = document.getElementById(id);
+      let arrow = document.getElementById(id + 'Arrow');
+      let open = panel.style.display !== 'none';
+      panel.style.display = open ? 'none' : 'block';
+      if(arrow) arrow.style.transform = open ? '' : 'rotate(90deg)';
+    }
+
+    // ── EMPTY TRASH ────────────────────────────────────────────────────
+    function emptyTrash(type) {
+      let count = type === 'main' ? trashMain.length : trashDb.length;
+      if(!count) return showToast('Bin is already empty.');
+      if(!confirm(`Permanently delete all ${count} item(s) from this bin? This cannot be undone.`)) return;
+      if(type === 'main') trashMain = []; else trashDb = [];
+      updateAll();
+      showToast(`Bin emptied — ${count} item(s) permanently deleted.`);
+    }
+
+    // ── MONTHLY EXPIRY ANALYSIS SHORTCUT ──────────────────────────────
+    function buildMonthlyExpiryChart() {
+      // Pre-fill controls and build
+      document.getElementById('cType').value = 'bar';
+      document.getElementById('cX').value = '__expiryMonth';
+      document.getElementById('cY').value = 'quantity';
+      document.getElementById('cAgg').value = 'count';
+      buildCustomChart();
+    }
+
+    // ── BULK SELECT ───────────────────────────────────────────────────
+    function bulkRowToggle(chk) {
+      let uuid = chk.dataset.uuid;
+      if(chk.checked) selectedRows.add(uuid); else selectedRows.delete(uuid);
+      updateBulkBar();
+    }
+    function bulkToggleAll(checked) {
+      lastVisibleRows.forEach(r => { if(checked) selectedRows.add(r.uuid); else selectedRows.delete(r.uuid); });
+      renderMainTable();
+    }
+    function updateBulkBar() {
+      let bar = document.getElementById('bulkBar');
+      let cnt = document.getElementById('bulkCount');
+      if(!bar || !cnt) return;
+      if(selectedRows.size > 0) { bar.classList.add('visible'); cnt.textContent = `${selectedRows.size} selected`; }
+      else bar.classList.remove('visible');
+    }
+    function bulkClearSelect() { selectedRows.clear(); renderMainTable(); }
+    function bulkSelectAll() { lastVisibleRows.forEach(r => selectedRows.add(r.uuid)); renderMainTable(); }
+    function bulkDelete() {
+      if(!selectedRows.size) return;
+      if(!confirm(`Delete ${selectedRows.size} selected rows? They will be moved to Trash.`)) return;
+      let toDelete = mainData.filter(r => selectedRows.has(r.uuid));
+      toDelete.forEach(r => { let idx = mainData.indexOf(r); if(idx>-1) { trashMain.push({origIdx:idx, data:r}); mainData.splice(idx,1); } });
+      selectedRows.clear();
+      updateAll();
+      showToast(`Deleted ${toDelete.length} rows.`);
+    }
+    function bulkExport() {
+      if(!selectedRows.size) return showToast('No rows selected.');
+      let rows = mainData.filter(r => selectedRows.has(r.uuid));
+      let d = rows.map(x => ({"Chemical Name":x.chemicalName,"SAP No.":x.sapNo,"Quantity":x.quantity,"Expiry Date":x.expiryDate,"Storage":x.storageLocation,"Batch":x.batchNo||""}));
+      let ws = XLSX.utils.json_to_sheet(d);
+      let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Selected');
+      XLSX.writeFile(wb, 'Selected_Rows.xlsx');
+    }
+    function bulkEditStorage() {
+      if(!selectedRows.size) return showToast('No rows selected.');
+      let loc = prompt(`Set storage location for ${selectedRows.size} selected rows:`);
+      if(loc === null) return;
+      mainData.forEach(r => { if(selectedRows.has(r.uuid)) { r.storageLocation = loc; r.lastModified = new Date().toISOString(); } });
+      updateAll();
+      showToast(`Updated storage for ${selectedRows.size} rows.`);
+      selectedRows.clear();
+    }
+
+    // ── CONSUMPTION RATE & STOCKOUT ───────────────────────────────────
+    function calcDailyUsageRate(uuid) {
+      let entries = consumptionLog.filter(e => e.uuid === uuid && e.delta > 0).sort((a,b) => new Date(a.ts) - new Date(b.ts));
+      if(entries.length < 2) return null;
+      let totalDelta = entries.reduce((s, e) => s + e.delta, 0);
+      let firstTs = new Date(entries[0].ts);
+      let lastTs = new Date(entries[entries.length-1].ts);
+      let daySpan = Math.max(1, (lastTs - firstTs) / 86400000);
+      return totalDelta / daySpan; // units per day
+    }
+    function calcDaysToStockout(uuid, currentQty) {
+      let rate = calcDailyUsageRate(uuid);
+      if(!rate || rate <= 0) return null;
+      return Math.round(currentQty / rate);
+    }
+    function calcSuggestedOrder(uuid, safeMargin) {
+      let rate = calcDailyUsageRate(uuid);
+      let boatFreq = parseInt(document.getElementById('boatFreqDays')?.value) || 14;
+      if(!rate) return safeMargin; // fall back to deficit
+      return Math.max(0, Math.ceil(rate * boatFreq * 1.2)); // 20% safety buffer
+    }
+
+    // ── MANIFEST: SAVE + HISTORY + EXPORT ────────────────────────────
+    function saveManifestToHistory() {
+      let items = [];
+      document.querySelectorAll('.manifest-order-qty').forEach(inp => {
+        let uuid = inp.dataset.uuid;
+        let row = mainData.find(r => r.uuid === uuid);
+        if(row) {
+          items.push({
+            sapNo: row.sapNo, name: row.chemicalName,
+            qty: parseFloat(row.quantity)||0, safeMargin: parseFloat(row.minAlertQty)||0,
+            orderQty: parseFloat(inp.value)||0,
+            daysToStockout: calcDaysToStockout(uuid, parseFloat(row.quantity)||0)
+          });
+        }
+      });
+      if(!items.length) return showToast('No manifest items to save.');
+      manifestHistory.unshift({ id: Date.now().toString(), ts: new Date().toISOString(), items });
+      if(manifestHistory.length > 30) manifestHistory = manifestHistory.slice(0, 30);
+      updateAll();
+      showToast(`Manifest saved with ${items.length} items.`);
+    }
+    function exportManifestExcel() {
+      let rows = [];
+      document.querySelectorAll('.manifest-order-qty').forEach(inp => {
+        let uuid = inp.dataset.uuid;
+        let row = mainData.find(r => r.uuid === uuid);
+        if(row) rows.push({"SAP No.":row.sapNo,"Chemical Name":row.chemicalName,"Live Qty":parseFloat(row.quantity)||0,"Safe Margin":parseFloat(row.minAlertQty)||0,"Deficit":(parseFloat(row.minAlertQty)||0)-(parseFloat(row.quantity)||0),"Order Qty":parseFloat(inp.value)||0,"Days to Stockout":calcDaysToStockout(uuid, parseFloat(row.quantity)||0)||'N/A'});
+      });
+      if(!rows.length) return showToast('No manifest items to export.');
+      let ws = XLSX.utils.json_to_sheet(rows);
+      let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Manifest');
+      XLSX.writeFile(wb, `Manifest_${new Date().toLocaleDateString().replace(/\//g,'-')}.xlsx`);
+    }
+    function renderManifestHistory() {
+      let c = document.getElementById('manifestHistContainer'); if(!c) return;
+      let badge = document.getElementById('binManHistBadge'); if(badge) badge.textContent = manifestHistory.length;
+      if(!manifestHistory.length) { c.innerHTML = '<div style="padding:12px; font-size:12px; color:var(--text-soft); text-align:center;">No saved manifests yet.</div>'; return; }
+      c.innerHTML = manifestHistory.map((m, i) => {
+        let dt = new Date(m.ts).toLocaleString();
+        return `<div class="mhist-row" onclick="viewManifestHistory(${i})">
+          <span style="font-size:11px; color:var(--text-soft);">${dt}</span>
+          <span style="font-size:13px; font-weight:bold; margin-left:12px;">${m.items.length} items</span>
+          <button class="btn btn-danger" style="padding:3px 8px; font-size:11px; float:right;" onclick="manifestHistory.splice(${i},1); updateAll(); event.stopPropagation();">✕</button>
+        </div>`;
+      }).join('');
+    }
+    window.viewManifestHistory = function(idx) {
+      let m = manifestHistory[idx];
+      document.getElementById('manifestHistViewTitle').textContent = `🚢 Manifest — ${new Date(m.ts).toLocaleString()}`;
+      let body = document.getElementById('manifestHistViewBody');
+      body.innerHTML = m.items.map(r => `<tr><td>${r.sapNo}</td><td>${r.name}</td><td>${r.qty}</td><td>${r.safeMargin}</td><td style="color:var(--accent); font-weight:bold;">${r.orderQty}</td><td>${r.daysToStockout !== null && r.daysToStockout !== undefined ? r.daysToStockout+'d' : 'N/A'}</td></tr>`).join('');
+      openModal('manifestHistViewModal');
+    };
+
+    // ── CONSUMPTION LOG ───────────────────────────────────────────────
+    function renderConsumptionLog() {
+      let body = document.getElementById('clogBody'); if(!body) return;
+      let q = (document.getElementById('clogSearch')?.value || '').toLowerCase();
+      let filtered = q ? consumptionLog.filter(e => e.chemicalName.toLowerCase().includes(q) || String(e.sapNo).includes(q)) : consumptionLog;
+      if(!filtered.length) { body.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-soft); padding:16px;">No consumption events recorded yet. Changes to USED will appear here.</td></tr>'; return; }
+      body.innerHTML = filtered.map(e => {
+        let cls = e.delta > 0 ? 'pos' : 'neg';
+        let sign = e.delta > 0 ? '+' : '';
+        return `<tr>
+          <td>${new Date(e.ts).toLocaleString()}</td>
+          <td>${e.chemicalName}</td>
+          <td>${e.sapNo}</td>
+          <td>${e.oldUsed}</td>
+          <td>${e.newUsed}</td>
+          <td><span class="clog-badge ${cls}">${sign}${e.delta}</span></td>
+        </tr>`;
+      }).join('');
+    }
+    function exportConsumptionLog() {
+      if(!consumptionLog.length) return showToast('Log is empty.');
+      let d = consumptionLog.map(e => ({"Timestamp":new Date(e.ts).toLocaleString(),"Chemical Name":e.chemicalName,"SAP No.":e.sapNo,"Prev USED":e.oldUsed,"New USED":e.newUsed,"Delta":e.delta}));
+      let ws = XLSX.utils.json_to_sheet(d);
+      let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'ConsumptionLog');
+      XLSX.writeFile(wb, 'Consumption_Log.xlsx');
+    }
+    function clearConsumptionLog() {
+      if(!consumptionLog.length) return;
+      if(!confirm('Clear the entire consumption log? This cannot be undone.')) return;
+      consumptionLog = [];
+      updateAll();
+      showToast('Consumption log cleared.');
+    }
+
+    // ── INSIGHTS MODAL ────────────────────────────────────────────────
+    function openInsightsModal() {
+      renderInsights();
+      openModal('insightsModal');
+    }
+    function renderInsights() {
+      let container = document.getElementById('insightsContainer'); if(!container) return;
+      let q = (document.getElementById('insightSearch')?.value || '').toLowerCase();
+      let boatDays = parseInt(document.getElementById('insightBoatDays')?.value) || 14;
+      let rows = mainData.filter(r => !q || r.chemicalName.toLowerCase().includes(q));
+      if(!rows.length) { container.innerHTML = '<p style="color:var(--text-soft); font-size:13px;">No data.</p>'; return; }
+      container.innerHTML = rows.map(r => {
+        let qty = parseFloat(r.quantity)||0;
+        let rate = calcDailyUsageRate(r.uuid);
+        let dts = rate ? Math.round(qty / rate) : null;
+        let reorderQty = rate ? Math.ceil(rate * boatDays * 1.2) : null;
+        let badge = dts === null ? '' : dts <= 7 ? `<span class="stockout-badge stockout-crit">⚠ ${dts}d</span>` : dts <= 30 ? `<span class="stockout-badge stockout-warn">${dts}d</span>` : `<span class="stockout-badge stockout-ok">${dts}d</span>`;
+        r.expiryDate = formatDate(r.expiryDate); r.days = calcDays(r.expiryDate);
+        return `<div class="insight-card" style="cursor:pointer;" onclick="goToRow('${r.uuid}')">
+          <h4>${r.chemicalName} <span style="font-size:10px; color:var(--text-soft);">SAP: ${r.sapNo}</span></h4>
+          <div class="insight-row"><span>Current Qty</span><strong>${qty} ${r.unitSize||''}</strong></div>
+          <div class="insight-row"><span>Daily Usage Rate</span><strong>${rate ? rate.toFixed(2)+' units/day' : '—'}</strong></div>
+          <div class="insight-row"><span>Days to Stockout</span>${badge || '<span style="color:var(--text-soft);">Need more history</span>'}</div>
+          <div class="insight-row"><span>Suggested Order (${boatDays}d)</span><strong style="color:var(--accent);">${reorderQty !== null ? reorderQty+' units' : '—'}</strong></div>
+          <div class="insight-row"><span>Expires In</span><strong>${r.days !== '' ? r.days+'d' : 'Unknown'}</strong></div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── EXPIRY CALENDAR ───────────────────────────────────────────────
+    function openCalendarModal() {
+      calendarYear = new Date().getFullYear();
+      calendarMonth = new Date().getMonth();
+      renderCalendar();
+      openModal('calendarModal');
+    }
+    function calNavMonth(dir) {
+      calendarMonth += dir;
+      if(calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+      if(calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+      renderCalendar();
+    }
+    function renderCalendar() {
+      document.getElementById('calMonthTitle').textContent = new Date(calendarYear, calendarMonth, 1).toLocaleDateString('en-US',{month:'long', year:'numeric'});
+      let grid = document.getElementById('calGrid');
+      // Remove old day cells (keep headers)
+      let oldCells = grid.querySelectorAll('.cal-day, .cal-day.empty');
+      oldCells.forEach(c => c.remove());
+      let firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+      let daysInMonth = new Date(calendarYear, calendarMonth+1, 0).getDate();
+      let today = new Date(); today.setHours(0,0,0,0);
+      // Build expiry map
+      let expiryMap = {};
+      mainData.forEach(r => {
+        r.expiryDate = formatDate(r.expiryDate);
+        if(!r.expiryDate) return;
+        let [y,m,d] = r.expiryDate.split('-').map(Number);
+        if(y===calendarYear && (m-1)===calendarMonth) {
+          if(!expiryMap[d]) expiryMap[d] = [];
+          let bucket = getExpBucket(calcDays(r.expiryDate));
+          expiryMap[d].push({name: r.chemicalName, bucket, uuid: r.uuid});
+        }
+      });
+      let bucketColors = {white:'#94a3b8',green:'#22c55e',orange:'#f97316',red:'#9ca3af',grey:'#ef4444',black:'#6b7280',unknown:'#6b7280'};
+      // Empty cells before month start
+      for(let i=0; i<firstDay; i++) { let e = document.createElement('div'); e.className='cal-day empty'; grid.appendChild(e); }
+      for(let day=1; day<=daysInMonth; day++) {
+        let cell = document.createElement('div');
+        cell.className = 'cal-day';
+        let d = new Date(calendarYear, calendarMonth, day); d.setHours(0,0,0,0);
+        if(d.getTime()===today.getTime()) cell.classList.add('today');
+        let numEl = document.createElement('div'); numEl.className = 'cal-day-num'; numEl.textContent = day;
+        cell.appendChild(numEl);
+        (expiryMap[day]||[]).forEach(item => {
+          let chip = document.createElement('div');
+          chip.className = 'cal-chip';
+          chip.style.background = bucketColors[item.bucket] + '40';
+          chip.style.color = bucketColors[item.bucket];
+          chip.style.border = '1px solid ' + bucketColors[item.bucket];
+          chip.textContent = item.name;
+          chip.title = item.name;
+          chip.onclick = () => { closeModal('calendarModal'); goToRow(item.uuid); };
+          cell.appendChild(chip);
+        });
+        grid.appendChild(cell);
+      }
+    }
+
+    // ── USE-BEFORE-EXPIRE PRIORITY LIST ───────────────────────────────
+    function openPriorityModal() {
+      let container = document.getElementById('priorityContainer');
+      let eligible = mainData.filter(r => {
+        r.expiryDate = formatDate(r.expiryDate); r.days = calcDays(r.expiryDate);
+        return r.expiryDate && r.days !== '' && r.days > 0 && (parseFloat(r.quantity)||0) > 0;
+      }).sort((a,b) => a.days - b.days);
+      if(!eligible.length) { container.innerHTML = '<p style="color:var(--text-soft); font-size:13px; padding:10px;">No chemicals with known expiry and available stock.</p>'; openModal('priorityModal'); return; }
+      let bucketColors = {white:'#94a3b8',green:'#22c55e',orange:'#f97316',red:'#9ca3af',grey:'#ef4444',black:'#6b7280',unknown:'#6b7280'};
+      container.innerHTML = eligible.map((r, i) => {
+        let bucket = getExpBucket(r.days);
+        let color = bucketColors[bucket];
+        return `<div class="priority-row" onclick="closeModal('priorityModal'); goToRow('${r.uuid}')">
+          <span class="priority-rank">${i+1}</span>
+          <div style="flex:1; margin-left:10px;">
+            <strong>${r.chemicalName}</strong>
+            <span style="font-size:11px; color:var(--text-soft); margin-left:8px;">SAP: ${r.sapNo}</span>
+            ${r.batchNo ? `<span style="font-size:10px; color:#a855f7; margin-left:6px;">[${r.batchNo}]</span>` : ''}
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:13px; font-weight:700; color:${color};">${r.days}d left</span><br>
+            <span style="font-size:11px; color:var(--text-soft);">Qty: ${r.quantity} ${r.unitSize||''}</span>
+          </div>
+        </div>`;
+      }).join('');
+      openModal('priorityModal');
+    }
+
+    // ── SDS VIEWER ────────────────────────────────────────────────────
+    window.openSdsView = function(url, name) {
+      document.getElementById('sdsChemName').textContent = name || '';
+      document.getElementById('sdsFrame').src = url;
+      document.getElementById('sdsExternalLink').href = url;
+      openModal('sdsViewModal');
+    };
+
+    // ── QUICK-ADD FROM DATABASE ───────────────────────────────────────
+    window.quickAddFromDb = function(idx) {
+      let r = dbData[idx];
+      clearEntryForm();
+      document.getElementById('fChemicalName').value = r.name || '';
+      document.getElementById('fSap').value = r.sap || '';
+      document.getElementById('fUnit').value = r.unit || '';
+      document.getElementById('entryTitle').textContent = '➕ Add New Entry (from Catalog)';
+      switchTab('tab-tracker');
+      openModal('entryModal');
+      showToast(`Form pre-filled from catalog: ${r.name}`);
+    };
+
+    // ── DUPLICATE DETECTION ON IMPORT ────────────────────────────────
+    let _dupImportParsed = [];
+    function checkForDuplicatesBeforeImport(parsed) {
+      let dups = parsed.filter(incoming => mainData.some(existing => String(existing.sapNo) === String(incoming.sapNo)));
+      if(!dups.length) { finalizeWithParsed(parsed); return; }
+      _dupImportParsed = parsed;
+      _dupDecisions = {};
+      let body = document.getElementById('dupCheckBody');
+      body.innerHTML = dups.map(d => {
+        let existing = mainData.find(e => String(e.sapNo) === String(d.sapNo));
+        _dupDecisions[d.sapNo] = 'skip';
+        return `<tr>
+          <td style="padding:6px 8px; font-size:12px;">${d.chemicalName||'—'}</td>
+          <td style="padding:6px 8px; font-size:12px;">${d.sapNo}</td>
+          <td style="padding:6px 8px; font-size:12px;">${existing ? existing.quantity : '—'}</td>
+          <td style="padding:6px 8px; font-size:12px;">${d.quantity||'0'}</td>
+          <td style="padding:6px 8px;">
+            <select id="dupAct_${d.sapNo}" onchange="_dupDecisions['${d.sapNo}']=this.value" style="font-size:11px; padding:3px;">
+              <option value="skip">Skip (keep existing)</option>
+              <option value="replace">Replace existing</option>
+              <option value="both">Keep both</option>
+            </select>
+          </td>
+        </tr>`;
+      }).join('');
+      openModal('dupCheckModal');
+    }
+    window.dupApplyAll = function(action) {
+      document.querySelectorAll('[id^="dupAct_"]').forEach(sel => { sel.value = action; let key = sel.id.replace('dupAct_',''); _dupDecisions[key] = action; });
+    };
+    window.confirmDupCheck = function() {
+      let result = [];
+      _dupImportParsed.forEach(incoming => {
+        let existingIdx = mainData.findIndex(e => String(e.sapNo) === String(incoming.sapNo));
+        let decision = _dupDecisions[incoming.sapNo];
+        if(existingIdx === -1) { result.push({ action:'add', row: incoming }); return; }
+        if(decision === 'replace') result.push({ action:'replace', idx: existingIdx, row: incoming });
+        else if(decision === 'both') result.push({ action:'add', row: incoming });
+        // 'skip' → do nothing
+      });
+      result.forEach(op => {
+        if(op.action === 'add') mainData.push(op.row);
+        else if(op.action === 'replace') mainData[op.idx] = { ...mainData[op.idx], ...op.row, uuid: mainData[op.idx].uuid };
+      });
+      closeModal('dupCheckModal');
+      updateAll();
+      showToast(`Import complete. ${result.filter(o=>o.action!=='skip').length} rows processed.`);
+      _dupImportParsed = []; _dupDecisions = {};
+    };
+    function finalizeWithParsed(parsed) {
+      let strat = document.getElementById('impStratHidden').value;
+      if(strat==='replace') mainData = parsed; else mainData = mainData.concat(parsed);
+      updateAll();
+      showToast(`Imported ${parsed.length} rows into Master Tracker.`);
+      _importParsed = [];
+    }
+
+    // ── RENDER TRASH + MANIFEST HISTORY UPDATES ───────────────────────
+
+    // ── LOW STOCK TREND ALERTS (snapshot-based) ───────────────────────
+    function checkLowStockTrend() {
+      if(snapshots.length < 3) return [];
+      let recent = snapshots.slice(0, 5);
+      // If total black+grey count is rising across last 3 snapshots → trend warning
+      let trends = recent.map(s => (s.counts.black||0) + (s.counts.grey||0));
+      if(trends[0] > trends[1] && trends[1] > trends[2]) {
+        return [`Critical/expired items increasing: ${trends[2]} → ${trends[1]} → ${trends[0]}`];
+      }
+      return [];
+    }
+
+    // ── ENHANCED WIPE ─────────────────────────────────────────────────
+    function wipeSystem() {
+      if(confirm("Wipe all local browser data?")) {
+        mainData=[]; dbData=[]; trashMain=[]; trashDb=[]; dismissedAlerts=[]; consumptionLog=[]; manifestHistory=[];
+        updateAll();
+      }
+    }
+
+    // ── ENHANCED IMPORT (hook duplicate detection) ────────────────────
+    function finalizeMainImport() {
+      let strat = document.getElementById('impStratHidden').value;
+      if(strat === 'append') {
+        checkForDuplicatesBeforeImport(_importParsed);
+      } else {
+        // Replace mode — no dup check needed
+        mainData = _importParsed;
+        updateAll();
+        showToast(`Imported ${_importParsed.length} rows into Master Tracker.`);
+        _importParsed = [];
+      }
+    }
+
+    // ── BACKUP JSON ENHANCED ──────────────────────────────────────────
+    function exportBackupJSON() {
+      let blob = new Blob([JSON.stringify({mainData, dbData, trashMain, trashDb, dismissedAlerts, consumptionLog, manifestHistory})], {type: "application/json"});
+      let a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Rig_Backup_${Date.now()}.json`; a.click();
+      localStorage.setItem('lastBackupTime', Date.now().toString());
+      document.getElementById('backupBanner').classList.remove('visible');
+    }
+    function importBackupJSON(e) {
+      let f = e.target.files[0]; if(!f) return; let r = new FileReader();
+      r.onload = ev => {
+        try {
+          let j = JSON.parse(ev.target.result);
+          mainData = j.mainData||[]; dbData = j.dbData||[]; trashMain = j.trashMain||[]; trashDb = j.trashDb||[];
+          dismissedAlerts = j.dismissedAlerts||[]; consumptionLog = j.consumptionLog||[]; manifestHistory = j.manifestHistory||[];
+          updateAll(); alert("Backup Restored!");
+        } catch(e) { alert("Invalid JSON"); }
+      }; r.readAsText(f);
+    }
+
+    // ── SWITCHAB UPDATE ────────────────────────────────────────────────
+    function switchTab(id) {
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-tab'));
+      event.target.classList.add('active');
+      document.getElementById(id).classList.add('active-tab');
+      if(id === 'tab-database') { document.getElementById('dItemNo').value = getNextItemNo(dbData, 'itemNo'); setTimeout(fitDbTableHeight, 0); }
+      if(id === 'tab-tracker') fitTableHeight();
+      if(id === 'tab-clog') renderConsumptionLog();
+    }
+
+  </script>
+
+<!--
+Recommended future enhancements:
+1. Auto backup every few minutes
+2. Batch edit/delete rows
+3. Expiry calendar timeline
+4. Chemical consumption trend prediction
+5. Multi-rig database separation
+6. Barcode / QR scanning support
+7. One-click low stock reorder list
+8. Printable dashboard reports
+9. Advanced filter chips
+10. Offline installable PWA version
+-->
+  <!-- ── INSIGHTS MODAL ── -->
+  <div class="modal-backdrop" id="insightsModal">
+    <div class="modal-box" style="max-width:960px;">
+      <div class="modal-header">
+        <h3>📈 Consumption Insights & Stockout Predictions</h3>
+        <button class="close-btn" onclick="closeModal('insightsModal')">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-soft); margin-bottom:14px;">Consumption rates are estimated from your <strong>Consumption Log</strong> entries. More history = more accurate predictions.</p>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+        <input type="text" id="insightSearch" placeholder="🔍 Filter chemical..." style="width:220px;" oninput="renderInsights()">
+        <label style="font-size:12px; color:var(--text-soft);">Supply boat every</label>
+        <input type="number" id="insightBoatDays" value="14" min="1" max="365" style="width:60px;" oninput="renderInsights()">
+        <label style="font-size:12px; color:var(--text-soft);">days</label>
+      </div>
+      <div class="insights-grid" id="insightsContainer"></div>
+    </div>
+  </div>
+
+  <!-- ── EXPIRY CALENDAR MODAL ── -->
+  <div class="modal-backdrop" id="calendarModal">
+    <div class="modal-box" style="max-width:960px;">
+      <div class="modal-header">
+        <h3>📅 Expiry Calendar</h3>
+        <button class="close-btn" onclick="closeModal('calendarModal')">✕</button>
+      </div>
+      <div class="cal-nav">
+        <button class="btn btn-secondary" onclick="calNavMonth(-1)">◀</button>
+        <h4 id="calMonthTitle"></h4>
+        <button class="btn btn-secondary" onclick="calNavMonth(1)">▶</button>
+      </div>
+      <div class="cal-grid" id="calGrid">
+        <div class="cal-day-hdr">Sun</div><div class="cal-day-hdr">Mon</div>
+        <div class="cal-day-hdr">Tue</div><div class="cal-day-hdr">Wed</div>
+        <div class="cal-day-hdr">Thu</div><div class="cal-day-hdr">Fri</div>
+        <div class="cal-day-hdr">Sat</div>
+      </div>
+      <p style="font-size:11px; color:var(--text-soft); margin-top:10px;">Click a chip to navigate to that chemical in the tracker.</p>
+    </div>
+  </div>
+
+  <!-- ── PRIORITY LIST MODAL ── -->
+  <div class="modal-backdrop" id="priorityModal">
+    <div class="modal-box" style="max-width:700px;">
+      <div class="modal-header">
+        <h3>⚡ Use-Before-Expire Priority List</h3>
+        <button class="close-btn" onclick="closeModal('priorityModal')">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-soft); margin-bottom:12px;">Chemicals with available stock sorted by soonest expiry. Use these first to minimize waste.</p>
+      <div id="priorityContainer"></div>
+    </div>
+  </div>
+
+  <!-- ── SDS VIEWER MODAL ── -->
+  <div class="modal-backdrop" id="sdsViewModal">
+    <div class="modal-box" style="max-width:900px;">
+      <div class="modal-header">
+        <h3>📋 Safety Data Sheet</h3>
+        <button class="close-btn" onclick="closeModal('sdsViewModal')">✕</button>
+      </div>
+      <p style="font-size:11px; color:var(--text-soft); margin-bottom:8px;" id="sdsChemName"></p>
+      <div style="background:#fff; border-radius:6px; overflow:hidden; height:62vh;">
+        <iframe id="sdsFrame" src="" style="width:100%; height:100%; border:none;"></iframe>
+      </div>
+      <div style="margin-top:8px; text-align:right;">
+        <a id="sdsExternalLink" href="" target="_blank" class="btn btn-secondary" style="font-size:11px;">🔗 Open in New Tab</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DUPLICATE CHECK MODAL ── -->
+  <div class="modal-backdrop" id="dupCheckModal">
+    <div class="modal-box" style="max-width:700px;">
+      <div class="modal-header">
+        <h3>⚠️ Duplicate SAP Numbers Detected</h3>
+        <button class="close-btn" onclick="closeModal('dupCheckModal')">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-soft); margin-bottom:12px;">These incoming rows share a SAP No. with existing entries. Choose how to handle each one.</p>
+      <div style="max-height:50vh; overflow-y:auto;">
+        <table style="width:100%;">
+          <thead><tr>
+            <th style="padding:6px 8px; font-size:11px;">Chemical Name</th>
+            <th style="padding:6px 8px; font-size:11px;">SAP No.</th>
+            <th style="padding:6px 8px; font-size:11px;">Existing Qty</th>
+            <th style="padding:6px 8px; font-size:11px;">Incoming Qty</th>
+            <th style="padding:6px 8px; font-size:11px;">Action</th>
+          </tr></thead>
+          <tbody id="dupCheckBody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+        <button class="btn btn-secondary" onclick="dupApplyAll('skip')">Skip All Duplicates</button>
+        <button class="btn btn-secondary" onclick="dupApplyAll('replace')">Replace All</button>
+        <button class="btn btn-primary" onclick="confirmDupCheck()">Apply Choices ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MANIFEST HISTORY VIEW MODAL ── -->
+  <div class="modal-backdrop" id="manifestHistViewModal">
+    <div class="modal-box" style="max-width:700px;">
+      <div class="modal-header">
+        <h3 id="manifestHistViewTitle">🚢 Manifest Details</h3>
+        <button class="close-btn" onclick="closeModal('manifestHistViewModal')">✕</button>
+      </div>
+      <div class="table-container" style="max-height:480px;">
+        <table>
+          <thead><tr><th>SAP No.</th><th>Chemical Name</th><th>Live Qty</th><th>Safe Margin</th><th>Order Qty</th><th>Days to Stockout</th></tr></thead>
+          <tbody id="manifestHistViewBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
