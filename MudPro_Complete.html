@@ -4979,12 +4979,6 @@ body.light::before{background:none}
       &lt;div class="ni" onclick="gt('vkm',this)"&gt;&lt;span class="ic"&gt;🔄&lt;/span&gt;&lt;span&gt;Volumetric Kill Method&lt;/span&gt;&lt;span class="nb nb-r"&gt;WC&lt;/span&gt;&lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class="ng"&gt;
-    &lt;div class="ngl" onclick="tng(this)"&gt;&lt;span&gt;Drilling Optimization&lt;/span&gt;&lt;span class="nga"&gt;▾&lt;/span&gt;&lt;/div&gt;
-    &lt;div class="ngb"&gt;
-      &lt;div class="ni" onclick="gt('bho',this)"&gt;&lt;span class="ic"&gt;⚡&lt;/span&gt;&lt;span&gt;Bit Hydraulics Optimizer&lt;/span&gt;&lt;span class="nb nb-o"&gt;OPT&lt;/span&gt;&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
 &lt;/div&gt;
 
 &lt;div id="mn"&gt;
@@ -5374,7 +5368,7 @@ const DL=(ctx,pts,col,lw=2)=&gt;{if(!pts.length)return;ctx.strokeStyle=col;ctx.l
 let _tt;function toast(m){clearTimeout(_tt);const t=document.getElementById('toast');t.textContent=m;t.style.display='block';_tt=setTimeout(()=&gt;t.style.display='none',2500)}
 
 // NAV
-const NM={mvt:'Mud Volume Tracker',chem:'Daily Chemical Use',sidpp:'SIDPP/SICP Monitor',feval:'Formation Eval',strip:'Stripping Calc',vkm:'Volumetric Kill',bho:'Bit Hydraulics Optimizer'};
+const NM={mvt:'Mud Volume Tracker',chem:'Daily Chemical Use',sidpp:'SIDPP/SICP Monitor',feval:'Formation Eval',strip:'Stripping Calc',vkm:'Volumetric Kill'};
 function gt(id,el){
   document.querySelectorAll('.cs').forEach(s=&gt;s.classList.remove('act'));
   document.querySelectorAll('.ni').forEach(n=&gt;n.classList.remove('act'));
@@ -5810,74 +5804,11 @@ function calcVKM() {
   S('vk-sched',rows);
 }
 
-// ════════════════════════════════════════════
-// 7. BIT HYDRAULICS OPTIMIZER
-// ════════════════════════════════════════════
-function calcBHO() {
-  const mw=vv('bh-mw'),gpm=vv('bh-gpm'),bpd=vv('bh-bpd'),nn=parseInt(sv('bh-nn'))||3;
-  const n1=vv('bh-n1'),n2=vv('bh-n2'),n3=vv('bh-n3');
-  if(!mw||!gpm) return;
-
-  function calcConfig(sizes, gpm, mw, bpd) {
-    const tfa = sizes.reduce((s,n)=&gt;s+Math.PI*(n/32)**2/4, 0); // in²
-    const jv = gpm / (3.117 * tfa); // ft/s
-    const dp_actual = 0.000216 * mw * gpm**2 / (tfa**2); // actual pressure drop
-    const hhp = dp_actual * gpm / 1714;
-    const impact = 0.000516 * mw * gpm * jv;
-    const hsi_val = hhp / (Math.PI * 8.5**2 / 4); // assuming 8.5" bit
-    return {tfa, jv, dp:dp_actual, hhp, impact, hsi:hsi_val};
-  }
-
-  const curr = calcConfig([n1,n2,n3].slice(0,nn), gpm, mw, bpd);
-  S('bh-tfa', fmt(curr.tfa, 4)+'&lt;span class="ru"&gt;in²&lt;/span&gt;');
-  S('bh-jv', fmt(curr.jv, 1)+'&lt;span class="ru"&gt;ft/s&lt;/span&gt;');
-  S('bh-if', fmt(curr.impact, 0)+'&lt;span class="ru"&gt;lbs&lt;/span&gt;');
-  S('bh-dp', fmt(curr.dp, 0)+'&lt;span class="ru"&gt;psi&lt;/span&gt;');
-  S('bh-hsi', fmt(curr.hsi, 3)+'&lt;span class="ru"&gt;HP/in²&lt;/span&gt;');
-  const bigEl=document.getElementById('bh-hhp');if(bigEl){bigEl.textContent=fmt(curr.hhp,1);bigEl.className='v '+(curr.hhp&gt;500?'a':'w')}
-  const totalHHP = bpd * gpm / 1714;
-  const pct = totalHHP&gt;0?curr.hhp/totalHHP*100:0;
-  S('bh-pct', fmt(pct,1)+'&lt;span class="ru"&gt;%&lt;/span&gt;');
-
-  const a=document.getElementById('bh-alert');
-  const opt=sv('bh-opt');
-  if(a){
-    if(pct&lt;50){a.className='ab wn';a.innerHTML=`⚠ Bit HHP ${fmt(pct,1)}% of total — too low. Reduce nozzle size to increase bit ΔP.`}
-    else if(pct&gt;80){a.className='ab wn';a.innerHTML=`⚠ Bit HHP ${fmt(pct,1)}% of total — very high. Ensure surface equipment can handle the pressure.`}
-    else{a.className='ab ok';a.innerHTML=`✅ Bit HHP ${fmt(pct,1)}% — Good. Jet velocity: ${fmt(curr.jv,1)} ft/s | Impact force: ${fmt(curr.impact,0)} lbs`}
-  }
-
-  // Generate top 5 combinations
-  const opt_target=opt;
-  let combos=[];
-  const sizes=Array.from({length:nn===3?15:10},(_,i)=&gt;8+i);
-  // For 3 nozzles: try combinations
-  for(let a2=8;a2&lt;=20;a2++) for(let b=a2;b&lt;=20;b++) for(let c=b;c&lt;=20;c++) {
-    if(nn===2&amp;&amp;c!==b)continue;
-    const s=nn===3?[a2,b,c]:nn===2?[a2,b]:[a2,b,c];
-    const res=calcConfig(s.slice(0,nn),gpm,mw,bpd);
-    const score=opt_target==='hhp'?res.hhp:opt_target==='jv'?res.jv:res.impact;
-    combos.push({sizes:s.slice(0,nn),score,...res});
-    if(combos.length&gt;2000)break;
-    if(combos.length&gt;2000)break;
-  }
-  combos.sort((a2,b)=&gt;b.score-a2.score);
-  const top5=combos.slice(0,5);
-  S('bh-top5', top5.map((c,i)=&gt;`&lt;tr style="${i===0?'background:rgba(0,255,157,.04)':''}"&gt;
-    &lt;td class="mono" style="color:${i===0?'var(--a2)':'var(--ac)'}"&gt;${c.sizes.join(' × ')} = ${fmt(c.sizes.reduce((s,n)=&gt;s+n,0)/c.sizes.length,1)} avg&lt;/td&gt;
-    &lt;td class="mono"&gt;${fmt(c.tfa,4)}&lt;/td&gt;
-    &lt;td class="mono"&gt;${fmt(c.jv,1)}&lt;/td&gt;
-    &lt;td class="mono" style="color:var(--a2)"&gt;${fmt(c.hhp,1)}&lt;/td&gt;
-    &lt;td class="mono"&gt;${fmt(c.impact,0)}&lt;/td&gt;
-    &lt;td class="mono"&gt;${fmt(c.hsi,3)}&lt;/td&gt;
-  &lt;/tr&gt;`).join(''));
-}
-
 // ─── INIT ─────────────────────────────────────────
 window.onload = function() {
   if(localStorage.getItem('p4th')==='l') document.body.classList.add('light');
   mvtInit(); chemInit(); siInit(); feRender();
-  calcStrip(); calcVKM(); calcBHO();
+  calcStrip(); calcVKM();
   document.getElementById('si-time').value = new Date().toTimeString().slice(0,5);
   document.getElementById('mvt-time').value = new Date().toTimeString().slice(0,5);
 };
